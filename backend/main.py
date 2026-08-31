@@ -103,10 +103,41 @@ async def admin_seed(token: str = Query(...), reset: bool = Query(False)):
         except Exception as e:
             result["events_error"] = str(e)
         try:
-            await seeder.seed_liquidity_metrics(db, days_back=90)
+            import numpy as np
+            from models.database import LiquidityRegime
+            np.random.seed(42)
+            today = datetime.utcnow().date()
+            existing_dates = {r[0] for r in db.query(LiquidityMetric.date).all()}
+            added = 0
+            for i in range(90, -1, -1):
+                d = today - timedelta(days=i)
+                if d in existing_dates:
+                    continue
+                score = float(np.clip(20 + np.random.normal(0, 15), -100, 100))
+                regime = LiquidityRegime.EXPANDING if score >= 20 else (LiquidityRegime.NEUTRAL if score >= -19 else LiquidityRegime.CONTRACTING)
+                db.add(LiquidityMetric(
+                    date=d,
+                    tga_score=float(np.random.uniform(-30, 30)),
+                    rrp_score=float(np.random.uniform(-30, 30)),
+                    fed_bs_score=float(np.random.uniform(-20, 20)),
+                    reserves_score=float(np.random.uniform(-15, 15)),
+                    m2_score=float(np.random.uniform(-10, 10)),
+                    liquidity_score=score,
+                    regime=regime,
+                    regime_confidence=float(np.random.uniform(60, 90)),
+                    tga_value=500000.0 + float(np.random.normal(0, 50000)),
+                    rrp_value=400000.0 + float(np.random.normal(0, 50000)),
+                    fed_bs_value=8000000.0 + float(np.random.normal(0, 100000)),
+                    reserves_value=3300000.0 + float(np.random.normal(0, 50000)),
+                    m2_value=21000.0 + float(np.random.normal(0, 200)),
+                ))
+                added += 1
+            db.commit()
             result["liquidity"] = db.query(LiquidityMetric).count()
+            result["liquidity_added"] = added
         except Exception as e:
-            result["liquidity_error"] = str(e)
+            db.rollback()
+            result["liquidity_error"] = f"{type(e).__name__}: {e}"
         try:
             await seeder.seed_market_prices(db, days_back=90)
             result["prices"] = db.query(MarketPrice).count()
