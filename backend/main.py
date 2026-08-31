@@ -100,7 +100,9 @@ async def admin_seed(token: str = Query(...), reset: bool = Query(False)):
         try:
             provider = seeder.provider_factory.get_fred_provider()
             today = datetime.utcnow()
-            events_data = await provider.get_events(today - timedelta(days=180), today + timedelta(days=180))
+            sd, ed = today - timedelta(days=180), today + timedelta(days=180)
+            events_data = await provider.get_events(sd, ed)
+            result["events_range"] = f"{sd.date()} → {ed.date()} raw={len(events_data)}"
             for ed in events_data:
                 exists = db.query(Event).filter(
                     Event.event_key == ed.get('event_key'),
