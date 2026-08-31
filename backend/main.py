@@ -81,14 +81,40 @@ async def health_check():
 
 
 @app.post("/admin/seed")
-async def admin_seed(token: str = Query(...)):
+async def admin_seed(token: str = Query(...), reset: bool = Query(False)):
     """One-shot: seed database with events, liquidity metrics, market prices."""
     if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
         raise HTTPException(status_code=403, detail="Forbidden")
     from services.data_seeder import DataSeeder
+    from models import SessionLocal
     seeder = DataSeeder()
-    await seeder.seed_all()
-    return {"status": "seeded"}
+    db = SessionLocal()
+    result = {}
+    try:
+        if reset:
+            db.query(Event).delete()
+            db.query(LiquidityMetric).delete()
+            db.query(MarketPrice).delete()
+            db.commit()
+            result["reset"] = True
+        try:
+            await seeder.seed_events(db, days_ahead=365)
+            result["events"] = db.query(Event).count()
+        except Exception as e:
+            result["events_error"] = str(e)
+        try:
+            await seeder.seed_liquidity_metrics(db, days_back=90)
+            result["liquidity"] = db.query(LiquidityMetric).count()
+        except Exception as e:
+            result["liquidity_error"] = str(e)
+        try:
+            await seeder.seed_market_prices(db, days_back=90)
+            result["prices"] = db.query(MarketPrice).count()
+        except Exception as e:
+            result["prices_error"] = str(e)
+    finally:
+        db.close()
+    return result
 
 
 # ==================== EVENT ENDPOINTS ====================
