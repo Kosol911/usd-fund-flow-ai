@@ -80,6 +80,17 @@ async def health_check():
     return {"status": "healthy"}
 
 
+@app.post("/admin/seed")
+async def admin_seed(token: str = Query(...)):
+    """One-shot: seed database with events, liquidity metrics, market prices."""
+    if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    from services.data_seeder import DataSeeder
+    seeder = DataSeeder()
+    await seeder.seed_all()
+    return {"status": "seeded"}
+
+
 # ==================== EVENT ENDPOINTS ====================
 
 @app.get("/api/events", response_model=List[EventResponse])
