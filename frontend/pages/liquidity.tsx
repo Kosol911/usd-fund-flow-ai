@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { liquidityApi } from '@/lib/api';
+import { liquidityApi } from '../lib/api';
 import {
   translateRegime,
   translateComponentLabel,
   COMPONENT_EXPLAIN,
   formatThaiShortDate,
-} from '@/lib/i18n';
+} from '../lib/i18n';
 
 interface LiquidityData {
   date: string;

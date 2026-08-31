@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { liquidityApi, crossAssetApi, eventApi } from '@/lib/api';
-import FedDotPlot from '@/components/FedDotPlot';
-import FedDotPlotByYear from '@/components/FedDotPlotByYear';
-import FedRateMonitorFull from '@/components/FedRateMonitorFull';
-import TradingViewCharts from '@/components/TradingViewCharts';
+import { liquidityApi, crossAssetApi, eventApi } from '../lib/api';
+import FedDotPlot from '../components/FedDotPlot';
+import FedDotPlotByYear from '../components/FedDotPlotByYear';
+import FedRateMonitorFull from '../components/FedRateMonitorFull';
+import TradingViewCharts from '../components/TradingViewCharts';
 import {
   translateRegime,
   regimeExplain,
@@ -16,7 +16,7 @@ import {
   thaiMonthName,
   formatThaiTime,
   isFedHighlightEvent,
-} from '@/lib/i18n';
+} from '../lib/i18n';
 
 // Distinct accent color per month band (cycled across the ~8-month window shown)
 const MONTH_COLORS = ['#60A5FA', '#34D399', '#FBBF24', '#F472B6', '#A78BFA', '#FB923C', '#2DD4BF', '#F87171'];

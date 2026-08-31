@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatThaiShortDate } from '@/lib/i18n';
+import { formatThaiShortDate } from '../lib/i18n';
 
 const TODAY_LABEL = formatThaiShortDate(new Date().toISOString());
 

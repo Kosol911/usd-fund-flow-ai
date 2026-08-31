@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { timelineApi } from '@/lib/api';
-import { thaiMonthName, formatThaiShortDate, isFedHighlightEvent } from '@/lib/i18n';
+import { timelineApi } from '../lib/api';
+import { thaiMonthName, formatThaiShortDate, isFedHighlightEvent } from '../lib/i18n';
 
 interface TimelineEvent {
   id: number;
