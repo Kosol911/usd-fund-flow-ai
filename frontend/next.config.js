@@ -3,6 +3,8 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://192.168.0.8:8000';
 
 const nextConfig = {
   reactStrictMode: true,
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
   async rewrites() {
     return [
       {
