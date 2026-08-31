@@ -98,10 +98,34 @@ async def admin_seed(token: str = Query(...), reset: bool = Query(False)):
             db.commit()
             result["reset"] = True
         try:
-            await seeder.seed_events(db, days_ahead=365)
+            provider = seeder.provider_factory.get_fred_provider()
+            today = datetime.utcnow()
+            events_data = await provider.get_events(today - timedelta(days=180), today + timedelta(days=180))
+            for ed in events_data:
+                exists = db.query(Event).filter(
+                    Event.event_key == ed.get('event_key'),
+                    Event.release_datetime_utc == ed.get('release_datetime_utc'),
+                ).first()
+                if exists:
+                    continue
+                db.add(Event(
+                    event_name=ed.get('event_name'),
+                    event_key=ed.get('event_key'),
+                    category=EventCategory[ed.get('category')],
+                    country=ed.get('country', 'US'),
+                    currency=ed.get('currency', 'USD'),
+                    release_datetime_utc=ed.get('release_datetime_utc'),
+                    importance=ed.get('importance'),
+                    forecast=ed.get('forecast'),
+                    previous=ed.get('previous'),
+                    unit=ed.get('unit'),
+                    status=EventStatus.SCHEDULED,
+                ))
+            db.commit()
             result["events"] = db.query(Event).count()
         except Exception as e:
-            result["events_error"] = str(e)
+            db.rollback()
+            result["events_error"] = f"{type(e).__name__}: {e}"
         try:
             import numpy as np
             from models.database import LiquidityRegime
