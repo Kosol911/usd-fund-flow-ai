@@ -117,6 +117,34 @@ async def admin_seed(token: str = Query(...), reset: bool = Query(False)):
     return result
 
 
+@app.post("/admin/seed-liquidity-debug")
+async def seed_liquidity_debug(token: str = Query(...)):
+    if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    import numpy as np
+    from models import SessionLocal
+    from models.database import LiquidityRegime
+    db = SessionLocal()
+    try:
+        m = LiquidityMetric(
+            date=datetime.utcnow().date(),
+            tga_score=10.0, rrp_score=10.0, fed_bs_score=10.0,
+            reserves_score=10.0, m2_score=10.0,
+            liquidity_score=20.0, regime=LiquidityRegime.EXPANDING,
+            regime_confidence=75.0,
+            tga_value=500000.0, rrp_value=400000.0, fed_bs_value=8000000.0,
+            reserves_value=3300000.0, m2_value=21000.0,
+        )
+        db.add(m)
+        db.commit()
+        return {"inserted": True, "count": db.query(LiquidityMetric).count()}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"{type(e).__name__}: {e}"}
+    finally:
+        db.close()
+
+
 # ==================== EVENT ENDPOINTS ====================
 
 @app.get("/api/events", response_model=List[EventResponse])
