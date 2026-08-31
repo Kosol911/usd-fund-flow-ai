@@ -1,0 +1,209 @@
+# Event Rules and Impact Scoring Configuration
+
+categories:
+  FED:
+    name: "Federal Reserve"
+    color: "#ff0000"
+    base_importance: 9
+
+  INFLATION:
+    name: "Inflation Data"
+    color: "#ff4500"
+    base_importance: 9
+
+  EMPLOYMENT:
+    name: "Employment Data"
+    color: "#ff6347"
+    base_importance: 8
+
+  TREASURY:
+    name: "Treasury Operations"
+    color: "#4169e1"
+    base_importance: 6
+
+  GDP:
+    name: "Growth Data"
+    color: "#ffa500"
+    base_importance: 7
+
+  LIQUIDITY:
+    name: "Liquidity Events"
+    color: "#00bfff"
+    base_importance: 8
+
+  CREDIT:
+    name: "Credit Markets"
+    color: "#9370db"
+    base_importance: 6
+
+# Event-specific importance
+events:
+  FOMC:
+    importance: 10
+    category: "FED"
+    volatility_window_hours: 48
+    description: "Federal Open Market Committee Decision"
+
+  FOMC_MINUTES:
+    importance: 7
+    category: "FED"
+    volatility_window_hours: 24
+    description: "FOMC Meeting Minutes"
+
+  POWELL_SPEECH:
+    importance: 8
+    category: "FED"
+    volatility_window_hours: 24
+    description: "Fed Chair Powell Speech"
+
+  SEP:
+    importance: 9
+    category: "FED"
+    volatility_window_hours: 48
+    description: "Summary of Economic Projections"
+
+  CPI:
+    importance: 10
+    category: "INFLATION"
+    volatility_window_hours: 24
+    description: "Consumer Price Index"
+
+  CORE_CPI:
+    importance: 10
+    category: "INFLATION"
+    volatility_window_hours: 24
+    description: "Core CPI (ex Food & Energy)"
+
+  PCE:
+    importance: 9
+    category: "INFLATION"
+    volatility_window_hours: 24
+    description: "Personal Consumption Expenditures Price Index"
+
+  CORE_PCE:
+    importance: 9
+    category: "INFLATION"
+    volatility_window_hours: 24
+    description: "Core PCE Price Index"
+
+  PPI:
+    importance: 6
+    category: "INFLATION"
+    volatility_window_hours: 12
+    description: "Producer Price Index"
+
+  NFP:
+    importance: 9
+    category: "EMPLOYMENT"
+    volatility_window_hours: 24
+    description: "Nonfarm Payrolls"
+
+  UNEMPLOYMENT_RATE:
+    importance: 8
+    category: "EMPLOYMENT"
+    volatility_window_hours: 24
+    description: "Unemployment Rate"
+
+  INITIAL_CLAIMS:
+    importance: 4
+    category: "EMPLOYMENT"
+    volatility_window_hours: 6
+    description: "Initial Jobless Claims"
+
+  JOLTS:
+    importance: 6
+    category: "EMPLOYMENT"
+    volatility_window_hours: 12
+    description: "Job Openings and Labor Turnover Survey"
+
+  GDP:
+    importance: 8
+    category: "GDP"
+    volatility_window_hours: 24
+    description: "Gross Domestic Product"
+
+  RETAIL_SALES:
+    importance: 6
+    category: "GDP"
+    volatility_window_hours: 12
+    description: "Retail Sales"
+
+  ISM_MANUFACTURING:
+    importance: 6
+    category: "GDP"
+    volatility_window_hours: 12
+    description: "ISM Manufacturing PMI"
+
+  ISM_SERVICES:
+    importance: 6
+    category: "GDP"
+    volatility_window_hours: 12
+    description: "ISM Services PMI"
+
+  TREASURY_AUCTION:
+    importance: 5
+    category: "TREASURY"
+    volatility_window_hours: 6
+    description: "Treasury Auction"
+
+  QUARTERLY_REFUNDING:
+    importance: 7
+    category: "TREASURY"
+    volatility_window_hours: 24
+    description: "Treasury Quarterly Refunding Announcement"
+
+# Impact scoring methodology
+impact_scoring:
+  methods:
+    - historical_volatility
+    - surprise_magnitude
+    - market_regime_sensitivity
+    - cross_asset_correlation
+
+  historical_lookback_periods:
+    - 24h
+    - 48h
+    - 5d
+    - 10d
+    - 30d
+
+  assets_tracked:
+    - BTC
+    - GOLD
+    - SPX
+    - NASDAQ
+    - DXY
+    - US10Y
+    - VIX
+
+# Color coding for UI
+importance_colors:
+  extreme:
+    min: 9
+    max: 10
+    emoji: "🔴"
+    color: "#ff0000"
+
+  very_high:
+    min: 8
+    max: 8
+    emoji: "🟠"
+    color: "#ff4500"
+
+  high:
+    min: 6
+    max: 7
+    emoji: "🟡"
+    color: "#ffa500"
+
+  medium:
+    min: 4
+    max: 5
+    emoji: "🟢"
+    color: "#90ee90"
+
+  low:
+    min: 1
+    max: 3
+    emoji: "🔵"
+    color: "#87ceeb"

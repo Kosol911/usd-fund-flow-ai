@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 26, 26, 46;
+  --background-end-rgb: 22, 33, 62;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0f3460;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e94560;
+}
+
+/* Card styles */
+.card {
+  @apply bg-secondary border border-accent rounded-lg shadow-lg;
+}
+
+/* Category-tinted cards (background + accent per dashboard category) */
+.card-liquidity {
+  background: #0D2621;
+  border: 1px solid #1B4C43;
+  @apply rounded-lg shadow-lg;
+}
+.card-usd {
+  background: #1E1B2E;
+  border: 1px solid #3B3560;
+  @apply rounded-lg shadow-lg;
+}
+.card-rates {
+  background: #161A34;
+  border: 1px solid #2C3260;
+  @apply rounded-lg shadow-lg;
+}
+.card-fed {
+  background: #2A2008;
+  border: 1px solid #4D3B0F;
+  @apply rounded-lg shadow-lg;
+}
+
+.text-liquidity { color: #5EEAD4; }
+.text-usd { color: #C4B5FD; }
+.text-rates { color: #93C5FD; }
+.text-fed { color: #FCD34D; }
+
+.card-hover {
+  @apply transition-transform duration-200 hover:scale-105 cursor-pointer;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-highlight text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90 transition-all;
+}
+
+/* Event importance colors */
+.event-extreme {
+  @apply bg-red-600 text-white;
+}
+
+.event-very-high {
+  @apply bg-orange-500 text-white;
+}
+
+.event-high {
+  @apply bg-yellow-500 text-black;
+}
+
+.event-medium {
+  @apply bg-green-400 text-black;
+}
+
+.event-low {
+  @apply bg-blue-400 text-white;
+}
+
+/* Regime colors */
+.regime-expanding {
+  @apply text-green-400;
+}
+
+.regime-contracting {
+  @apply text-red-400;
+}
+
+.regime-neutral {
+  @apply text-yellow-400;
+}
+
+/* Timeline styles */
+.timeline-event {
+  @apply p-3 rounded-lg border-l-4 mb-2 hover:bg-accent transition-colors cursor-pointer;
+}
+
+.timeline-month {
+  @apply mb-8;
+}
+
+.timeline-day {
+  @apply text-sm text-gray-400 mb-2;
+}

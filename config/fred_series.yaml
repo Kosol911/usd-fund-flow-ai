@@ -1,0 +1,139 @@
+# FRED Series Configuration
+# https://fred.stlouisfed.org/
+
+# Federal Reserve Policy
+fed_funds:
+  series_id: "FEDFUNDS"
+  name: "Federal Funds Effective Rate"
+  unit: "Percent"
+  frequency: "Monthly"
+
+fed_balance_sheet:
+  series_id: "WALCL"
+  name: "Fed Total Assets"
+  unit: "Millions of Dollars"
+  frequency: "Weekly"
+
+# Treasury General Account
+tga:
+  series_id: "WTREGEN"
+  name: "Treasury General Account"
+  unit: "Millions of Dollars"
+  frequency: "Weekly"
+
+# Reverse Repo
+rrp:
+  series_id: "RRPONTSYD"
+  name: "Overnight Reverse Repurchase Agreements"
+  unit: "Millions of Dollars"
+  frequency: "Daily"
+
+# Bank Reserves
+reserves:
+  series_id: "TOTRESNS"
+  name: "Total Reserve Balances Maintained"
+  unit: "Millions of Dollars"
+  frequency: "Weekly"
+
+# Money Supply
+m2:
+  series_id: "M2SL"
+  name: "M2 Money Stock"
+  unit: "Billions of Dollars"
+  frequency: "Monthly"
+
+# Treasury Yields
+treasury_2y:
+  series_id: "DGS2"
+  name: "2-Year Treasury Constant Maturity Rate"
+  unit: "Percent"
+  frequency: "Daily"
+
+treasury_5y:
+  series_id: "DGS5"
+  name: "5-Year Treasury Constant Maturity Rate"
+  unit: "Percent"
+  frequency: "Daily"
+
+treasury_10y:
+  series_id: "DGS10"
+  name: "10-Year Treasury Constant Maturity Rate"
+  unit: "Percent"
+  frequency: "Daily"
+
+treasury_30y:
+  series_id: "DGS30"
+  name: "30-Year Treasury Constant Maturity Rate"
+  unit: "Percent"
+  frequency: "Daily"
+
+# SOFR
+sofr:
+  series_id: "SOFR"
+  name: "Secured Overnight Financing Rate"
+  unit: "Percent"
+  frequency: "Daily"
+
+# Inflation
+cpi:
+  series_id: "CPIAUCSL"
+  name: "Consumer Price Index for All Urban Consumers"
+  unit: "Index 1982-1984=100"
+  frequency: "Monthly"
+
+core_cpi:
+  series_id: "CPILFESL"
+  name: "Consumer Price Index for All Urban Consumers: All Items Less Food and Energy"
+  unit: "Index 1982-1984=100"
+  frequency: "Monthly"
+
+pce:
+  series_id: "PCEPI"
+  name: "Personal Consumption Expenditures: Chain-type Price Index"
+  unit: "Index 2017=100"
+  frequency: "Monthly"
+
+core_pce:
+  series_id: "PCEPILFE"
+  name: "Personal Consumption Expenditures Excluding Food and Energy"
+  unit: "Index 2017=100"
+  frequency: "Monthly"
+
+# Employment
+unemployment:
+  series_id: "UNRATE"
+  name: "Unemployment Rate"
+  unit: "Percent"
+  frequency: "Monthly"
+
+nonfarm_payrolls:
+  series_id: "PAYEMS"
+  name: "All Employees, Total Nonfarm"
+  unit: "Thousands of Persons"
+  frequency: "Monthly"
+
+initial_claims:
+  series_id: "ICSA"
+  name: "Initial Claims"
+  unit: "Number"
+  frequency: "Weekly"
+
+continuing_claims:
+  series_id: "CCSA"
+  name: "Continued Claims (Insured Unemployment)"
+  unit: "Number"
+  frequency: "Weekly"
+
+# GDP
+gdp:
+  series_id: "GDP"
+  name: "Gross Domestic Product"
+  unit: "Billions of Dollars"
+  frequency: "Quarterly"
+
+# Financial Conditions
+financial_stress:
+  series_id: "STLFSI4"
+  name: "St. Louis Fed Financial Stress Index"
+  unit: "Index"
+  frequency: "Weekly"

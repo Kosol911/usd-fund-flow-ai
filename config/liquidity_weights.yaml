@@ -1,0 +1,76 @@
+# Liquidity Score Weights Configuration
+# Total weight should sum to 1.0
+
+components:
+  tga_change:
+    weight: 0.20
+    direction: "inverse"  # TGA increase = liquidity drain
+    description: "Treasury General Account balance change"
+    lookback_days: 30
+
+  rrp_change:
+    weight: 0.25
+    direction: "inverse"  # RRP increase = liquidity drain
+    description: "Reverse Repo facility usage change"
+    lookback_days: 30
+
+  fed_balance_sheet_change:
+    weight: 0.30
+    direction: "direct"  # Fed BS increase = liquidity injection
+    description: "Federal Reserve total assets change"
+    lookback_days: 90
+
+  reserves_change:
+    weight: 0.15
+    direction: "direct"  # Reserve increase = liquidity injection
+    description: "Bank reserve balances change"
+    lookback_days: 30
+
+  m2_trend:
+    weight: 0.10
+    direction: "direct"  # M2 growth = liquidity expansion
+    description: "M2 money supply trend"
+    lookback_days: 90
+
+# Normalization parameters
+normalization:
+  method: "z_score"  # z_score or minmax
+  rolling_window: 252  # trading days for historical context
+  clip_std: 3.0  # clip outliers beyond 3 standard deviations
+
+# Regime thresholds
+regimes:
+  strongly_expanding:
+    min: 60
+    max: 100
+    label: "STRONGLY EXPANDING"
+    color: "#00ff00"
+
+  expanding:
+    min: 20
+    max: 59
+    label: "EXPANDING"
+    color: "#90ee90"
+
+  neutral:
+    min: -19
+    max: 19
+    label: "NEUTRAL"
+    color: "#ffff00"
+
+  contracting:
+    min: -59
+    max: -20
+    label: "CONTRACTING"
+    color: "#ffa500"
+
+  strongly_contracting:
+    min: -100
+    max: -60
+    label: "STRONGLY CONTRACTING"
+    color: "#ff0000"
+
+# Cache settings
+cache:
+  ttl_seconds: 3600  # 1 hour
+  recalculate_on_new_data: true

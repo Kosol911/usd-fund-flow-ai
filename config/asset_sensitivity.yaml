@@ -1,0 +1,180 @@
+# Asset Sensitivity Configuration
+
+assets:
+  BTC:
+    name: "Bitcoin"
+    ticker: "BTCUSD"
+    sensitivities:
+      liquidity: "VERY_HIGH"
+      usd: "HIGH"
+      rates: "MEDIUM"
+      real_yields: "MEDIUM"
+      risk_appetite: "VERY_HIGH"
+    weights:
+      liquidity: 0.35
+      usd: 0.25
+      rates: 0.15
+      real_yields: 0.10
+      risk_appetite: 0.15
+    description: "Highly sensitive to USD liquidity conditions and risk appetite"
+
+  GOLD:
+    name: "Gold"
+    ticker: "XAUUSD"
+    sensitivities:
+      liquidity: "HIGH"
+      usd: "VERY_HIGH"
+      rates: "MEDIUM"
+      real_yields: "VERY_HIGH"
+      risk_appetite: "MEDIUM"
+    weights:
+      liquidity: 0.20
+      usd: 0.30
+      rates: 0.10
+      real_yields: 0.35
+      risk_appetite: 0.05
+    description: "Inversely correlated with USD and real yields"
+
+  SPX:
+    name: "S&P 500"
+    ticker: "SPX"
+    sensitivities:
+      liquidity: "HIGH"
+      usd: "MEDIUM"
+      rates: "HIGH"
+      real_yields: "HIGH"
+      risk_appetite: "VERY_HIGH"
+    weights:
+      liquidity: 0.25
+      usd: 0.10
+      rates: 0.25
+      real_yields: 0.15
+      risk_appetite: 0.25
+    description: "Driven by liquidity, rates, and risk sentiment"
+
+  NASDAQ:
+    name: "Nasdaq 100"
+    ticker: "NDX"
+    sensitivities:
+      liquidity: "VERY_HIGH"
+      usd: "MEDIUM"
+      rates: "VERY_HIGH"
+      real_yields: "VERY_HIGH"
+      risk_appetite: "VERY_HIGH"
+    weights:
+      liquidity: 0.30
+      usd: 0.10
+      rates: 0.25
+      real_yields: 0.20
+      risk_appetite: 0.15
+    description: "Tech-heavy, highly sensitive to rates and liquidity"
+
+  US10Y:
+    name: "US 10Y Treasury Yield"
+    ticker: "US10Y"
+    sensitivities:
+      liquidity: "MEDIUM"
+      usd: "HIGH"
+      rates: "VERY_HIGH"
+      real_yields: "VERY_HIGH"
+      risk_appetite: "MEDIUM"
+    weights:
+      liquidity: 0.15
+      usd: 0.20
+      rates: 0.35
+      real_yields: 0.25
+      risk_appetite: 0.05
+    description: "Direct reflection of Fed policy and inflation expectations"
+
+  DXY:
+    name: "US Dollar Index"
+    ticker: "DXY"
+    sensitivities:
+      liquidity: "MEDIUM"
+      usd: "VERY_HIGH"
+      rates: "VERY_HIGH"
+      real_yields: "HIGH"
+      risk_appetite: "HIGH"
+    weights:
+      liquidity: 0.10
+      usd: 0.40
+      rates: 0.30
+      real_yields: 0.15
+      risk_appetite: 0.05
+    description: "Reflects relative USD strength and rate differentials"
+
+# Correlation matrix (historical approximations)
+correlations:
+  - pair: ["BTC", "SPX"]
+    correlation: 0.65
+    regime_dependent: true
+
+  - pair: ["BTC", "GOLD"]
+    correlation: 0.25
+    regime_dependent: true
+
+  - pair: ["BTC", "DXY"]
+    correlation: -0.45
+    regime_dependent: true
+
+  - pair: ["GOLD", "DXY"]
+    correlation: -0.75
+    regime_dependent: false
+
+  - pair: ["SPX", "US10Y"]
+    correlation: -0.30
+    regime_dependent: true
+
+  - pair: ["NASDAQ", "US10Y"]
+    correlation: -0.50
+    regime_dependent: true
+
+# Regime-specific behaviors
+regime_behaviors:
+  EXPANDING_LIQUIDITY:
+    BTC: "BULLISH"
+    GOLD: "BULLISH"
+    SPX: "BULLISH"
+    NASDAQ: "VERY_BULLISH"
+    US10Y: "NEUTRAL"
+    DXY: "BEARISH"
+
+  CONTRACTING_LIQUIDITY:
+    BTC: "BEARISH"
+    GOLD: "NEUTRAL"
+    SPX: "BEARISH"
+    NASDAQ: "VERY_BEARISH"
+    US10Y: "BULLISH"
+    DXY: "BULLISH"
+
+  WEAK_USD:
+    BTC: "BULLISH"
+    GOLD: "VERY_BULLISH"
+    SPX: "BULLISH"
+    NASDAQ: "BULLISH"
+    US10Y: "BEARISH"
+    DXY: "BEARISH"
+
+  STRONG_USD:
+    BTC: "BEARISH"
+    GOLD: "VERY_BEARISH"
+    SPX: "NEUTRAL"
+    NASDAQ: "BEARISH"
+    US10Y: "BULLISH"
+    DXY: "BULLISH"
+
+  FALLING_RATES:
+    BTC: "BULLISH"
+    GOLD: "BULLISH"
+    SPX: "BULLISH"
+    NASDAQ: "VERY_BULLISH"
+    US10Y: "BEARISH"
+    DXY: "BEARISH"
+
+  RISING_RATES:
+    BTC: "BEARISH"
+    GOLD: "BEARISH"
+    SPX: "BEARISH"
+    NASDAQ: "VERY_BEARISH"
+    US10Y: "BULLISH"
+    DXY: "BULLISH"
