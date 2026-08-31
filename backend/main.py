@@ -10,7 +10,7 @@ import logging
 import os
 
 from models import get_db, init_db
-from models.database import Event, EventCategory, LiquidityMetric, MarketPrice
+from models.database import Event, EventCategory, EventStatus, LiquidityMetric, MarketPrice
 from models.schemas import (
     EventResponse, EventDetail, LiquidityScoreResponse,
     CrossAssetResponse, TimelineEventResponse, AnnualTimelineResponse,
