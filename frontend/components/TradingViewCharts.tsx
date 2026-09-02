@@ -62,7 +62,7 @@ export default function TradingViewCharts() {
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-4 text-highlight">กราฟราคาสด (TradingView)</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <TVChart
           symbol="BINANCE:BTCUSDT"
           label="BTC / USDT"
