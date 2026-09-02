@@ -67,7 +67,7 @@ export default function TradingViewCharts() {
           symbol="BINANCE:BTCUSDT"
           label="BTC / USDT"
           containerId="tv_btc_chart"
-          chartId="4GFg4wRP"
+          chartId="OQ48Orn3"
         />
         <TVChart
           symbol="OANDA:XAUUSD"
