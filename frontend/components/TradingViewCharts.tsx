@@ -73,7 +73,7 @@ export default function TradingViewCharts() {
           symbol="OANDA:XAUUSD"
           label="GOLD / USD (XAUUSD)"
           containerId="tv_gold_chart"
-          chartId="6bSOoSjX"
+          chartId="rzTvbd0A"
         />
       </div>
     </div>
