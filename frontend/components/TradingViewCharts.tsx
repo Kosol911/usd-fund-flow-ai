@@ -1,14 +1,59 @@
-function TVChart({ src, label }: { src: string; label: string }) {
+import { useEffect, useRef } from 'react';
+
+function TVChart({
+  symbol,
+  label,
+  containerId,
+  chartId,
+}: {
+  symbol: string;
+  label: string;
+  containerId: string;
+  chartId: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.innerHTML = `<div id="${containerId}" style="height:420px"></div>`;
+
+    const script = document.createElement('script');
+    script.src = 'https://s3.tradingview.com/tv.js';
+    script.async = true;
+    script.onload = () => {
+      // @ts-ignore
+      if (window.TradingView) {
+        // @ts-ignore
+        new window.TradingView.widget({
+          autosize: true,
+          height: 420,
+          symbol,
+          interval: '240',
+          timezone: 'Asia/Bangkok',
+          theme: 'dark',
+          style: '1',
+          locale: 'th',
+          toolbar_bg: '#0f3460',
+          enable_publishing: false,
+          hide_top_toolbar: false,
+          hide_legend: false,
+          save_image: false,
+          chart: chartId,
+          container_id: containerId,
+        });
+      }
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      script.remove();
+    };
+  }, [symbol, containerId, chartId]);
+
   return (
     <div className="card p-4">
       <h3 className="text-lg font-bold mb-3 text-highlight">{label}</h3>
-      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
-        <iframe
-          src={src}
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-          allowFullScreen
-        />
-      </div>
+      <div ref={ref} style={{ minHeight: 420 }} />
     </div>
   );
 }
@@ -19,12 +64,16 @@ export default function TradingViewCharts() {
       <h2 className="text-2xl font-bold mb-4 text-highlight">กราฟราคาสด (TradingView)</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TVChart
-          src="https://th.tradingview.com/chart/BTCUSDT/4GFg4wRP/"
+          symbol="BINANCE:BTCUSDT"
           label="BTC / USDT"
+          containerId="tv_btc_chart"
+          chartId="4GFg4wRP"
         />
         <TVChart
-          src="https://th.tradingview.com/chart/XAUUSD/6bSOoSjX/"
+          symbol="OANDA:XAUUSD"
           label="GOLD / USD (XAUUSD)"
+          containerId="tv_gold_chart"
+          chartId="6bSOoSjX"
         />
       </div>
     </div>
