@@ -64,7 +64,7 @@ const FUTURE_COLUMNS: QuarterColumn[] = [
 ];
 
 const ALL_COLUMNS: QuarterColumn[] = [...PAST_COLUMNS, ...FUTURE_COLUMNS];
-const CURRENT_RATE_MID = 4.0;
+const CURRENT_RATE_MID = 3.625;
 
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);

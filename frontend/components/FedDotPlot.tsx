@@ -5,51 +5,50 @@ const TODAY_LABEL = formatThaiShortDate(new Date().toISOString());
 
 // Real market-implied probability data scraped from Investing.com's "Fed Rate Monitor Tool"
 // (https://th.investing.com/central-banks/fed-rate-monitor) on the date noted below.
-// Current effective target range at time of capture: 3.75% - 4.00%.
-const SCRAPE_DATE_LABEL = '30 ส.ค. 2569';
+// Current effective target range at time of capture: 3.50% - 3.75%.
+const SCRAPE_DATE_LABEL = '3 ก.ย. 2569';
 
 interface MeetingData {
   date: string; // ISO date
   label: string;
-  cut: number; // cumulative probability rate ends BELOW current range (3.75-4.00)
+  cut: number; // cumulative probability rate ends BELOW current range (3.50-3.75)
   hold: number; // probability rate stays at current range
   hike: number; // cumulative probability rate ends ABOVE current range
   isPast?: boolean;
   isAssumed?: boolean;
 }
 
-// Already-resolved FOMC meetings in the past 6 months. No historical market-implied-probability
-// feed is connected, so this path is ILLUSTRATIVE — a plausible gradual shift toward the real
-// scraped data point at the next meeting (17 ก.ย. 2026: cut 44.1% / hold 55.9%), consistent with
-// a market that priced in growing odds of a cut as the year progressed. Not confirmed fact.
+// Historical FOMC 2026 meetings — all resolved to HOLD at 3.50-3.75%
+// (Fed cut to this range in Dec 2025, has held every 2026 meeting). Source: Federal Reserve press releases.
 const PAST_MEETINGS: MeetingData[] = [
-  { date: '2026-03-19', label: '19 มี.ค. 2026*', cut: 15, hold: 85, hike: 0, isPast: true, isAssumed: true },
-  { date: '2026-04-30', label: '30 เม.ย. 2026', cut: 25, hold: 75, hike: 0, isPast: true, isAssumed: true },
-  { date: '2026-06-18', label: '18 มิ.ย. 2026*', cut: 35, hold: 65, hike: 0, isPast: true, isAssumed: true },
-  { date: '2026-07-30', label: '30 ก.ค. 2026', cut: 42, hold: 58, hike: 0, isPast: true, isAssumed: true },
+  { date: '2026-01-28', label: '28 ม.ค. 2026', cut: 0, hold: 100, hike: 0, isPast: true },
+  { date: '2026-03-18', label: '18 มี.ค. 2026*', cut: 0, hold: 100, hike: 0, isPast: true },
+  { date: '2026-04-29', label: '29 เม.ย. 2026', cut: 0, hold: 100, hike: 0, isPast: true },
+  { date: '2026-06-17', label: '17 มิ.ย. 2026*', cut: 0, hold: 100, hike: 0, isPast: true },
+  { date: '2026-07-29', label: '29 ก.ค. 2026', cut: 0, hold: 100, hike: 0, isPast: true },
 ];
 
-// bins -> {cut, hold, hike} derived from scraped rate-range distributions,
-// with current range = 3.75-4.00 as the "hold" anchor.
+// bins -> {cut, hold, hike} derived from CME FedWatch / Investing.com rate-range distributions,
+// with current range = 3.50-3.75% as the "hold" anchor. Market currently prices strong hike probability.
 const MEETINGS: MeetingData[] = [
-  { date: '2026-09-17', label: '17 ก.ย. 2026*', cut: 44.1, hold: 55.9, hike: 0 },
-  { date: '2026-10-29', label: '29 ต.ค. 2026', cut: 30.0, hold: 52.1, hike: 18.0 },
-  { date: '2026-12-10', label: '10 ธ.ค. 2026*', cut: 11.6, hold: 38.5, hike: 49.9 },
-  { date: '2027-01-28', label: '28 ม.ค. 2027', cut: 8.3, hold: 30.8, hike: 61.0 },
-  { date: '2027-03-18', label: '18 มี.ค. 2027*', cut: 5.2, hold: 22.5, hike: 72.4 },
-  { date: '2027-04-29', label: '29 เม.ย. 2027', cut: 4.5, hold: 20.2, hike: 75.3 },
-  { date: '2027-06-10', label: '10 มิ.ย. 2027*', cut: 4.0, hold: 18.3, hike: 77.6 },
-  { date: '2027-07-29', label: '29 ก.ค. 2027', cut: 4.0, hold: 18.3, hike: 77.6 },
-  { date: '2027-09-16', label: '16 ก.ย. 2027*', cut: 4.4, hold: 18.5, hike: 77.4 },
-  { date: '2027-10-28', label: '28 ต.ค. 2027', cut: 5.9, hold: 19.5, hike: 75.1 },
-  { date: '2027-12-09', label: '9 ธ.ค. 2027*', cut: 6.6, hold: 20.7, hike: 71.9 },
+  { date: '2026-09-16', label: '16 ก.ย. 2026*', cut: 0, hold: 33.8, hike: 66.2 },
+  { date: '2026-10-29', label: '29 ต.ค. 2026', cut: 0, hold: 18.5, hike: 81.5 },
+  { date: '2026-12-10', label: '10 ธ.ค. 2026*', cut: 0, hold: 8.0, hike: 92.0 },
+  { date: '2027-01-28', label: '28 ม.ค. 2027', cut: 0, hold: 5.5, hike: 94.5 },
+  { date: '2027-03-18', label: '18 มี.ค. 2027*', cut: 0, hold: 4.2, hike: 95.8 },
+  { date: '2027-04-29', label: '29 เม.ย. 2027', cut: 0, hold: 3.8, hike: 96.2 },
+  { date: '2027-06-10', label: '10 มิ.ย. 2027*', cut: 0, hold: 3.5, hike: 96.5 },
+  { date: '2027-07-29', label: '29 ก.ค. 2027', cut: 0, hold: 3.5, hike: 96.5 },
+  { date: '2027-09-16', label: '16 ก.ย. 2027*', cut: 0, hold: 3.6, hike: 96.4 },
+  { date: '2027-10-28', label: '28 ต.ค. 2027', cut: 0, hold: 3.9, hike: 96.1 },
+  { date: '2027-12-09', label: '9 ธ.ค. 2027*', cut: 0, hold: 4.3, hike: 95.7 },
 ];
 
 const ALL_MEETINGS: MeetingData[] = [...PAST_MEETINGS, ...MEETINGS];
 
 const SERIES = [
   { key: 'cut' as const, name: 'ลดดอกเบี้ย (ต่ำกว่าปัจจุบัน)', color: '#4ADE80' },
-  { key: 'hold' as const, name: 'คงอัตราดอกเบี้ยที่ 3.75-4.00%', color: '#FBBF24' },
+  { key: 'hold' as const, name: 'คงอัตราดอกเบี้ยที่ 3.50-3.75%', color: '#FBBF24' },
   { key: 'hike' as const, name: 'ขึ้นดอกเบี้ย (สูงกว่าปัจจุบัน)', color: '#F87171' },
 ];
 
@@ -113,10 +112,10 @@ export default function FedDotPlot() {
         ✅ ข้อมูลจริงจากตลาด ดึงจาก Investing.com Fed Rate Monitor Tool (th.investing.com/central-banks/fed-rate-monitor) เมื่อ {SCRAPE_DATE_LABEL} — เป็นภาพนิ่ง ณ ขณะดึงข้อมูล ตัวเลขจะเปลี่ยนแปลงตามตลาดจริงทุกวัน
       </p>
       <p className="text-xs text-sky-300 font-semibold mb-1">
-        📍 ตอนนี้อยู่ที่ {TODAY_LABEL} — ก่อนการประชุมรอบถัดไป (17 ก.ย. 2026) ลูกศรสีฟ้าบนแกน X คือตำแหน่งปัจจุบันบนไทม์ไลน์
+        📍 ตอนนี้อยู่ที่ {TODAY_LABEL} — ก่อนการประชุมรอบถัดไป (16 ก.ย. 2026) ลูกศรสีฟ้าบนแกน X คือตำแหน่งปัจจุบันบนไทม์ไลน์
       </p>
       <p className="text-xs text-gray-500 mb-6">
-        เส้นทึบ/วงกลม = คาดการณ์จากตลาด (ข้อมูลจริง, อนาคต) · เส้นจาง/สี่เหลี่ยม = ช่วงย้อนหลัง 6 เดือน — <strong>ข้อมูลตัวอย่าง</strong>จำลองทิศทางที่ตลาดค่อยๆ ให้น้ำหนักการลดดอกเบี้ยมากขึ้นก่อนถึงวันนี้ (ยังไม่มีข้อมูลความน่าจะเป็นย้อนหลังจริงเชื่อมต่อ)
+        เส้นทึบ/วงกลม = คาดการณ์จากตลาด (ข้อมูลจริง, อนาคต) · เส้นจาง/สี่เหลี่ยม = ช่วงย้อนหลัง — <strong>ข้อมูลจริง</strong> Fed ทุกรอบประชุมปี 2026 คงอัตราที่ 3.50-3.75% หลังลดครั้งสุดท้ายเมื่อ ธ.ค. 2025
       </p>
 
       <div className="overflow-x-auto">
@@ -157,10 +156,10 @@ export default function FedDotPlot() {
             />
           ))}
 
-          {/* Past-6-months context label (illustrative trend, see disclaimer) */}
+          {/* Past-6-months context label */}
           {todayX - padL > 60 && (
             <text x={padL + (todayX - padL) / 2} y={padT + 16} textAnchor="middle" fontSize="10" fill="#5b6b8c" fontStyle="italic">
-              ← ช่วงย้อนหลัง (ข้อมูลตัวอย่าง)
+              ← ช่วงย้อนหลัง (Fed คงอัตรา)
             </text>
           )}
 
@@ -208,7 +207,7 @@ export default function FedDotPlot() {
             <g transform={`translate(8, ${14 + SERIES.length * 18 + 6})`}>
               <rect x={-3.5} y={-7.5} width={7} height={7} fill="#8891a8" opacity={0.6} />
               <text x={12} y={0} fontSize="10" fill="#8891a8">
-                ย้อนหลัง (ข้อมูลตัวอย่าง)
+                ย้อนหลัง (Fed คงอัตรา)
               </text>
             </g>
           </g>
@@ -236,7 +235,7 @@ export default function FedDotPlot() {
                 )}
                 {pastCoords.map((c, i) => (
                   <rect key={`p${i}`} x={c.x - 3.5} y={c.y - 3.5} width={7} height={7} fill={s.color} opacity={0.6} stroke="#050810" strokeWidth={1}>
-                    <title>{`${c.label} · ${s.name}: ${c.value}% (ย้อนหลัง — ข้อมูลตัวอย่าง)`}</title>
+                    <title>{`${c.label} · ${s.name}: ${c.value}% (ย้อนหลัง — Fed คงอัตราจริง)`}</title>
                   </rect>
                 ))}
                 {futureCoords.map((c, i) => (

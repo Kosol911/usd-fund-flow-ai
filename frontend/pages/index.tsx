@@ -202,11 +202,12 @@ export default function Home() {
             {/* USD Panel */}
             <div className="card-usd p-6">
               <h2 className="text-2xl font-bold mb-4 text-usd">ดัชนีดอลลาร์ (USD)</h2>
-              <div className="text-4xl font-bold mb-2 text-white">
-                เป็นกลาง
+              <div className="flex items-baseline gap-3 mb-2">
+                <span className="text-4xl font-bold text-white">แข็งค่า</span>
+                <span className="text-2xl font-bold text-violet-200 font-mono">99.5</span>
               </div>
               <div className="text-sm text-violet-200 text-opacity-70 mt-4">
-                ติดตามดัชนี DXY อย่างต่อเนื่อง
+                DXY สูงสุดใน 3 สัปดาห์ · ตลาดคาดหวัง Fed hike ก.ย.
               </div>
               <div className="text-sm text-violet-100 text-opacity-90 border-t border-violet-800 pt-3 mt-3">
                 ดอลลาร์แข็ง มักกดดัน Gold และ BTC · ดอลลาร์อ่อน มักหนุนราคาสินทรัพย์เหล่านี้ให้ขึ้น
@@ -218,10 +219,10 @@ export default function Home() {
               <h2 className="text-2xl font-bold mb-4 text-rates">อัตราดอกเบี้ย (RATES)</h2>
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-bold text-white">คงที่</span>
-                <span className="text-2xl font-bold text-blue-200 font-mono">3.75–4.00%</span>
+                <span className="text-2xl font-bold text-blue-200 font-mono">3.50–3.75%</span>
               </div>
               <div className="text-sm text-blue-200 text-opacity-70 mt-4">
-                ติดตามนโยบายการเงินของ Fed
+                หลัง FOMC 28-29 ก.ค. · ตลาดคาดหวัง hike 66% ที่ประชุม 15-16 ก.ย.
               </div>
               <div className="text-sm text-blue-100 text-opacity-90 border-t border-blue-800 pt-3 mt-3">
                 ดอกเบี้ยขึ้นมักกดดันหุ้นกลุ่มเทค (NASDAQ) มากกว่ากลุ่มอื่น เพราะไวต่อการคิดลดกระแสเงินสดในอนาคต

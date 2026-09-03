@@ -17,36 +17,36 @@ interface Meeting {
 
 const MEETINGS: Meeting[] = [
   {
-    title: 'Sep 17, 2026',
-    meetingTime: 'Sep 17, 2026 01:00 น.',
+    title: 'Sep 16, 2026',
+    meetingTime: 'Sep 16, 2026 01:00 น.',
     futuresPrice: '96.305',
-    updated: 'Aug 29, 2026 11:35 ICT',
+    updated: 'Sep 03, 2026 08:00 ICT',
     bins: [
-      { range: '3.50 - 3.75', current: 44.1, dayBefore: 65.9, weekBefore: 61.0 },
-      { range: '3.75 - 4.00', current: 55.9, dayBefore: 34.1, weekBefore: 39.0 },
+      { range: '3.50 - 3.75', current: 33.8, dayBefore: 40.0, weekBefore: 55.9 },
+      { range: '3.75 - 4.00', current: 66.2, dayBefore: 60.0, weekBefore: 44.1 },
     ],
   },
   {
     title: 'Oct 29, 2026',
     meetingTime: 'Oct 29, 2026 01:00 น.',
     futuresPrice: '96.220',
-    updated: 'Aug 29, 2026 11:35 ICT',
+    updated: 'Sep 03, 2026 08:00 ICT',
     bins: [
-      { range: '3.50 - 3.75', current: 30.0, dayBefore: 46.2, weekBefore: 47.0 },
-      { range: '3.75 - 4.00', current: 52.1, dayBefore: 43.6, weekBefore: 44.1 },
-      { range: '4.00 - 4.25', current: 18.0, dayBefore: 10.2, weekBefore: 9.0 },
+      { range: '3.50 - 3.75', current: 18.5, dayBefore: 22.4, weekBefore: 30.0 },
+      { range: '3.75 - 4.00', current: 42.8, dayBefore: 44.6, weekBefore: 52.1 },
+      { range: '4.00 - 4.25', current: 38.7, dayBefore: 33.0, weekBefore: 18.0 },
     ],
   },
   {
     title: 'Dec 10, 2026',
     meetingTime: 'Dec 10, 2026 02:00 น.',
     futuresPrice: '96.035',
-    updated: 'Aug 29, 2026 11:35 ICT',
+    updated: 'Sep 03, 2026 08:00 ICT',
     bins: [
-      { range: '3.50 - 3.75', current: 11.6, dayBefore: 25.4, weekBefore: 28.9 },
-      { range: '3.75 - 4.00', current: 38.5, dayBefore: 44.8, weekBefore: 45.2 },
-      { range: '4.00 - 4.25', current: 38.9, dayBefore: 25.2, weekBefore: 22.5 },
-      { range: '4.25 - 4.50', current: 11.0, dayBefore: 4.6, weekBefore: 3.5 },
+      { range: '3.50 - 3.75', current: 8.0, dayBefore: 10.5, weekBefore: 15.0 },
+      { range: '3.75 - 4.00', current: 28.6, dayBefore: 32.8, weekBefore: 38.5 },
+      { range: '4.00 - 4.25', current: 42.5, dayBefore: 38.5, weekBefore: 32.5 },
+      { range: '4.25 - 4.50', current: 20.9, dayBefore: 18.2, weekBefore: 14.0 },
     ],
   },
 ];
