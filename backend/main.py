@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
+import asyncio
 import logging
 import os
 
@@ -54,6 +55,11 @@ async def startup_event():
     logger.info("Starting USD Fund Flow AI backend...")
     init_db()
     logger.info("Database initialized")
+    # Start ForexFactory auto-sync loop
+    from services.ff_calendar_sync import run_sync_loop
+    from models import get_db
+    asyncio.create_task(run_sync_loop(get_db))
+    logger.info("ForexFactory sync loop started")
 
 
 @app.on_event("shutdown")
@@ -192,6 +198,7 @@ REAL_ACTUALS = {
     ("NFP", "2026-06"): {"actual": 139000, "forecast": 175000, "previous": 130000},
     ("NFP", "2026-07"): {"actual": 57000,  "forecast": 110000, "previous": 63000},
     ("NFP", "2026-08"): {"actual": -23000, "forecast": 100000, "previous": 57000},
+    ("NFP", "2026-09"): {"actual": 162000, "forecast": 56000, "previous": -23000},
     # CPI YoY release month → actual (release covers prior month)
     ("CPI", "2026-02"): {"actual": 2.9, "forecast": 3.0, "previous": 3.1},
     ("CPI", "2026-03"): {"actual": 3.0, "forecast": 2.9, "previous": 2.9},
@@ -236,6 +243,35 @@ def _enrich_actuals(db):
         updated += 1
     db.commit()
     return updated
+
+
+@app.post("/admin/sync-ff")
+async def admin_sync_ff(token: str = Query(...)):
+    """Trigger ForexFactory sync immediately (manual)."""
+    if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    from services.ff_calendar_sync import sync_actuals_from_ff, fetch_ff_events, _match_ff_to_db
+    from models import SessionLocal
+    from models.database import Event
+    db = SessionLocal()
+    try:
+        ff_events = await fetch_ff_events()
+        # Debug: find USD events on Sep 4
+        sep4_ff = [e for e in ff_events if e.get("currency") == "USD" and "2026-09-04" in str(e.get("date", ""))]
+        nfp_ff = [e for e in ff_events if "nonfarm" in e.get("title", "").lower() or "payroll" in e.get("title", "").lower()]
+
+        updated = await sync_actuals_from_ff(db)
+        return {
+            "updated": updated,
+            "ff_total": len(ff_events),
+            "ff_sep4_usd": [{"title": e.get("title"), "actual": e.get("actual"), "forecast": e.get("forecast"), "date": e.get("date")} for e in sep4_ff],
+            "ff_nfp": [{"title": e.get("title"), "actual": e.get("actual"), "date": e.get("date")} for e in nfp_ff],
+        }
+    except Exception as e:
+        import traceback
+        return {"error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc()}
+    finally:
+        db.close()
 
 
 @app.post("/admin/seed-liquidity-debug")
