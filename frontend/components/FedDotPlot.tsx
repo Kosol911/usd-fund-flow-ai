@@ -30,18 +30,16 @@ const PAST_MEETINGS: MeetingData[] = [
 
 // bins -> {cut, hold, hike} derived from CME FedWatch / Investing.com rate-range distributions,
 // with current range = 3.50-3.75% as the "hold" anchor. Market currently prices strong hike probability.
+// Only meetings currently shown on investing.com's Fed Rate Monitor page are included —
+// hold = probability outcome stays at the original 2026 range (3.50-3.75%), hike = probability
+// of any higher range. Beyond Jun 2027 the page shows no data, so no meetings are extrapolated past it.
 const MEETINGS: MeetingData[] = [
   { date: '2026-09-16', label: '16 ก.ย. 2026*', cut: 0, hold: 14.5, hike: 85.5 },
   { date: '2026-10-28', label: '28 ต.ค. 2026', cut: 0, hold: 7.2, hike: 92.8 },
   { date: '2026-12-09', label: '9 ธ.ค. 2026*', cut: 0, hold: 2.6, hike: 97.4 },
   { date: '2027-01-27', label: '27 ม.ค. 2027', cut: 0, hold: 1.6, hike: 98.4 },
   { date: '2027-03-17', label: '17 มี.ค. 2027*', cut: 0, hold: 0.7, hike: 99.3 },
-  { date: '2027-04-29', label: '29 เม.ย. 2027', cut: 0, hold: 0.5, hike: 99.5 },
   { date: '2027-06-09', label: '9 มิ.ย. 2027*', cut: 0, hold: 0.3, hike: 99.7 },
-  { date: '2027-07-29', label: '29 ก.ค. 2027', cut: 0, hold: 3.5, hike: 96.5 },
-  { date: '2027-09-16', label: '16 ก.ย. 2027*', cut: 0, hold: 3.6, hike: 96.4 },
-  { date: '2027-10-28', label: '28 ต.ค. 2027', cut: 0, hold: 3.9, hike: 96.1 },
-  { date: '2027-12-09', label: '9 ธ.ค. 2027*', cut: 0, hold: 4.3, hike: 95.7 },
 ];
 
 const ALL_MEETINGS: MeetingData[] = [...PAST_MEETINGS, ...MEETINGS];

@@ -224,7 +224,7 @@ export default function Home() {
                 <span className="text-2xl font-bold text-blue-200 font-mono">3.50–3.75%</span>
               </div>
               <div className="text-sm text-blue-200 text-opacity-70 mt-4">
-                หลัง FOMC 28-29 ก.ค. · ตลาดคาดหวัง hike 66% ที่ประชุม 15-16 ก.ย.
+                หลัง FOMC 28-29 ก.ค. · ตลาดคาดหวัง hike 85.5% ที่ประชุม 16 ก.ย. 2026
               </div>
               <div className="text-sm text-blue-100 text-opacity-90 border-t border-blue-800 pt-3 mt-3">
                 ดอกเบี้ยขึ้นมักกดดันหุ้นกลุ่มเทค (NASDAQ) มากกว่ากลุ่มอื่น เพราะไวต่อการคิดลดกระแสเงินสดในอนาคต

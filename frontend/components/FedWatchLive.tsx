@@ -108,6 +108,7 @@ function MeetingSnapshot({ meeting, isNext }: { meeting: Meeting; isNext: boolea
 
   return (
     <div className={`rounded-xl border ${isNext ? 'border-sky-500/60 bg-sky-950/30' : 'border-gray-700/60 bg-gray-900/40'} p-4`}>
+      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {isNext && (
@@ -118,6 +119,7 @@ function MeetingSnapshot({ meeting, isNext }: { meeting: Meeting; isNext: boolea
         <span className="text-xs text-gray-500 font-mono">Futures: {meeting.futuresPrice}</span>
       </div>
 
+      {/* Stacked bar */}
       <div className="rounded-lg overflow-hidden h-10 flex mb-2 bg-gray-800">
         {meeting.bins.map((bin) => (
           <div
@@ -138,6 +140,7 @@ function MeetingSnapshot({ meeting, isNext }: { meeting: Meeting; isNext: boolea
         ))}
       </div>
 
+      {/* Bin labels below bar */}
       <div className="flex mb-3 gap-0.5">
         {meeting.bins.map((bin) => (
           <div
@@ -152,6 +155,7 @@ function MeetingSnapshot({ meeting, isNext }: { meeting: Meeting; isNext: boolea
         ))}
       </div>
 
+      {/* Most likely outcome */}
       <div className="flex items-center gap-2 mb-3">
         <div
           className="w-3 h-3 rounded-sm"
@@ -163,6 +167,7 @@ function MeetingSnapshot({ meeting, isNext }: { meeting: Meeting; isNext: boolea
         </span>
       </div>
 
+      {/* Comparison table */}
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
@@ -246,6 +251,7 @@ export default function FedWatchLive() {
         </a>
       </div>
 
+      {/* Color legend */}
       <div className="flex flex-wrap gap-x-3 gap-y-1 mb-4 text-[10px]">
         {Object.entries(RANGE_COLORS).map(([range, color]) => (
           <div key={range} className="flex items-center gap-1">
@@ -255,6 +261,7 @@ export default function FedWatchLive() {
         ))}
       </div>
 
+      {/* Meeting grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-3">
         {MEETINGS.map((m, i) => (
           <MeetingSnapshot key={m.date} meeting={m} isNext={i === 0} />

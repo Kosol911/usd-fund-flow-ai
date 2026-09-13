@@ -788,6 +788,103 @@ async def get_ai_event_summary(db: Session = Depends(get_db)):
     return {"summary": summary}
 
 
+@app.post("/admin/fix-events")
+async def admin_fix_events(token: str = Query(...)):
+    """One-time fix for seeded event data errors (FOMC placeholder, PCE Aug sign, NFP Feb sign, CPI/PCE/NFP forecasts)."""
+    if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    from models import SessionLocal
+    from models.database import Event
+    from datetime import datetime as dt
+
+    db = SessionLocal()
+    log = []
+    try:
+        # 1. Fix FOMC forecast placeholder 4.5 → 3.75
+        fomc_all = db.query(Event).filter(Event.event_key.like("FOMC%")).all()
+        fomc_fixed = 0
+        for ev in fomc_all:
+            changed = False
+            if ev.forecast is not None and abs(float(ev.forecast) - 4.5) < 0.01:
+                ev.forecast = 3.75; changed = True
+            if ev.previous is not None and abs(float(ev.previous) - 4.5) < 0.01:
+                ev.previous = 3.75; changed = True
+            if changed:
+                fomc_fixed += 1
+        log.append(f"[FOMC placeholder] fixed {fomc_fixed} rows")
+
+        # 2. Past FOMC actual=3.75, future forecast by hike probability
+        for ev in fomc_all:
+            if ev.release_datetime_utc:
+                if ev.release_datetime_utc < dt.utcnow():
+                    ev.actual = 3.75; ev.forecast = 3.75; ev.previous = 3.75
+                else:
+                    m = ev.release_datetime_utc.month
+                    y = ev.release_datetime_utc.year
+                    if y == 2026 and m == 9:  ev.forecast = 4.00  # 85.5% hike
+                    elif y == 2026 and m == 10: ev.forecast = 4.00
+                    elif y == 2026 and m == 12: ev.forecast = 4.25
+                    else: ev.forecast = 3.75
+        log.append("[FOMC actuals/forecasts] updated past+future")
+
+        # 3. Fix FOMC dates (Sep 17→16, Oct 29→28, Dec 10→9)
+        date_fixes = [(9, 17, 16), (10, 29, 28), (12, 10, 9)]
+        for m, wrong_day, right_day in date_fixes:
+            ev = db.query(Event).filter(
+                Event.event_key.like("FOMC%"),
+                Event.release_datetime_utc >= dt(2026, m, wrong_day),
+                Event.release_datetime_utc < dt(2026, m, wrong_day + 1),
+            ).first()
+            if ev:
+                ev.release_datetime_utc = ev.release_datetime_utc.replace(day=right_day)
+                log.append(f"[FOMC date] 2026-{m:02d}-{wrong_day} → {right_day}")
+
+        # 4. Fix PCE Aug 2026 actual: 2.7 → 3.7
+        pce_aug = db.query(Event).filter(
+            Event.event_key == "PCE",
+            Event.release_datetime_utc >= dt(2026, 8, 1),
+            Event.release_datetime_utc < dt(2026, 9, 1),
+        ).first()
+        if pce_aug and pce_aug.actual is not None and abs(float(pce_aug.actual) - 2.7) < 0.05:
+            pce_aug.actual = 3.7
+            log.append(f"[PCE Aug] actual 2.7 → 3.7")
+
+        # 5. Fix NFP Feb 2026: +92K → -92K
+        nfp_feb = db.query(Event).filter(
+            Event.event_key == "NFP",
+            Event.release_datetime_utc >= dt(2026, 2, 1),
+            Event.release_datetime_utc < dt(2026, 3, 1),
+        ).first()
+        if nfp_feb and nfp_feb.actual is not None and float(nfp_feb.actual) > 0 and abs(float(nfp_feb.actual) - 92000) < 5000:
+            nfp_feb.actual = -92000
+            log.append("[NFP Feb] +92K → -92K")
+
+        # 6. Update CPI/PCE/NFP forecasts with consensus estimates
+        CPI_CONSENSUS = {(2026,5):3.3,(2026,6):3.8,(2026,7):4.0,(2026,8):3.7,(2026,9):3.4,(2026,10):3.4,(2026,11):3.5,(2026,12):3.5}
+        PCE_CONSENSUS = {(2026,5):3.5,(2026,6):3.8,(2026,7):4.0,(2026,8):2.6,(2026,9):3.7,(2026,10):2.6,(2026,11):2.6,(2026,12):2.6}
+        NFP_CONSENSUS = {(2026,5):148000,(2026,6):180000,(2026,7):63000,(2026,8):30000,(2026,9):180000,(2026,10):162000,(2026,11):175000,(2026,12):175000}
+
+        for key, consensus in [("CPI", CPI_CONSENSUS), ("PCE", PCE_CONSENSUS), ("NFP", NFP_CONSENSUS)]:
+            for ev in db.query(Event).filter(Event.event_key == key).all():
+                if ev.release_datetime_utc:
+                    k = (ev.release_datetime_utc.year, ev.release_datetime_utc.month)
+                    if k in consensus:
+                        old = ev.forecast
+                        ev.forecast = consensus[k]
+                        if old != ev.forecast:
+                            log.append(f"[{key} {ev.release_datetime_utc.date()}] forecast {old} → {ev.forecast}")
+
+        db.commit()
+        log.append("✅ All committed")
+        return {"status": "ok", "log": log}
+    except Exception as e:
+        import traceback
+        db.rollback()
+        return {"status": "error", "error": str(e), "trace": traceback.format_exc()}
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("BACKEND_PORT", "8000"))
