@@ -7,12 +7,21 @@ interface Source {
   winner?: boolean;
 }
 
+interface Call {
+  releaseLabel: string;
+  value: string;
+  valueNote: string;
+  lastRound: string;
+  hit: 'hit' | 'miss' | 'mixed';
+}
+
 interface Indicator {
   key: string;
   title: string;
   winner: string;
   verdict: Verdict;
   sample: string;
+  call: Call;
   sources: Source[];
   why: string;
   caution: string;
@@ -25,6 +34,13 @@ const INDICATORS: Indicator[] = [
     winner: 'Street Consensus',
     verdict: 'win',
     sample: 'ทดสอบย้อนหลัง มี.ค.–ส.ค. 2026 · ตารางเต็ม 44 งวด',
+    call: {
+      releaseLabel: 'CPI ก.ย. · ประกาศ 14 ต.ค. 20:30 น.',
+      value: '3.7%',
+      valueNote: 'YoY · Street Consensus',
+      lastRound: 'รอบที่แล้ว CPI ส.ค. จริง 3.4% — Street คาด 3.4%',
+      hit: 'hit',
+    },
     sources: [
       { name: 'Street Consensus', mae: '0.067pp', detail: 'ใกล้สุด 6/6 เดือน', winner: true },
       { name: 'Cleveland Fed', mae: '0.127pp', detail: 'ใกล้สุด 0/6 เดือน' },
@@ -38,7 +54,14 @@ const INDICATORS: Indicator[] = [
     title: 'PCE',
     winner: 'CPI + PPI ที่ออกไปแล้ว',
     verdict: 'derived',
-    sample: 'Street MAE 0.13pp จาก 3 งวดล่าสุดในระบบ',
+    sample: 'อ่านจาก CPI + PPI เดือน ส.ค. ที่ประกาศไปแล้ว',
+    call: {
+      releaseLabel: 'PCE ส.ค. · ประกาศ 30 ก.ย. 20:30 น.',
+      value: '≥ 3.3%',
+      valueNote: 'Core YoY · เอียงขึ้นจากฐาน 3.3%',
+      lastRound: 'รอบที่แล้ว PCE ก.ค. core 3.3% ตรงคาด · headline 3.7% สูงกว่าคาด 0.1',
+      hit: 'mixed',
+    },
     sources: [
       { name: 'คำนวณจาก CPI + PPI', mae: 'แม่นสุด', detail: 'รู้ก่อนประกาศ 2-3 สัปดาห์', winner: true },
       { name: 'Street Consensus', mae: '0.13pp', detail: '+0.2 / −0.1 / −0.1' },
@@ -53,6 +76,13 @@ const INDICATORS: Indicator[] = [
     winner: 'ไม่มีผู้ชนะ',
     verdict: 'none',
     sample: 'Street 8 เดือน 2026 · โมเดล 24 งวด walk-forward',
+    call: {
+      releaseLabel: 'NFP ก.ย. · ประกาศ 2 ต.ค. 20:30 น.',
+      value: '+120K',
+      valueNote: 'Street Consensus · Nowflation +102K',
+      lastRound: 'รอบที่แล้ว NFP ส.ค. จริง +162K — Street คาด +56K พลาด 106K',
+      hit: 'miss',
+    },
     sources: [
       { name: 'Nowflation model', mae: '90.3K', detail: 'ชนะ naive แค่ 54% ของเดือน' },
       { name: 'Street Consensus', mae: '91K', detail: 'พลาดหนักสุด 151K' },
@@ -67,6 +97,12 @@ const VERDICT_STYLE: Record<Verdict, { label: string; bg: string; color: string 
   win: { label: 'มีผู้ชนะชัดเจน', bg: '#0f2e1f', color: '#4ade80' },
   derived: { label: 'คำนวณได้ ไม่ต้องเดา', bg: '#12283f', color: '#60a5fa' },
   none: { label: 'พยากรณ์ไม่ได้', bg: '#3a1d1d', color: '#f87171' },
+};
+
+const HIT_STYLE: Record<Call['hit'], { label: string; color: string }> = {
+  hit: { label: 'ตรง', color: '#4ade80' },
+  mixed: { label: 'ครึ่งๆ', color: '#fbbf24' },
+  miss: { label: 'พลาด', color: '#f87171' },
 };
 
 function Bar({ pct, color }: { pct: number; color: string }) {
@@ -92,6 +128,22 @@ function IndicatorCard({ ind }: { ind: Indicator }) {
         ผู้ชนะ: <span style={{ color: v.color, fontWeight: 600 }}>{ind.winner}</span>
       </div>
       <div style={{ fontSize: 11, color: '#5a6f94', marginBottom: 12 }}>{ind.sample}</div>
+
+      <div style={{ background: '#0c1626', border: `1px solid ${v.color}33`, borderRadius: 8, padding: '12px 14px', marginBottom: 14 }}>
+        <div style={{ fontSize: 11, color: '#7a90b4', marginBottom: 6 }}>{ind.call.releaseLabel}</div>
+        <div className="flex items-baseline" style={{ gap: 9 }}>
+          <span style={{ fontSize: 30, fontWeight: 700, color: v.color, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
+            {ind.call.value}
+          </span>
+          <span style={{ fontSize: 11, color: '#7a90b4' }}>{ind.call.valueNote}</span>
+        </div>
+        <div className="flex items-start" style={{ gap: 6, marginTop: 9, paddingTop: 9, borderTop: '1px solid #16243a', fontSize: 11, lineHeight: 1.5 }}>
+          <span style={{ color: HIT_STYLE[ind.call.hit].color, fontWeight: 600, flexShrink: 0 }}>
+            {HIT_STYLE[ind.call.hit].label}
+          </span>
+          <span style={{ color: '#7a90b4' }}>{ind.call.lastRound}</span>
+        </div>
+      </div>
 
       {ind.sources.map((s, i) => (
         <div key={s.name} className="flex items-center" style={{ gap: 9, padding: '5px 0', fontSize: 12 }}>
@@ -123,8 +175,8 @@ export default function ForecastSourceGuide() {
     <div className="card p-6 mb-8">
       <h2 className="text-2xl font-bold mb-2 text-highlight">แหล่งคาดการณ์ไหนแม่นที่สุด</h2>
       <p className="text-sm text-gray-400 mb-5">
-        ทดสอบย้อนหลังกับตัวเลขที่ประกาศจริง ใช้อ่านช่อง &ldquo;คาดการณ์&rdquo; ในปฏิทินด้านล่างว่าเชื่อได้แค่ไหน —
-        ค่าที่แสดงคือความคลาดเคลื่อนเฉลี่ย (ยิ่งต่ำยิ่งแม่น)
+        ทดสอบย้อนหลังกับตัวเลขที่ประกาศจริง แล้วแสดงตัวเลขของแหล่งที่ชนะสำหรับงวดถัดไป —
+        แถบด้านล่างคือความคลาดเคลื่อนเฉลี่ย (ยิ่งต่ำยิ่งแม่น)
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -134,8 +186,8 @@ export default function ForecastSourceGuide() {
       </div>
 
       <div style={{ marginTop: 16, fontSize: 11, color: '#5a6f94', lineHeight: 1.6 }}>
-        ที่มา: Nowflation CPI Forecast Scoreboard (44 งวด) · Nowflation Jobs Report Track Record · ตัวเลขที่ประกาศจริงในระบบ ·
-        Cleveland Fed Nowcasting Working Paper · ข้อมูล ณ 13 ก.ย. 2026
+        ที่มา: Nowflation CPI Forecast Scoreboard (44 งวด) · Nowflation Jobs Report Track Record · CNBC &amp; BEA สำหรับ PCE ·
+        Cleveland Fed Nowcasting Working Paper · ตัวเลขคาดการณ์ตรึง ณ 13 ก.ย. 2026 — ตรวจกับแหล่งอีกครั้งก่อนวันประกาศ
       </div>
     </div>
   );
