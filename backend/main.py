@@ -60,6 +60,10 @@ async def startup_event():
     from models import get_db
     asyncio.create_task(run_sync_loop(get_db))
     logger.info("ForexFactory sync loop started")
+    # Start pre-release leading-indicator loop (DOL claims + Truflation)
+    from services.pre_release_signals import run_signals_loop
+    asyncio.create_task(run_signals_loop(get_db))
+    logger.info("Pre-release signals loop started")
 
 
 @app.on_event("shutdown")
@@ -267,6 +271,30 @@ async def admin_sync_ff(token: str = Query(...)):
             "ff_sep4_usd": [{"title": e.get("title"), "actual": e.get("actual"), "forecast": e.get("forecast"), "date": e.get("date")} for e in sep4_ff],
             "ff_nfp": [{"title": e.get("title"), "actual": e.get("actual"), "date": e.get("date")} for e in nfp_ff],
         }
+    except Exception as e:
+        import traceback
+        return {"error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc()}
+    finally:
+        db.close()
+
+
+@app.get("/api/pre-release-signals")
+async def get_pre_release_signals(db: Session = Depends(get_db)):
+    """Leading indicators that move 2-4 weeks before the official print."""
+    from services.pre_release_signals import build_signal_summary
+    return build_signal_summary(db)
+
+
+@app.post("/admin/sync-signals")
+async def admin_sync_signals(token: str = Query(...)):
+    """Trigger the pre-release signal sync immediately (manual)."""
+    if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    from services.pre_release_signals import sync_pre_release_signals
+    from models import SessionLocal
+    db = SessionLocal()
+    try:
+        return await sync_pre_release_signals(db)
     except Exception as e:
         import traceback
         return {"error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc()}

@@ -6,6 +6,7 @@ import FedDotPlot from '../components/FedDotPlot';
 import FedDotPlotByYear from '../components/FedDotPlotByYear';
 import FedRateMonitorFull from '../components/FedRateMonitorFull';
 import TradingViewCharts from '../components/TradingViewCharts';
+import PreReleaseSignals from '../components/PreReleaseSignals';
 import {
   translateRegime,
   regimeExplain,
@@ -235,6 +236,8 @@ export default function Home() {
           <FedRateMonitorFull />
           <FedDotPlot />
           <FedDotPlotByYear />
+
+          <PreReleaseSignals />
 
           {/* Economic Calendar (ForexFactory-style) */}
           <div className="card p-6 mb-8">

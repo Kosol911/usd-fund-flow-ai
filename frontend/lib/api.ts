@@ -13,6 +13,14 @@ const apiClient = axios.create({
   },
 });
 
+// Pre-release leading indicators (DOL claims + Truflation)
+export const signalApi = {
+  getPreReleaseSignals: async () => {
+    const response = await apiClient.get('/api/pre-release-signals');
+    return response.data;
+  },
+};
+
 // Event API
 export const eventApi = {
   getEvents: async (params?: {
