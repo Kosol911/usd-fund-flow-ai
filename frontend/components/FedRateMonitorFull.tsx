@@ -18,40 +18,45 @@ interface Meeting {
 const MEETINGS: Meeting[] = [
   {
     title: 'Sep 16, 2026',
-    meetingTime: 'Sep 16, 2026 01:00 น.',
-    futuresPrice: '96.305',
-    updated: 'Sep 03, 2026 08:00 ICT',
+    meetingTime: 'Sep 16, 2026 02:00PM ET',
+    futuresPrice: '96.268',
+    updated: 'Sep 12, 2026 12:35AM EDT',
     bins: [
-      { range: '3.50 - 3.75', current: 33.8, dayBefore: 40.0, weekBefore: 55.9 },
-      { range: '3.75 - 4.00', current: 66.2, dayBefore: 60.0, weekBefore: 44.1 },
+      { range: '3.50 - 3.75', current: 14.5, dayBefore: 31.0, weekBefore: 41.6 },
+      { range: '3.75 - 4.00', current: 85.5, dayBefore: 69.0, weekBefore: 58.4 },
     ],
   },
   {
-    title: 'Oct 29, 2026',
-    meetingTime: 'Oct 29, 2026 01:00 น.',
-    futuresPrice: '96.220',
-    updated: 'Sep 03, 2026 08:00 ICT',
+    title: 'Oct 28, 2026',
+    meetingTime: 'Oct 28, 2026 02:00PM ET',
+    futuresPrice: '96.140',
+    updated: 'Sep 12, 2026 12:35AM EDT',
     bins: [
-      { range: '3.50 - 3.75', current: 18.5, dayBefore: 22.4, weekBefore: 30.0 },
-      { range: '3.75 - 4.00', current: 42.8, dayBefore: 44.6, weekBefore: 52.1 },
-      { range: '4.00 - 4.25', current: 38.7, dayBefore: 33.0, weekBefore: 18.0 },
+      { range: '3.50 - 3.75', current: 7.2, dayBefore: 18.9, weekBefore: 30.1 },
+      { range: '3.75 - 4.00', current: 49.6, dayBefore: 54.2, weekBefore: 53.8 },
+      { range: '4.00 - 4.25', current: 43.2, dayBefore: 26.9, weekBefore: 16.1 },
     ],
   },
   {
-    title: 'Dec 10, 2026',
-    meetingTime: 'Dec 10, 2026 02:00 น.',
-    futuresPrice: '96.035',
-    updated: 'Sep 03, 2026 08:00 ICT',
+    title: 'Dec 09, 2026',
+    meetingTime: 'Dec 09, 2026 02:00PM ET',
+    futuresPrice: '95.910',
+    updated: 'Sep 12, 2026 12:35AM EDT',
     bins: [
-      { range: '3.50 - 3.75', current: 8.0, dayBefore: 10.5, weekBefore: 15.0 },
-      { range: '3.75 - 4.00', current: 28.6, dayBefore: 32.8, weekBefore: 38.5 },
-      { range: '4.00 - 4.25', current: 42.5, dayBefore: 38.5, weekBefore: 32.5 },
-      { range: '4.25 - 4.50', current: 20.9, dayBefore: 18.2, weekBefore: 14.0 },
+      { range: '3.50 - 3.75', current: 2.6, dayBefore: 6.5, weekBefore: 14.4 },
+      { range: '3.75 - 4.00', current: 22.7, dayBefore: 31.1, weekBefore: 41.4 },
+      { range: '4.00 - 4.25', current: 47.3, dayBefore: 44.8, weekBefore: 35.8 },
+      { range: '4.25 - 4.50', current: 27.4, dayBefore: 17.6, weekBefore: 8.4 },
     ],
   },
 ];
 
-const BAR_COLORS = ['#38BDF8', '#8891a8', '#8891a8', '#8891a8'];
+const BAR_COLORS: Record<string, string> = {
+  '3.50 - 3.75': '#4ADE80',
+  '3.75 - 4.00': '#38BDF8',
+  '4.00 - 4.25': '#FBBF24',
+  '4.25 - 4.50': '#FB923C',
+};
 
 function MeetingCard({ meeting }: { meeting: Meeting }) {
   return (
@@ -67,13 +72,13 @@ function MeetingCard({ meeting }: { meeting: Meeting }) {
       </div>
 
       <div className="space-y-2 mb-3">
-        {meeting.bins.map((b, i) => (
+        {meeting.bins.map((b) => (
           <div key={b.range} className="flex items-center gap-2">
             <div className="w-20 text-xs text-gray-400 font-mono shrink-0">{b.range}</div>
             <div className="flex-1 bg-gray-800 rounded h-5 overflow-hidden">
               <div
                 className="h-full rounded"
-                style={{ width: `${Math.max(b.current, 2)}%`, background: BAR_COLORS[i] || '#8891a8' }}
+                style={{ width: `${Math.max(b.current, 2)}%`, background: BAR_COLORS[b.range] || '#8891a8' }}
               />
             </div>
             <div className="w-12 text-right text-xs font-bold text-gray-100 shrink-0">{b.current}%</div>

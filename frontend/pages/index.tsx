@@ -5,6 +5,7 @@ import { liquidityApi, crossAssetApi, eventApi } from '../lib/api';
 import FedDotPlot from '../components/FedDotPlot';
 import FedDotPlotByYear from '../components/FedDotPlotByYear';
 import FedRateMonitorFull from '../components/FedRateMonitorFull';
+import FedWatchLive from '../components/FedWatchLive';
 import TradingViewCharts from '../components/TradingViewCharts';
 import PreReleaseSignals from '../components/PreReleaseSignals';
 import ForecastSourceGuide from '../components/ForecastSourceGuide';
@@ -234,6 +235,7 @@ export default function Home() {
 
           <TradingViewCharts />
 
+          <FedWatchLive />
           <FedRateMonitorFull />
           <FedDotPlot />
           <FedDotPlotByYear />

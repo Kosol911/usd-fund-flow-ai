@@ -6,7 +6,7 @@ const TODAY_LABEL = formatThaiShortDate(new Date().toISOString());
 // Real market-implied probability data scraped from Investing.com's "Fed Rate Monitor Tool"
 // (https://th.investing.com/central-banks/fed-rate-monitor) on the date noted below.
 // Current effective target range at time of capture: 3.50% - 3.75%.
-const SCRAPE_DATE_LABEL = '3 ก.ย. 2569';
+const SCRAPE_DATE_LABEL = '13 ก.ย. 2569';
 
 interface MeetingData {
   date: string; // ISO date
@@ -31,13 +31,13 @@ const PAST_MEETINGS: MeetingData[] = [
 // bins -> {cut, hold, hike} derived from CME FedWatch / Investing.com rate-range distributions,
 // with current range = 3.50-3.75% as the "hold" anchor. Market currently prices strong hike probability.
 const MEETINGS: MeetingData[] = [
-  { date: '2026-09-16', label: '16 ก.ย. 2026*', cut: 0, hold: 33.8, hike: 66.2 },
-  { date: '2026-10-29', label: '29 ต.ค. 2026', cut: 0, hold: 18.5, hike: 81.5 },
-  { date: '2026-12-10', label: '10 ธ.ค. 2026*', cut: 0, hold: 8.0, hike: 92.0 },
-  { date: '2027-01-28', label: '28 ม.ค. 2027', cut: 0, hold: 5.5, hike: 94.5 },
-  { date: '2027-03-18', label: '18 มี.ค. 2027*', cut: 0, hold: 4.2, hike: 95.8 },
-  { date: '2027-04-29', label: '29 เม.ย. 2027', cut: 0, hold: 3.8, hike: 96.2 },
-  { date: '2027-06-10', label: '10 มิ.ย. 2027*', cut: 0, hold: 3.5, hike: 96.5 },
+  { date: '2026-09-16', label: '16 ก.ย. 2026*', cut: 0, hold: 14.5, hike: 85.5 },
+  { date: '2026-10-28', label: '28 ต.ค. 2026', cut: 0, hold: 7.2, hike: 92.8 },
+  { date: '2026-12-09', label: '9 ธ.ค. 2026*', cut: 0, hold: 2.6, hike: 97.4 },
+  { date: '2027-01-27', label: '27 ม.ค. 2027', cut: 0, hold: 1.6, hike: 98.4 },
+  { date: '2027-03-17', label: '17 มี.ค. 2027*', cut: 0, hold: 0.7, hike: 99.3 },
+  { date: '2027-04-29', label: '29 เม.ย. 2027', cut: 0, hold: 0.5, hike: 99.5 },
+  { date: '2027-06-09', label: '9 มิ.ย. 2027*', cut: 0, hold: 0.3, hike: 99.7 },
   { date: '2027-07-29', label: '29 ก.ค. 2027', cut: 0, hold: 3.5, hike: 96.5 },
   { date: '2027-09-16', label: '16 ก.ย. 2027*', cut: 0, hold: 3.6, hike: 96.4 },
   { date: '2027-10-28', label: '28 ต.ค. 2027', cut: 0, hold: 3.9, hike: 96.1 },
@@ -105,7 +105,7 @@ export default function FedDotPlot() {
         FOMC Rate-Path Probability — โอกาสความน่าจะเป็นการปรับดอกเบี้ยรายรอบประชุม
       </h2>
       <p className="text-sm text-gray-400 mb-1">
-        แสดงช่วงเวลา 6 เดือนก่อนหน้า ถึง 6 เดือนข้างหน้า นับจากวันนี้ · แกน X คือวันประชุม/แถลงข่าว FOMC ในช่วงนั้น · แกน Y คือโอกาสความน่าจะเป็น (%) ที่อัตราดอกเบี้ยสิ้นสุดรอบนั้นจะ ลด / คง / ขึ้น เทียบกับปัจจุบัน (3.75–4.00%) ·
+        แสดงช่วงเวลา 6 เดือนก่อนหน้า ถึง 6 เดือนข้างหน้า นับจากวันนี้ · แกน X คือวันประชุม/แถลงข่าว FOMC ในช่วงนั้น · แกน Y คือโอกาสความน่าจะเป็น (%) ที่อัตราดอกเบี้ยสิ้นสุดรอบนั้นจะ ลด / คง / ขึ้น เทียบกับปัจจุบัน (3.50–3.75%) ·
         รอบที่มีเครื่องหมาย * คือรอบที่มี Dot Plot ประกอบด้วย
       </p>
       <p className="text-xs text-teal-300 font-semibold mb-1">
