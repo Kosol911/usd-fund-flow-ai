@@ -223,8 +223,11 @@ export default function Home() {
                 <span className="text-4xl font-bold text-orange-300">ขึ้น +0.25%</span>
                 <span className="text-2xl font-bold text-blue-200 font-mono">3.75–4.00%</span>
               </div>
-              <div className="text-sm text-blue-200 text-opacity-70 mt-4">
-                FOMC 16 ก.ย. 2026 ขึ้นดอกเบี้ย 0.25pp · ประชุมครั้งถัดไป 28 ต.ค. 2026
+              <div className="text-sm text-blue-200 text-opacity-70 mt-2">
+                FOMC 16 ก.ย. 2026 มีมติเป็นเอกฉันท์ขึ้น 0.25pp · มีผล 17 ก.ย.
+              </div>
+              <div className="text-xs text-blue-300/60 mt-1">
+                IORB (ดอกเบี้ยเงินสำรอง) = <span className="font-mono font-semibold">3.90%</span> · ประชุมครั้งถัดไป <span className="font-semibold">28 ต.ค. 2026</span>
               </div>
               <div className="text-sm text-blue-100 text-opacity-90 border-t border-blue-800 pt-3 mt-3">
                 ดอกเบี้ยขึ้นมักกดดันหุ้นกลุ่มเทค (NASDAQ) มากกว่ากลุ่มอื่น เพราะไวต่อการคิดลดกระแสเงินสดในอนาคต
