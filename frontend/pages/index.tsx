@@ -6,6 +6,7 @@ import FedDotPlot from '../components/FedDotPlot';
 import FedDotPlotByYear from '../components/FedDotPlotByYear';
 import FedWatchLive from '../components/FedWatchLive';
 import TradingViewCharts from '../components/TradingViewCharts';
+import BtcGoldWeeklySummary from '../components/BtcGoldWeeklySummary';
 import PreReleaseSignals from '../components/PreReleaseSignals';
 import ForecastSourceGuide from '../components/ForecastSourceGuide';
 import {
@@ -234,6 +235,8 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          <BtcGoldWeeklySummary />
 
           <TradingViewCharts />
 
