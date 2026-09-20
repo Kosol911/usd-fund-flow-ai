@@ -1,9 +1,9 @@
 // Native visualization of Fed Rate Monitor data — replaces the iframe embed.
 // Data scraped from investing.com/central-banks/fed-rate-monitor on the date below.
-// Current effective target range at scrape time: 3.50–3.75%.
+// Sep 16 2026: Fed HIKED +0.25pp → current range 3.75–4.00% (was 3.50–3.75%)
 
 const SCRAPE_DATE = 'Sep 12, 2026 12:35AM EDT';
-const SCRAPE_LABEL = '13 ก.ย. 2569';
+const SCRAPE_LABEL = '13 ก.ย. 2569 (ก่อนประชุม Sep 16)';
 
 interface RateBin {
   range: string;
@@ -19,16 +19,18 @@ interface Meeting {
   bins: RateBin[];
 }
 
+// Sep 16 COMPLETED: hiked +0.25pp → 3.75-4.00% (ไม่แสดงในตาราง)
+const PAST_SEP16 = {
+  date: '2026-09-16',
+  label: 'Sep 16, 2026 ✅',
+  result: 'HIKE +0.25pp → 3.75–4.00%',
+  bins: [
+    { range: '3.50-3.75', current: 14.5, prevDay: 31.0, prevWeek: 41.6 },
+    { range: '3.75-4.00', current: 85.5, prevDay: 69.0, prevWeek: 58.4 },
+  ],
+};
+
 const MEETINGS: Meeting[] = [
-  {
-    date: '2026-09-16',
-    label: 'Sep 16, 2026',
-    futuresPrice: '96.268',
-    bins: [
-      { range: '3.50-3.75', current: 14.5, prevDay: 31.0, prevWeek: 41.6 },
-      { range: '3.75-4.00', current: 85.5, prevDay: 69.0, prevWeek: 58.4 },
-    ],
-  },
   {
     date: '2026-10-28',
     label: 'Oct 28, 2026',
@@ -221,16 +223,26 @@ export default function FedWatchLive() {
     <div className="card p-6 mb-8">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
         <h2 className="text-2xl font-bold text-highlight">
-          Fed Rate Monitor — ความน่าจะเป็นอัตราดอกเบี้ย 6 รอบประชุมถัดไป
+          Fed Rate Monitor — ความน่าจะเป็นอัตราดอกเบี้ย 5 รอบประชุมถัดไป
         </h2>
       </div>
 
+      {/* Sep 16 outcome banner */}
+      <div className="flex items-center gap-3 bg-orange-500/10 border border-orange-500/30 rounded-lg px-4 py-2 mb-3">
+        <span className="text-orange-300 font-bold text-sm">FOMC 16 ก.ย. 2026</span>
+        <span className="text-white font-semibold text-sm">ขึ้นดอกเบี้ย +0.25pp</span>
+        <span className="text-gray-400 text-xs">3.50–3.75%</span>
+        <span className="text-gray-400 text-xs">→</span>
+        <span className="text-orange-300 font-bold text-sm">3.75–4.00%</span>
+        <span className="ml-auto text-[10px] text-gray-500">ตลาดคาดไว้ 85.5%</span>
+      </div>
+
       <p className="text-sm text-gray-400 mb-1">
-        อ้างอิงจากราคาสัญญาฟิวเจอร์ส Fed Fund 30 วัน สะท้อนความคาดหวังของตลาดต่อการเปลี่ยนแปลงอัตราดอกเบี้ย ·
-        อัตราปัจจุบัน (ก่อนประชุม Sep 16): <span className="font-bold text-green-400">3.50–3.75%</span>
+        อ้างอิงจากราคาสัญญาฟิวเจอร์ส Fed Fund 30 วัน · อัตราปัจจุบัน (หลังประชุม Sep 16):
+        <span className="font-bold text-orange-300 ml-1">3.75–4.00%</span>
       </p>
-      <p className="text-xs text-teal-300 font-semibold mb-1">
-        ✅ ข้อมูลจริงจาก Investing.com Fed Rate Monitor Tool — ดึงเมื่อ {SCRAPE_LABEL} (ภาพนิ่ง ณ ขณะดึง)
+      <p className="text-xs text-yellow-400/70 font-semibold mb-1">
+        ⚠️ ข้อมูลความน่าจะเป็นด้านล่างถ่ายเมื่อ {SCRAPE_LABEL} (ก่อนประชุม Sep 16) — ดูข้อมูลสดที่ Investing.com
       </p>
       <div className="flex gap-3 text-xs mb-4">
         <a

@@ -5,49 +5,46 @@ const TODAY_LABEL = formatThaiShortDate(new Date().toISOString());
 
 // Real market-implied probability data scraped from Investing.com's "Fed Rate Monitor Tool"
 // (https://th.investing.com/central-banks/fed-rate-monitor) on the date noted below.
-// Current effective target range at time of capture: 3.50% - 3.75%.
-const SCRAPE_DATE_LABEL = '13 ก.ย. 2569';
+// Sep 16 2026: Fed HIKED +0.25pp → current range 3.75–4.00% (was 3.50–3.75%)
+const SCRAPE_DATE_LABEL = '13 ก.ย. 2569 (ก่อนประชุม Sep 16)';
 
 interface MeetingData {
   date: string; // ISO date
   label: string;
-  cut: number; // cumulative probability rate ends BELOW current range (3.50-3.75)
+  cut: number; // cumulative probability rate ends BELOW current range
   hold: number; // probability rate stays at current range
   hike: number; // cumulative probability rate ends ABOVE current range
   isPast?: boolean;
   isAssumed?: boolean;
 }
 
-// Historical FOMC 2026 meetings — all resolved to HOLD at 3.50-3.75%
-// (Fed cut to this range in Dec 2025, has held every 2026 meeting). Source: Federal Reserve press releases.
+// Historical FOMC 2026 meetings — all held at 3.50-3.75% until Sep 16 (hiked to 3.75-4.00%)
 const PAST_MEETINGS: MeetingData[] = [
   { date: '2026-01-28', label: '28 ม.ค. 2026', cut: 0, hold: 100, hike: 0, isPast: true },
   { date: '2026-03-18', label: '18 มี.ค. 2026*', cut: 0, hold: 100, hike: 0, isPast: true },
   { date: '2026-04-29', label: '29 เม.ย. 2026', cut: 0, hold: 100, hike: 0, isPast: true },
   { date: '2026-06-17', label: '17 มิ.ย. 2026*', cut: 0, hold: 100, hike: 0, isPast: true },
   { date: '2026-07-29', label: '29 ก.ค. 2026', cut: 0, hold: 100, hike: 0, isPast: true },
+  // Sep 16: ขึ้นดอกเบี้ย +0.25pp → 3.75-4.00% (hike=100 เพราะเกิดขึ้นแล้ว)
+  { date: '2026-09-16', label: '16 ก.ย. 2026* ✅ Hike', cut: 0, hold: 0, hike: 100, isPast: true },
 ];
 
-// bins -> {cut, hold, hike} derived from CME FedWatch / Investing.com rate-range distributions,
-// with current range = 3.50-3.75% as the "hold" anchor. Market currently prices strong hike probability.
-// Only meetings currently shown on investing.com's Fed Rate Monitor page are included —
-// hold = probability outcome stays at the original 2026 range (3.50-3.75%), hike = probability
-// of any higher range. Beyond Jun 2027 the page shows no data, so no meetings are extrapolated past it.
+// Forward meetings — probabilities from Sep 12 data (before Sep 16 hike), still directionally useful
+// hold = probability outcome stays at 3.75-4.00% (new current range), hike = above 4.00%
 const MEETINGS: MeetingData[] = [
-  { date: '2026-09-16', label: '16 ก.ย. 2026*', cut: 0, hold: 14.5, hike: 85.5 },
-  { date: '2026-10-28', label: '28 ต.ค. 2026', cut: 0, hold: 7.2, hike: 92.8 },
-  { date: '2026-12-09', label: '9 ธ.ค. 2026*', cut: 0, hold: 2.6, hike: 97.4 },
-  { date: '2027-01-27', label: '27 ม.ค. 2027', cut: 0, hold: 1.6, hike: 98.4 },
-  { date: '2027-03-17', label: '17 มี.ค. 2027*', cut: 0, hold: 0.7, hike: 99.3 },
-  { date: '2027-06-09', label: '9 มิ.ย. 2027*', cut: 0, hold: 0.3, hike: 99.7 },
+  { date: '2026-10-28', label: '28 ต.ค. 2026', cut: 0, hold: 49.6, hike: 43.2, isAssumed: true },
+  { date: '2026-12-09', label: '9 ธ.ค. 2026*', cut: 0, hold: 22.7, hike: 74.7, isAssumed: true },
+  { date: '2027-01-27', label: '27 ม.ค. 2027', cut: 0, hold: 14.6, hike: 84.0, isAssumed: true },
+  { date: '2027-03-17', label: '17 มี.ค. 2027*', cut: 0, hold: 7.1, hike: 92.2, isAssumed: true },
+  { date: '2027-06-09', label: '9 มิ.ย. 2027*', cut: 0, hold: 3.8, hike: 95.6, isAssumed: true },
 ];
 
 const ALL_MEETINGS: MeetingData[] = [...PAST_MEETINGS, ...MEETINGS];
 
 const SERIES = [
-  { key: 'cut' as const, name: 'ลดดอกเบี้ย (ต่ำกว่าปัจจุบัน)', color: '#4ADE80' },
-  { key: 'hold' as const, name: 'คงอัตราดอกเบี้ยที่ 3.50-3.75%', color: '#FBBF24' },
-  { key: 'hike' as const, name: 'ขึ้นดอกเบี้ย (สูงกว่าปัจจุบัน)', color: '#F87171' },
+  { key: 'cut' as const, name: 'ลดดอกเบี้ย', color: '#4ADE80' },
+  { key: 'hold' as const, name: 'คงอัตราดอกเบี้ยที่ 3.75–4.00%', color: '#FBBF24' },
+  { key: 'hike' as const, name: 'ขึ้นดอกเบี้ย (สูงกว่า 4.00%)', color: '#F87171' },
 ];
 
 export default function FedDotPlot() {

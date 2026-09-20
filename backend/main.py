@@ -788,6 +788,61 @@ async def get_ai_event_summary(db: Session = Depends(get_db)):
     return {"summary": summary}
 
 
+@app.post("/admin/patch-sep20")
+async def admin_patch_sep20(token: str = Query(...)):
+    """Patch Sep 20 2026: FOMC Sep16 actual=4.00 (hiked), CPI Aug13 actual=3.4%."""
+    if token != os.getenv("ADMIN_TOKEN", "seed-me-2026"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    from models import SessionLocal
+    from models.database import Event
+    from datetime import datetime as dt
+    db = SessionLocal()
+    log = []
+    try:
+        # FOMC Sep 2026 — hiked 0.25pp to 3.75-4.00% (stored as 4.00)
+        fomc_sep = db.query(Event).filter(
+            Event.event_key.like("FOMC%"),
+            Event.release_datetime_utc >= dt(2026, 9, 1),
+            Event.release_datetime_utc < dt(2026, 10, 1),
+        ).first()
+        if fomc_sep:
+            old_fc = fomc_sep.forecast
+            fomc_sep.actual = 4.00
+            fomc_sep.forecast = 4.00
+            fomc_sep.previous = 3.75
+            log.append(f"FOMC Sep: actual→4.00, forecast {old_fc}→4.00, previous→3.75")
+
+        # CPI Aug (released Sep 13) actual = 3.4%
+        cpi_sep13 = db.query(Event).filter(
+            Event.event_key == "CPI",
+            Event.release_datetime_utc >= dt(2026, 9, 1),
+            Event.release_datetime_utc < dt(2026, 10, 1),
+        ).first()
+        if cpi_sep13:
+            cpi_sep13.actual = 3.4
+            log.append(f"CPI Sep13: actual→3.4 (Aug CPI)")
+
+        # Fix FOMC Oct date: Oct 29 → Oct 28 (if still wrong)
+        fomc_oct_wrong = db.query(Event).filter(
+            Event.event_key.like("FOMC%"),
+            Event.release_datetime_utc >= dt(2026, 10, 29),
+            Event.release_datetime_utc < dt(2026, 10, 30),
+        ).first()
+        if fomc_oct_wrong:
+            fomc_oct_wrong.release_datetime_utc = fomc_oct_wrong.release_datetime_utc.replace(day=28)
+            log.append("FOMC Oct: date 29→28")
+
+        db.commit()
+        log.append("✅ committed")
+        return {"status": "ok", "log": log}
+    except Exception as e:
+        db.rollback()
+        import traceback
+        return {"status": "error", "error": str(e), "trace": traceback.format_exc()}
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("BACKEND_PORT", "8000"))

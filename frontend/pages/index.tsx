@@ -206,10 +206,10 @@ export default function Home() {
               <h2 className="text-2xl font-bold mb-4 text-usd">ดัชนีดอลลาร์ (USD)</h2>
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-bold text-white">แข็งค่า</span>
-                <span className="text-2xl font-bold text-violet-200 font-mono">99.5</span>
+                <span className="text-2xl font-bold text-violet-200 font-mono">DXY ~102</span>
               </div>
               <div className="text-sm text-violet-200 text-opacity-70 mt-4">
-                DXY สูงสุดใน 3 สัปดาห์ · ตลาดคาดหวัง Fed hike ก.ย.
+                หลัง Fed hike 16 ก.ย. · ตลาดคาด hike เพิ่มอีกที่ประชุม 28 ต.ค.
               </div>
               <div className="text-sm text-violet-100 text-opacity-90 border-t border-violet-800 pt-3 mt-3">
                 ดอลลาร์แข็ง มักกดดัน Gold และ BTC · ดอลลาร์อ่อน มักหนุนราคาสินทรัพย์เหล่านี้ให้ขึ้น
@@ -220,11 +220,11 @@ export default function Home() {
             <div className="card-rates p-6">
               <h2 className="text-2xl font-bold mb-4 text-rates">อัตราดอกเบี้ย (RATES)</h2>
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold text-white">คงที่</span>
-                <span className="text-2xl font-bold text-blue-200 font-mono">3.50–3.75%</span>
+                <span className="text-4xl font-bold text-orange-300">ขึ้น +0.25%</span>
+                <span className="text-2xl font-bold text-blue-200 font-mono">3.75–4.00%</span>
               </div>
               <div className="text-sm text-blue-200 text-opacity-70 mt-4">
-                หลัง FOMC 28-29 ก.ค. · ตลาดคาดหวัง hike 85.5% ที่ประชุม 16 ก.ย. 2026
+                FOMC 16 ก.ย. 2026 ขึ้นดอกเบี้ย 0.25pp · ประชุมครั้งถัดไป 28 ต.ค. 2026
               </div>
               <div className="text-sm text-blue-100 text-opacity-90 border-t border-blue-800 pt-3 mt-3">
                 ดอกเบี้ยขึ้นมักกดดันหุ้นกลุ่มเทค (NASDAQ) มากกว่ากลุ่มอื่น เพราะไวต่อการคิดลดกระแสเงินสดในอนาคต
