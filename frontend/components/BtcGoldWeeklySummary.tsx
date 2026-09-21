@@ -258,14 +258,14 @@ export default function BtcGoldWeeklySummary() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-2 mb-1">
         <h2 className="text-2xl font-bold text-highlight">
-          ₿ BTC & 🥇 Gold — สรุปสัปดาห์
+          ₿ BTC & 🥇 Gold — สรุปสัปดาห์ที่ผ่านมา และคาดการณ์ล่วงหน้า 2 สัปดาห์
         </h2>
         <div className="text-xs text-gray-500 font-mono bg-gray-800/60 px-2 py-1 rounded">
           อัปเดต {updatedLabel}
         </div>
       </div>
       <div className="text-sm text-orange-300 font-semibold mb-1">
-        สัปดาห์ที่ {d.weekLabel}
+        สัปดาห์ที่ผ่านมา: {d.weekLabel}
       </div>
       <p className="text-sm text-gray-300 mb-1 leading-relaxed border-l-2 border-orange-500/50 pl-3">
         {d.context}
