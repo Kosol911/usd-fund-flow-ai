@@ -7,6 +7,7 @@ import FedDotPlotByYear from '../components/FedDotPlotByYear';
 import FedWatchLive from '../components/FedWatchLive';
 import TradingViewCharts from '../components/TradingViewCharts';
 import BtcGoldWeeklySummary from '../components/BtcGoldWeeklySummary';
+import CdcSignals from '../components/CdcSignals';
 import PreReleaseSignals from '../components/PreReleaseSignals';
 import ForecastSourceGuide from '../components/ForecastSourceGuide';
 import {
@@ -237,6 +238,8 @@ export default function Home() {
           </div>
 
           <BtcGoldWeeklySummary />
+
+          <CdcSignals />
 
           <TradingViewCharts />
 

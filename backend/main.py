@@ -789,6 +789,154 @@ async def get_ai_event_summary(db: Session = Depends(get_db)):
 
 
 
+# ---- CDC Action Zone (/api/cdc) ----
+# In-memory cache: {asset: {data, fetched_at}}
+_cdc_cache: dict = {}
+_CDC_CACHE_TTL = 1800  # 30 minutes
+
+def _calc_ema(closes: list[float], period: int) -> list[float]:
+    """Exponential Moving Average (standard EMA formula)."""
+    k = 2.0 / (period + 1)
+    ema = [closes[0]]
+    for price in closes[1:]:
+        ema.append(price * k + ema[-1] * (1 - k))
+    return ema
+
+def _cdc_zone(price: float, ema12: float, ema26: float) -> dict:
+    """Return CDC Action Zone number, label, and hex color."""
+    if price > ema12 and ema12 > ema26:
+        return {"zone": 1, "label": "Strong Buy", "color": "#4ADE80"}
+    if price < ema12 and ema12 > ema26:
+        return {"zone": 2, "label": "Buy", "color": "#86EFAC"}
+    if price > ema12 and ema12 < ema26:
+        return {"zone": 3, "label": "Sell", "color": "#FB923C"}
+    # price < ema12 and ema12 < ema26
+    return {"zone": 4, "label": "Strong Sell", "color": "#F87171"}
+
+async def _fetch_btc_closes(days: int = 90) -> list[float]:
+    """Fetch BTC daily closes from CoinGecko (free, no key)."""
+    url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
+    params = {"vs_currency": "usd", "days": str(days), "interval": "daily"}
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get(url, params=params)
+        r.raise_for_status()
+        data = r.json()
+    # data["prices"] is [[timestamp_ms, price], ...]
+    # CoinGecko returns today's incomplete candle last — drop it
+    prices = [p[1] for p in data["prices"]]
+    return prices[:-1] if len(prices) > 1 else prices
+
+async def _fetch_gold_closes(days: int = 90) -> list[float]:
+    """Fetch XAUUSD daily closes from stooq.com (free CSV, no key)."""
+    import io
+    from datetime import date, timedelta
+    today = date.today()
+    start = today - timedelta(days=days + 10)  # buffer for weekends
+    url = (
+        f"https://stooq.com/q/d/l/?s=xauusd&d1={start.strftime('%Y%m%d')}"
+        f"&d2={today.strftime('%Y%m%d')}&i=d"
+    )
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get(url, follow_redirects=True)
+        r.raise_for_status()
+        text = r.text
+    closes: list[float] = []
+    for line in text.strip().splitlines()[1:]:  # skip header
+        parts = line.split(",")
+        if len(parts) >= 5:
+            try:
+                closes.append(float(parts[4]))  # Close column
+            except ValueError:
+                pass
+    # stooq returns ascending order; limit to last `days` trading days
+    return closes[-days:] if len(closes) > days else closes
+
+async def _compute_cdc(asset: str, days: int = 90) -> dict:
+    """Fetch closes, compute EMA12/EMA26, return CDC signal + history."""
+    now_ts = datetime.utcnow().timestamp()
+    cached = _cdc_cache.get(asset)
+    if cached and (now_ts - cached["fetched_at"]) < _CDC_CACHE_TTL:
+        return cached["data"]
+
+    try:
+        if asset == "BTC":
+            closes = await _fetch_btc_closes(days)
+        else:
+            closes = await _fetch_gold_closes(days)
+
+        if len(closes) < 27:
+            raise ValueError(f"Not enough data: {len(closes)} closes")
+
+        ema12_series = _calc_ema(closes, 12)
+        ema26_series = _calc_ema(closes, 26)
+
+        # Build history of last 10 days
+        history = []
+        for i in range(max(0, len(closes) - 10), len(closes)):
+            z = _cdc_zone(closes[i], ema12_series[i], ema26_series[i])
+            history.append({
+                "idx": i - len(closes),  # negative index offset
+                "close": round(closes[i], 2),
+                "ema12": round(ema12_series[i], 2),
+                "ema26": round(ema26_series[i], 2),
+                **z,
+            })
+
+        current = history[-1]
+
+        # Find last zone change
+        last_change_idx = None
+        for i in range(len(history) - 2, -1, -1):
+            if history[i]["zone"] != current["zone"]:
+                last_change_idx = history[i]["idx"]
+                break
+
+        result = {
+            "asset": asset,
+            "price": current["close"],
+            "ema12": current["ema12"],
+            "ema26": current["ema26"],
+            "zone": current["zone"],
+            "label": current["label"],
+            "color": current["color"],
+            "last_zone_change_days_ago": abs(last_change_idx) - 1 if last_change_idx is not None else None,
+            "history": history,
+            "fetched_utc": datetime.utcnow().isoformat(),
+            "error": None,
+        }
+    except Exception as e:
+        logger.warning(f"CDC fetch error for {asset}: {e}")
+        result = {
+            "asset": asset,
+            "price": None, "ema12": None, "ema26": None,
+            "zone": None, "label": "ข้อมูลไม่พร้อม", "color": "#6B7280",
+            "last_zone_change_days_ago": None,
+            "history": [],
+            "fetched_utc": datetime.utcnow().isoformat(),
+            "error": str(e),
+        }
+
+    _cdc_cache[asset] = {"data": result, "fetched_at": now_ts}
+    return result
+
+
+@app.get("/api/cdc")
+async def get_cdc_signals():
+    """
+    CDC Action Zone signals for BTC and Gold (Daily).
+    EMA12 / EMA26 crossover zones. Cached 30 minutes.
+    Zone 1 Strong Buy: price > EMA12 > EMA26
+    Zone 2 Buy:        price < EMA12, EMA12 > EMA26
+    Zone 3 Sell:       price > EMA12, EMA12 < EMA26
+    Zone 4 Strong Sell: price < EMA12, EMA12 < EMA26
+    """
+    btc, gold = await asyncio.gather(
+        _compute_cdc("BTC"),
+        _compute_cdc("GOLD"),
+    )
+    return {"btc": btc, "gold": gold, "timeframe": "D1", "ema_periods": [12, 26]}
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("BACKEND_PORT", "8000"))
