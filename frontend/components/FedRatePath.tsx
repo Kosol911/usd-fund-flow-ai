@@ -131,17 +131,17 @@ function MeetingCard({ m }: { m: Meeting }) {
 
       {/* Most likely outcome highlight */}
       <div
-        className="flex items-center gap-2 mb-3 px-2 py-1.5 rounded-lg"
+        className="flex items-center gap-3 mb-3 px-3 py-2 rounded-lg"
         style={{ backgroundColor: bestColor + '15', border: `1px solid ${bestColor}40` }}
       >
-        <span className="text-lg font-black font-mono" style={{ color: bestColor }}>
-          {bestPct.toFixed(0)}%
+        <span className="text-[36px] font-black font-mono leading-none" style={{ color: bestColor }}>
+          {bestPct.toFixed(1)}%
         </span>
         <div>
-          <div className="text-xs font-bold" style={{ color: bestColor }}>
+          <div className="text-base font-bold" style={{ color: bestColor }}>
             {bestLabel}ดอกเบี้ย
           </div>
-          <div className="text-[10px] text-gray-400">{m.mostLikelyRange}</div>
+          <div className="text-[20px] font-bold text-yellow-300 leading-tight">{m.mostLikelyRange}</div>
         </div>
       </div>
 
