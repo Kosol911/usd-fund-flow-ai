@@ -66,7 +66,7 @@ export default function TradingViewCharts() {
       <div className="grid grid-cols-1 gap-6">
         <ChartBlock
           label="GOLD — Day CDC System (4,000–4,700 Sideway)"
-          snapshotUrl="https://s3.tradingview.com/s/4H5STjbm_big.png"
+          snapshotUrl="https://s3.tradingview.com/4/4H5STjbm_big.png"
           ideaUrl="https://www.tradingview.com/chart/GC1!/4H5STjbm-GOLD-Day-4000-4700-sideway-with-CDC-system/"
         />
         <ChartBlock
