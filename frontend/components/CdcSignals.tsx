@@ -404,31 +404,53 @@ function AssetCard({
   );
 }
 
+const AUTO_REFRESH_MS = 4 * 60 * 60 * 1000; // 4 hours
+const RETRY_DELAY_MS = 4000; // 4s — gives Railway time to wake up
+
 export default function CdcSignals() {
   const [data, setData] = useState<CdcResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchedAt, setFetchedAt] = useState('');
+  const [retrying, setRetrying] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (isRetry = false) => {
+    if (!isRetry) setLoading(true);
     setError(null);
     try {
       const res = await fetch('/api/cdc');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: CdcResponse = await res.json();
+      // ถ้าราคายังเป็น null และยังไม่เคย retry → retry ครั้งเดียว
+      if (!isRetry && json.btc?.price === null && json.gold?.price === null) {
+        throw new Error('no_data');
+      }
       setData(json);
-      setFetchedAt(new Date().toLocaleTimeString('th-TH', {
-        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok',
+      setRetrying(false);
+      const now = new Date();
+      setFetchedAt(now.toLocaleString('th-TH', {
+        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+        timeZone: 'Asia/Bangkok',
       }));
     } catch (e: any) {
-      setError(e.message || 'โหลดไม่สำเร็จ');
+      if (!isRetry) {
+        // Railway อาจยัง wake up — รอแล้วลองใหม่ 1 ครั้ง
+        setRetrying(true);
+        setTimeout(() => load(true), RETRY_DELAY_MS);
+      } else {
+        setRetrying(false);
+        setError(e.message === 'no_data' ? 'ข้อมูลตลาดยังไม่พร้อม (กด รีเฟรช อีกครั้ง)' : (e.message || 'โหลดไม่สำเร็จ'));
+      }
     } finally {
-      setLoading(false);
+      if (!isRetry) setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const timer = setInterval(() => load(), AUTO_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, []);
 
   const ctx = data?.context;
   const fgColor = ctx?.fear_greed
@@ -447,13 +469,13 @@ export default function CdcSignals() {
           CDC Action Zone — BTC & Gold
         </h2>
         <div className="flex items-center gap-2">
-          {fetchedAt && <span className="text-xs text-gray-600 font-mono">อัปเดต {fetchedAt} ICT</span>}
+          {fetchedAt && <span className="text-xs text-gray-500 font-mono">อัปเดต {fetchedAt} ICT · รีเฟรชอัตโนมัติทุก 4 ชม.</span>}
           <button
-            onClick={load}
-            disabled={loading}
+            onClick={() => load()}
+            disabled={loading || retrying}
             className="text-xs bg-sky-800/40 hover:bg-sky-700/50 disabled:opacity-40 text-sky-300 px-3 py-1 rounded-lg border border-sky-700/40 transition-colors"
           >
-            {loading ? 'กำลังโหลด…' : '↻ รีเฟรช'}
+            {loading ? 'กำลังโหลด…' : retrying ? '⏳ กำลังเชื่อมต่อ…' : '↻ รีเฟรช'}
           </button>
         </div>
       </div>
