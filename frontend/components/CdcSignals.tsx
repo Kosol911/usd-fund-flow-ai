@@ -27,9 +27,63 @@ const WEEKLY_NOTES = {
     resistance: ['~$4,420 (weekly high)'],
   },
   watchNext: [
-    'PCE ส.ค. (~26 ก.ย.) — consensus 3.7%',
-    'NFP ก.ย. (~2 ต.ค.) — consensus 162K',
-    'FOMC 28 ต.ค. — ตลาดคาด hike 43.2%',
+    {
+      date: '~26 ก.ย. 2569',
+      time: '19:30 น. ICT',
+      event: 'PCE ส.ค.',
+      consensus: '3.7% YoY',
+      detail:
+        'PCE (Personal Consumption Expenditures) คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ใช้กำหนดนโยบายดอกเบี้ย — แม่นกว่า CPI เพราะวัดจากฝั่งต้นทุนจริงของผู้บริโภค\n' +
+        '▸ > 3.7% = แรงกดดัน hike ต่อ 28 ต.ค. ทันที → real yield เพิ่ม → Gold ร่วง, BTC ปรับลงตาม risk-off\n' +
+        '▸ ≤ 3.4% = ตลาด re-price hike odds ลด → DXY อ่อน → หนุน Gold และ BTC ฟื้น\n' +
+        '▸ เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
+    },
+    {
+      date: '~2 ต.ค. 2569',
+      time: '19:30 น. ICT',
+      event: 'NFP ก.ย.',
+      consensus: '162K',
+      detail:
+        'NFP (Nonfarm Payrolls) คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE — ตลาดแรงงาน "ร้อน" = Fed ต้อง hike ต่อ\n' +
+        '▸ > 200K = ร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n' +
+        '▸ 120–160K = ใกล้คาด ตลาดรอ PCE ยืนยัน\n' +
+        '▸ < 100K = ตลาดแรงงานชะลอ → Fed อาจ hold → risk-on กลับมา\n' +
+        '▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings (ชี้เงินเฟ้อ service-side)',
+    },
+    {
+      date: 'ต่อเนื่อง',
+      time: '—',
+      event: 'CFTC / SEC Crypto Rulemaking',
+      consensus: undefined,
+      detail:
+        'หลัง CLARITY Act ล้มเหลว ทำเนียบขาวผลักดัน CFTC มีอำนาจกำกับ spot crypto ผ่าน Executive Order ทางเลือก\n' +
+        '▸ EO ออกภายใน 2–3 สัปดาห์ = regulatory clarity แม้ไม่ใช่กฎหมาย → BTC ETF demand ฟื้น\n' +
+        '▸ SEC ออก Guidance เรื่อง crypto custody = หนุน institutional confidence\n' +
+        '▸ ไม่มีอะไรออกมา = CLARITY Act failure ยังกดดัน sentiment ต่อเนื่อง\n' +
+        '▸ ติดตาม: crypto.news · SEC.gov daily filing · White House briefing',
+    },
+    {
+      date: 'ต่อเนื่อง',
+      time: '—',
+      event: 'DXY Trajectory หลัง Fed hike',
+      consensus: undefined,
+      detail:
+        'DXY (US Dollar Index) เป็น inverse ของ Gold + BTC ระยะกลาง — หลัง hike 16 ก.ย. DXY พุ่งสั้นแล้วอ่อนผิดปกติ บ่งชี้ตลาดอาจมองว่า Fed ใกล้สิ้นสุด cycle\n' +
+        '▸ DXY < 102 = เงื่อนไขดี Gold ทดสอบ ATH ใหม่ + BTC ได้แรงหนุน\n' +
+        '▸ DXY > 104 = real yield กดดัน → Gold มีแรงเทขาย ระวัง\n' +
+        '▸ ตัวชี้วัดที่ต้องดู: US10Y yield movement, PCE surprise, Fed speech ก่อน blackout (21 ต.ค.–28 ต.ค.)',
+    },
+    {
+      date: '28 ต.ค. 2569',
+      time: '01:00 น. ICT (29 ต.ค.)',
+      event: 'FOMC (ไม่มี Dot Plot)',
+      consensus: 'hike 43.2% · hold 49.6%',
+      detail:
+        'ครั้งนี้ไม่มี SEP / Dot Plot — ตลาดฟังเฉพาะ statement + แถลงข่าว Powell หาก hike กับ hold "ใกล้เคียงกัน" (43% vs 50%) นับว่า tension สูงมาก\n' +
+        '▸ hike + Powell ส่งสัญญาณยังขึ้นต่อ = real yield พุ่ง → Gold ร่วงสั้น แต่ถ้าเป็น "last hike" ตลาดอาจ sell-news-buy-dip ใน 24–48 ชม.\n' +
+        '▸ hold + พูดถึง data-dependency = risk-on กลับมา → Gold + BTC ฟื้น\n' +
+        '▸ PCE 26 ก.ย. และ NFP 2 ต.ค. จะกำหนดว่า odds เอียงไปทางใดก่อนประชุม',
+    },
   ],
 };
 // ─────────────────────────────────────────────────────────────────────────────
@@ -441,12 +495,47 @@ export default function CdcSignals() {
               </div>
             )}
 
-            {/* Watch next week */}
-            <div className="border-t border-gray-700/40 pt-2">
-              <div className="text-[10px] text-gray-500 font-semibold mb-1">สัปดาห์หน้า watch:</div>
-              <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+            {/* Section 07: คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า */}
+            <div className="border-t border-gray-700/40 pt-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-bold bg-amber-800/60 text-amber-300 px-1.5 py-0.5 rounded font-mono">07</span>
+                <span className="text-xs font-semibold text-amber-200">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</span>
+                <span className="text-[10px] text-gray-600">(ไม่ทำนายราคา)</span>
+              </div>
+              <div className="space-y-2">
                 {WEEKLY_NOTES.watchNext.map((w, i) => (
-                  <span key={i} className="text-xs text-gray-400">• {w}</span>
+                  <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-2.5">
+                    {/* Date + time + event header */}
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-[10px] font-mono text-amber-400 shrink-0">{w.date}</span>
+                      {w.time !== '—' && (
+                        <span className="text-[10px] font-mono text-gray-500 bg-gray-800/60 px-1.5 py-0.5 rounded shrink-0">
+                          🕐 {w.time}
+                        </span>
+                      )}
+                      <span className="text-xs font-bold text-white">{w.event}</span>
+                      {w.consensus && (
+                        <span className="text-[10px] text-gray-500 bg-gray-800/50 px-1.5 py-0.5 rounded">
+                          consensus: {w.consensus}
+                        </span>
+                      )}
+                    </div>
+                    {/* Expanded detail — split by \n for multi-line */}
+                    <div className="space-y-0.5 pl-1">
+                      {w.detail.split('\n').map((line, li) => (
+                        <div
+                          key={li}
+                          className={`text-xs ${
+                            line.startsWith('▸')
+                              ? 'text-gray-400 pl-1'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

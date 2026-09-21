@@ -9,6 +9,7 @@ interface SectionItem {
 
 interface ForwardEvent {
   date: string;
+  time?: string;
   event: string;
   consensus?: string;
   watch: string;
@@ -171,31 +172,39 @@ const WEEKLY_DATA: WeeklyData = {
   forwardEvents: [
     {
       date: '~26 ก.ย. 2569',
+      time: '19:30 น. ICT',
       event: 'PCE ส.ค.',
-      consensus: '~3.7%',
-      watch: 'ตัวเลขที่ Fed ใช้จริง — สูงกว่าคาด = กดดัน Gold + BTC พร้อมกัน · ต่ำกว่าคาด = ลด hawkish pressure',
+      consensus: '3.7% YoY',
+      watch:
+        'PCE (Personal Consumption Expenditures) คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ใช้กำหนดนโยบายดอกเบี้ย — แม่นกว่า CPI เพราะวัดจากฝั่งต้นทุนจริงของผู้บริโภค ออกโดย BEA พร้อมรายงาน Personal Income & Spending\n▸ > 3.7% YoY = แรงกดดัน hike ต่อ 28 ต.ค. ทันที → real yield เพิ่ม → กดดัน Gold + BTC risk-off\n▸ ≤ 3.4% = ตลาด re-price hike odds ลด → DXY อ่อน → เงื่อนไขดีขึ้นสำหรับ Gold + BTC\n▸ PCE core (ไม่รวมอาหาร/พลังงาน) มีน้ำหนักมากกว่าในการตัดสินของ Fed — ดูทั้งคู่\n▸ ตัวเลขนี้เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
     },
     {
       date: '~2 ต.ค. 2569',
+      time: '19:30 น. ICT',
       event: 'NFP ก.ย.',
-      consensus: '~162K',
-      watch: 'ตลาดแรงงานยังแข็งแกร่ง = หนุน Fed hike ต่อที่ 28 ต.ค. · อ่อนแอกว่าคาด = ลด hike odds',
+      consensus: '162K',
+      watch:
+        'NFP (Nonfarm Payrolls) คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE ในการตัดสินใจดอกเบี้ย ตลาดแรงงาน "ร้อน" หมายความว่า Fed ยังต้องคุมเงินเฟ้อต่อ\n▸ > 200K = ตลาดแรงงานร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n▸ 120–160K = ใกล้เคียงคาด ตลาดรอ PCE ยืนยันก่อนปรับ positioning\n▸ < 100K = ชะลอตัวชัดเจน → Fed อาจ hold → risk-on กลับมา Gold + BTC ฟื้น\n▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings ซึ่งชี้เงินเฟ้อ service-side ที่ PCE จับไม่ครบ',
     },
     {
       date: 'ต่อเนื่อง',
       event: 'CFTC / SEC Crypto Rulemaking',
-      watch: 'ถ้า White House อนุมัติ CFTC package เร็ว — ตลาดอาจตีความเป็น regulatory clarity ทดแทน CLARITY Act',
+      watch:
+        'หลัง CLARITY Act ล้มเหลวในวุฒิสภา 15 ก.ย. ทำเนียบขาวยังผลักดัน CFTC มีอำนาจกำกับ spot crypto markets ผ่านช่องทาง Executive Order ทางเลือก\n▸ EO ออกภายใน 2–3 สัปดาห์ = regulatory clarity แม้ไม่ใช่กฎหมาย → BTC ETF demand ฟื้น sentiment กลับบวก\n▸ SEC ออก Guidance เรื่อง crypto custody = หนุน institutional confidence ระยะกลาง\n▸ ไม่มีอะไรออกมา = CLARITY Act failure ยังคงเป็นหัวข้อกดดัน → ระวัง outflow จาก ETF ต่อเนื่อง\n▸ ติดตาม: crypto.news · SEC.gov daily filing · White House press briefing',
     },
     {
       date: 'ต่อเนื่อง',
       event: 'DXY Trajectory หลัง Fed hike',
-      watch: 'ถ้า DXY อ่อนค่าต่อ → หนุน Gold ทดสอบ $4,400+ · DXY แข็ง → กดดัน Gold ต่อ',
+      watch:
+        'DXY (US Dollar Index) เป็น inverse ของ Gold + BTC ระยะกลาง — หลัง hike 16 ก.ย. DXY พุ่งสั้นแล้วอ่อนค่าผิดปกติ บ่งชี้ตลาดอาจมองว่า Fed ใกล้สิ้นสุด cycle แล้ว\n▸ DXY < 102 = เงื่อนไขดี Gold ทดสอบ $4,400+ และ BTC ได้แรงหนุนสินทรัพย์เสี่ยง\n▸ DXY > 104 = real yield กระโดด → Gold มีแรงกดดันเทขาย ระวัง pullback\n▸ Watch: US10Y yield movement, PCE surprise, และ Fed speech ก่อน blackout (21 ต.ค.–28 ต.ค.)\n▸ สัญญาณสำคัญ: ถ้า DXY อ่อนแม้ yield ขึ้น = เงินไหลออกจาก USD จริง ไม่ใช่แค่ technical',
     },
     {
       date: '28 ต.ค. 2569',
+      time: '01:00 น. ICT (29 ต.ค.)',
       event: 'FOMC (ไม่มี Dot Plot)',
-      consensus: 'ตลาดคาด hike 43.2%',
-      watch: 'ข้อมูล PCE+NFP ที่จะออกก่อนหน้า จะกำหนด positioning ก่อนการประชุม',
+      consensus: 'hike 43.2% · hold 49.6%',
+      watch:
+        'ครั้งนี้ไม่มี SEP / Dot Plot — ตลาดฟังเฉพาะ statement + แถลงข่าว Powell เป็น "กล่องดำ" กว่าปกติ ณ วันนี้ hike กับ hold "ใกล้เคียงกัน" มากผิดปกติ (43% vs 50%)\n▸ hike + Powell ส่งสัญญาณขึ้นต่อ = real yield พุ่ง → Gold ร่วงระยะสั้น แต่ถ้าเป็น "last hike" ตลาดมักทำ sell-news-buy-dip ใน 24–48 ชม.\n▸ hold + พูดถึง data-dependency = risk-on กลับมา → Gold + BTC ฟื้น\n▸ PCE 26 ก.ย. และ NFP 2 ต.ค. จะกำหนดว่า odds เอียงไปทางใดก่อนประชุม — ดูตัวเลขทั้งสองก่อนแล้วค่อย position\n▸ ถ้า hike+hold odds ยังใกล้เคียงกันจนถึงวัน FOMC = ตลาดมีความผันผวนสูงผิดปกติช่วงค่ำวันนั้น',
     },
   ],
 
@@ -301,16 +310,36 @@ export default function BtcGoldWeeklySummary() {
           <h3 className="text-sm font-bold text-white">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</h3>
           <span className="text-xs text-gray-600">(ไม่ทำนายราคา)</span>
         </div>
-        <div className="space-y-2 pl-8">
+        <div className="space-y-3 pl-8">
           {d.forwardEvents.map((ev, i) => (
-            <div key={i} className="flex gap-3 text-sm p-2.5 rounded-lg bg-amber-900/10 border border-amber-800/20">
-              <div className="shrink-0 text-amber-400 font-mono text-xs pt-0.5 min-w-[110px]">{ev.date}</div>
-              <div className="flex-1">
-                <div className="font-semibold text-white text-sm">
-                  {ev.event}
-                  {ev.consensus && <span className="text-gray-400 font-normal ml-2 text-xs">consensus: {ev.consensus}</span>}
-                </div>
-                <div className="text-xs text-gray-400 mt-0.5">{ev.watch}</div>
+            <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-3">
+              {/* Header row: date + time + event + consensus */}
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <span className="text-xs font-mono text-amber-400 shrink-0">{ev.date}</span>
+                {ev.time && (
+                  <span className="text-[10px] font-mono text-gray-500 bg-gray-800/60 px-1.5 py-0.5 rounded shrink-0">
+                    🕐 {ev.time}
+                  </span>
+                )}
+                <span className="text-sm font-bold text-white">{ev.event}</span>
+                {ev.consensus && (
+                  <span className="text-[11px] text-gray-400 bg-gray-800/50 px-1.5 py-0.5 rounded">
+                    consensus: {ev.consensus}
+                  </span>
+                )}
+              </div>
+              {/* Expanded detail — split \n into separate lines */}
+              <div className="space-y-0.5 pl-1">
+                {ev.watch.split('\n').map((line, li) => (
+                  <div
+                    key={li}
+                    className={`text-xs leading-relaxed ${
+                      line.startsWith('▸') ? 'text-gray-400 pl-1' : 'text-gray-300'
+                    }`}
+                  >
+                    {line}
+                  </div>
+                ))}
               </div>
             </div>
           ))}
