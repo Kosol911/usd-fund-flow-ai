@@ -8,6 +8,7 @@ import CdcSignals from '../components/CdcSignals';
 import FedRatePath from '../components/FedRatePath';
 import PreReleaseSignals from '../components/PreReleaseSignals';
 import ForecastSourceGuide from '../components/ForecastSourceGuide';
+import EconCalendar from '../components/EconCalendar';
 import {
   translateRegime,
   regimeExplain,
@@ -247,124 +248,7 @@ export default function Home() {
 
           <ForecastSourceGuide />
 
-          {/* Economic Calendar (ForexFactory-style) */}
-          <div className="card p-6 mb-8">
-            <h2 className="text-2xl font-bold mb-2 text-highlight">
-              ปฏิทินเศรษฐกิจ (ย้อนหลัง–ล่วงหน้า 4 เดือน)
-            </h2>
-            <p className="text-sm text-gray-400 mb-6">
-              🔴 สำคัญที่สุด/มาก · 🟠 สำคัญมาก · 🟡 สำคัญ · 🟢 ทั่วไป — แต่ละเดือนมีแถบสีต่างกันเพื่อแยกช่วงเวลา · "เกิดจริง" สีเขียว = ดีกว่าคาด, สีแดง = แย่กว่าคาด (เทียบกับคาดการณ์)
-            </p>
-            {upcomingEvents.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="text-left text-gray-400 border-b border-gray-700">
-                      <th className="py-2 pr-3 font-medium">วันที่</th>
-                      <th className="py-2 pr-3 font-medium">เวลา</th>
-                      <th className="py-2 pr-3 font-medium">อีเวนต์</th>
-                      <th className="py-2 pr-3 font-medium text-right">เกิดจริง</th>
-                      <th className="py-2 pr-3 font-medium text-right">คาดการณ์</th>
-                      <th className="py-2 pr-3 font-medium text-right">ครั้งก่อน</th>
-                      <th className="py-2 pl-3 font-medium text-right">กำหนดการ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {groupEventsByMonth(upcomingEvents).map((group, gIdx) => {
-                      const color = MONTH_COLORS[gIdx % MONTH_COLORS.length];
-                      const monthIsPast = group.events.every((e) => isPastDate(e.release_datetime_utc));
-                      return (
-                        <React.Fragment key={group.key}>
-                          <tr key={`${group.key}-hdr`}>
-                            <td colSpan={7} className="pt-7 pb-3">
-                              <div
-                                className="flex items-center gap-3 pl-4"
-                                style={{ borderLeft: `6px solid ${color}` }}
-                              >
-                                <span
-                                  className="text-2xl font-extrabold uppercase tracking-wide underline decoration-4 underline-offset-4"
-                                  style={{ color, textDecorationColor: color }}
-                                >
-                                  {thaiMonthName(group.month)} {group.year + 543}
-                                </span>
-                                {monthIsPast && (
-                                  <span className="text-sm text-gray-500 font-normal">· ผ่านมาแล้ว</span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                          {group.events.map((event) => {
-                            const past = isPastDate(event.release_datetime_utc);
-                            const isFed = isFedHighlightEvent(event.event_name);
-                            return (
-                              <React.Fragment key={event.id}>
-                                {event.id === firstFutureEventId && (
-                                  <tr>
-                                    <td colSpan={7} style={{ padding: '6px 0' }}>
-                                      <div style={{ background: '#ffffff', borderRadius: '4px', padding: '8px 16px' }}>
-                                        <span style={{ fontSize: '2.25rem', fontWeight: '900', color: '#111827', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                                          ➜ วันนี้
-                                        </span>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              <tr
-                                className={`border-b transition-colors ${
-                                  isFed
-                                    ? 'border-amber-500 border-b-2 bg-amber-400 bg-opacity-10 hover:bg-opacity-20'
-                                    : 'border-gray-800 hover:bg-white hover:bg-opacity-5'
-                                } ${past ? 'opacity-60' : ''}`}
-                                style={{ borderLeft: `${isFed ? 6 : 4}px solid ${isFed ? '#F59E0B' : color}` }}
-                              >
-                                <td className={`py-2 pr-3 pl-3 whitespace-nowrap ${isFed ? 'text-amber-300 font-bold' : 'text-gray-400'}`}>
-                                  {new Date(event.release_datetime_utc).getDate()} {thaiMonthName(new Date(event.release_datetime_utc).getMonth() + 1).slice(0, 3)}
-                                </td>
-                                <td className={`py-2 pr-3 whitespace-nowrap ${isFed ? 'text-amber-300 font-semibold' : 'text-gray-500'}`}>
-                                  {formatThaiTime(event.release_datetime_utc)} น.
-                                </td>
-                                <td className="py-2 pr-3">
-                                  <span className="mr-2" title={importanceLabel(event.importance)}>
-                                    {getImportanceEmoji(event.importance)}
-                                  </span>
-                                  <span
-                                    className={
-                                      isFed
-                                        ? 'font-extrabold text-lg text-amber-300 underline decoration-2 underline-offset-4 decoration-amber-400'
-                                        : 'font-semibold'
-                                    }
-                                  >
-                                    {event.event_name}
-                                  </span>
-                                </td>
-                                <td className={`py-2 pr-3 text-right font-semibold whitespace-nowrap ${surpriseColor(event.actual, event.forecast)}`}>
-                                  {fmtVal(event.actual, event.unit)}
-                                </td>
-                                <td className="py-2 pr-3 text-right text-gray-400 whitespace-nowrap">
-                                  {fmtVal(event.forecast, event.unit)}
-                                </td>
-                                <td className="py-2 pr-3 text-right text-gray-500 whitespace-nowrap">
-                                  {fmtVal(event.previous, event.unit)}
-                                </td>
-                                <td className={`py-2 pl-3 text-right whitespace-nowrap ${isFed ? 'text-amber-300 font-bold' : 'text-gray-400'}`}>
-                                  {formatRelativeDayThai(event.release_datetime_utc)}
-                                </td>
-                              </tr>
-                              </React.Fragment>
-                            );
-                          })}
-                        </React.Fragment>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-gray-400 text-center py-8">
-                ไม่มีอีเวนต์ในช่วงเวลานี้
-              </div>
-            )}
-          </div>
+          <EconCalendar />
 
           {/* Cross Asset Panel */}
           <div className="card p-6 mb-8">
