@@ -264,7 +264,7 @@ export default function BtcGoldWeeklySummary() {
           อัปเดต {updatedLabel}
         </div>
       </div>
-      <div className="text-sm text-orange-300 font-semibold mb-1">
+      <div className="text-[42px] text-orange-300 font-semibold mb-1 leading-tight">
         สัปดาห์ที่ผ่านมา: {d.weekLabel}
       </div>
       <p className="text-sm text-gray-300 mb-1 leading-relaxed border-l-2 border-orange-500/50 pl-3">
