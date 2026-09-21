@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { liquidityApi, crossAssetApi, eventApi } from '../lib/api';
-import FedDotPlot from '../components/FedDotPlot';
-import FedDotPlotByYear from '../components/FedDotPlotByYear';
-import FedWatchLive from '../components/FedWatchLive';
 import TradingViewCharts from '../components/TradingViewCharts';
 import BtcGoldWeeklySummary from '../components/BtcGoldWeeklySummary';
 import CdcSignals from '../components/CdcSignals';
+import FedRatePath from '../components/FedRatePath';
 import PreReleaseSignals from '../components/PreReleaseSignals';
 import ForecastSourceGuide from '../components/ForecastSourceGuide';
 import {
@@ -243,9 +241,7 @@ export default function Home() {
 
           <TradingViewCharts />
 
-          <FedWatchLive />
-          <FedDotPlot />
-          <FedDotPlotByYear />
+          <FedRatePath />
 
           <PreReleaseSignals />
 
