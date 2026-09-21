@@ -305,36 +305,38 @@ export default function BtcGoldWeeklySummary() {
 
       {/* Section 7: Forward Factors */}
       <div>
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-xs font-bold bg-amber-800/60 text-amber-300 px-2 py-0.5 rounded font-mono">07</span>
-          <h3 className="text-sm font-bold text-white">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</h3>
-          <span className="text-xs text-gray-600">(ไม่ทำนายราคา)</span>
+        <div className="flex items-center gap-4 mb-4">
+          <span className="text-[48px] font-black bg-amber-800/60 text-amber-300 px-4 py-1 rounded font-mono leading-none">07</span>
+          <div>
+            <h3 className="text-[44px] font-black text-white leading-tight">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</h3>
+            <span className="text-lg text-gray-500">(ไม่ทำนายราคา)</span>
+          </div>
         </div>
-        <div className="space-y-3 pl-8">
+        <div className="space-y-5">
           {d.forwardEvents.map((ev, i) => (
-            <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-3">
+            <div key={i} className="rounded-xl bg-amber-900/10 border border-amber-800/25 p-6">
               {/* Header row: date + time + event + consensus */}
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="text-xs font-mono text-amber-400 shrink-0">{ev.date}</span>
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                <span className="text-[40px] font-mono text-amber-400 shrink-0 leading-none">{ev.date}</span>
                 {ev.time && (
-                  <span className="text-[10px] font-mono text-gray-500 bg-gray-800/60 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-[32px] font-mono text-gray-500 bg-gray-800/60 px-3 py-1 rounded shrink-0 leading-none">
                     🕐 {ev.time}
                   </span>
                 )}
-                <span className="text-sm font-bold text-white">{ev.event}</span>
+                <span className="text-[44px] font-black text-white leading-none">{ev.event}</span>
                 {ev.consensus && (
-                  <span className="text-[11px] text-gray-400 bg-gray-800/50 px-1.5 py-0.5 rounded">
+                  <span className="text-[32px] text-gray-400 bg-gray-800/50 px-3 py-1 rounded">
                     consensus: {ev.consensus}
                   </span>
                 )}
               </div>
               {/* Expanded detail — split \n into separate lines */}
-              <div className="space-y-0.5 pl-1">
+              <div className="space-y-1.5 pl-2">
                 {ev.watch.split('\n').map((line, li) => (
                   <div
                     key={li}
-                    className={`text-xs leading-relaxed ${
-                      line.startsWith('▸') ? 'text-gray-400 pl-1' : 'text-gray-300'
+                    className={`text-[40px] leading-relaxed ${
+                      line.startsWith('▸') ? 'text-gray-400 pl-3' : 'text-gray-300'
                     }`}
                   >
                     {line}

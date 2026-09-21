@@ -496,38 +496,40 @@ export default function CdcSignals() {
             )}
 
             {/* Section 07: คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า */}
-            <div className="border-t border-gray-700/40 pt-3">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-bold bg-amber-800/60 text-amber-300 px-1.5 py-0.5 rounded font-mono">07</span>
-                <span className="text-xs font-semibold text-amber-200">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</span>
-                <span className="text-[10px] text-gray-600">(ไม่ทำนายราคา)</span>
+            <div className="border-t border-gray-700/40 pt-4">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-[40px] font-black bg-amber-800/60 text-amber-300 px-3 py-1 rounded font-mono leading-none">07</span>
+                <div>
+                  <span className="text-[36px] font-black text-amber-200 leading-tight block">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</span>
+                  <span className="text-base text-gray-600">(ไม่ทำนายราคา)</span>
+                </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {WEEKLY_NOTES.watchNext.map((w, i) => (
-                  <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-2.5">
+                  <div key={i} className="rounded-xl bg-amber-900/10 border border-amber-800/25 p-5">
                     {/* Date + time + event header */}
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="text-[10px] font-mono text-amber-400 shrink-0">{w.date}</span>
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <span className="text-[36px] font-mono text-amber-400 shrink-0 leading-none">{w.date}</span>
                       {w.time !== '—' && (
-                        <span className="text-[10px] font-mono text-gray-500 bg-gray-800/60 px-1.5 py-0.5 rounded shrink-0">
+                        <span className="text-[28px] font-mono text-gray-500 bg-gray-800/60 px-2.5 py-1 rounded shrink-0 leading-none">
                           🕐 {w.time}
                         </span>
                       )}
-                      <span className="text-xs font-bold text-white">{w.event}</span>
+                      <span className="text-[40px] font-black text-white leading-none">{w.event}</span>
                       {w.consensus && (
-                        <span className="text-[10px] text-gray-500 bg-gray-800/50 px-1.5 py-0.5 rounded">
+                        <span className="text-[28px] text-gray-400 bg-gray-800/50 px-2.5 py-1 rounded">
                           consensus: {w.consensus}
                         </span>
                       )}
                     </div>
                     {/* Expanded detail — split by \n for multi-line */}
-                    <div className="space-y-0.5 pl-1">
+                    <div className="space-y-1 pl-2">
                       {w.detail.split('\n').map((line, li) => (
                         <div
                           key={li}
-                          className={`text-xs ${
+                          className={`text-[36px] leading-relaxed ${
                             line.startsWith('▸')
-                              ? 'text-gray-400 pl-1'
+                              ? 'text-gray-400 pl-3'
                               : 'text-gray-300'
                           }`}
                         >
