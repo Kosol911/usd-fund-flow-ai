@@ -181,33 +181,33 @@ function RatePathTimeline() {
   ];
 
   return (
-    <div className="flex items-center gap-0 mb-6 overflow-x-auto pb-1">
+    <div className="flex items-center gap-0 mb-6 overflow-x-auto pb-2">
       {/* Current */}
       <div className="flex flex-col items-center shrink-0">
-        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center font-bold text-black text-xs border-2 border-blue-300">
+        <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center font-bold text-black text-xl border-4 border-blue-300">
           NOW
         </div>
-        <div className="text-[10px] text-blue-300 mt-1 font-mono font-bold">3.90%</div>
-        <div className="text-[9px] text-gray-500">IORB</div>
+        <div className="text-[20px] text-blue-300 mt-2 font-mono font-bold">3.90%</div>
+        <div className="text-[18px] text-gray-500">IORB</div>
       </div>
 
       {steps.map((s, i) => (
         <div key={i} className="flex items-center shrink-0">
           {/* Arrow */}
-          <div className="w-8 h-0.5 relative mx-0.5" style={{ backgroundColor: s.hike ? '#F87171' : '#38BDF8' }}>
+          <div className="w-16 h-1 relative mx-1" style={{ backgroundColor: s.hike ? '#F87171' : '#38BDF8' }}>
             <div
               className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0"
               style={{
-                borderLeft: `6px solid ${s.hike ? '#F87171' : '#38BDF8'}`,
-                borderTop: '4px solid transparent',
-                borderBottom: '4px solid transparent',
+                borderLeft: `12px solid ${s.hike ? '#F87171' : '#38BDF8'}`,
+                borderTop: '8px solid transparent',
+                borderBottom: '8px solid transparent',
               }}
             />
           </div>
           {/* Node */}
           <div className="flex flex-col items-center">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs border-2"
+              className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl border-4"
               style={{
                 backgroundColor: s.done ? '#4ADE8020' : (s.hike ? '#F8717120' : '#38BDF820'),
                 borderColor: s.done ? '#4ADE80' : (s.hike ? '#F87171' : '#38BDF8'),
@@ -217,12 +217,12 @@ function RatePathTimeline() {
               {s.label}
             </div>
             <div
-              className="text-[10px] mt-1 font-mono font-bold"
+              className="text-[20px] mt-2 font-mono font-bold"
               style={{ color: s.done ? '#4ADE80' : (s.hike ? '#F87171' : '#38BDF8') }}
             >
               {s.value}
             </div>
-            <div className="text-[9px] text-gray-600">{s.hike ? 'คาดขึ้น' : 'คาดคง'}</div>
+            <div className="text-[18px] text-gray-600">{s.hike ? 'คาดขึ้น' : 'คาดคง'}</div>
           </div>
         </div>
       ))}
