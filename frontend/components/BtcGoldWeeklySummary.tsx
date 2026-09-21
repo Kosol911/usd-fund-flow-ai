@@ -305,12 +305,11 @@ export default function BtcGoldWeeklySummary() {
 
       {/* Section 7: Forward Factors */}
       <div>
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-[24px] font-black bg-amber-800/60 text-amber-300 px-3 py-0.5 rounded font-mono leading-none">07</span>
-          <div>
-            <h3 className="text-[22px] font-black text-white leading-tight">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</h3>
-            <span className="text-sm text-gray-500">(ไม่ทำนายราคา)</span>
-          </div>
+        <div className="flex flex-wrap items-baseline gap-3 mb-3">
+          <h3 className="text-[42px] text-orange-300 font-semibold leading-tight">
+            07 คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า
+          </h3>
+          <span className="text-sm text-gray-500">(ไม่ทำนายราคา)</span>
         </div>
         <div className="space-y-3 pl-8">
           {d.forwardEvents.map((ev, i) => (
