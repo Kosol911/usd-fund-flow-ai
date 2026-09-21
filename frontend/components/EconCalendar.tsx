@@ -473,14 +473,6 @@ const MONTH_LABEL: Record<string, string> = {
   '2026-12': 'ธันวาคม 2569',  '2027-1':  'มกราคม 2570',
 };
 
-const CAT_LABELS: { key: Cat | 'all'; label: string }[] = [
-  { key: 'all',        label: 'ทั้งหมด' },
-  { key: 'FOMC',       label: '🏛 FOMC' },
-  { key: 'inflation',  label: '📈 เงินเฟ้อ CPI/PCE/PPI' },
-  { key: 'employment', label: '👷 แรงงาน NFP/ADP' },
-  { key: 'gdp',        label: '📊 GDP / Retail' },
-  { key: 'other',      label: 'อื่นๆ' },
-];
 
 const IMPACT_BADGE: Record<Impact, { label: string; dot: string; bg: string; text: string }> = {
   critical: { label: 'สูงมาก', dot: '🔴', bg: 'bg-red-900/30',    text: 'text-red-300' },
@@ -496,12 +488,12 @@ function isPast(date: string) { return date < TODAY; }
 function isToday(date: string) { return date === TODAY; }
 
 export default function EconCalendar() {
-  const [filter, setFilter] = useState<Cat | 'all'>('all');
+  const [impactFilter, setImpactFilter] = useState<'critical' | 'all'>('critical');
   const [showPast, setShowPast] = useState(true);
 
   const visible = EVENTS.filter((e) => {
     if (!showPast && isPast(e.date)) return false;
-    if (filter !== 'all' && e.cat !== filter) return false;
+    if (impactFilter === 'critical' && e.impact !== 'critical') return false;
     return true;
   });
 
@@ -529,34 +521,41 @@ export default function EconCalendar() {
         </div>
       </div>
       <p className="text-xs text-gray-500 mb-4">
-        🔴 สำคัญที่สุด (Fed + CPI + NFP + PCE) · 🟠 สำคัญมาก · 🟡 ปานกลาง
-        · สีเขียว = ดีกว่าคาด · สีแดง = แย่กว่าคาด (เทียบ Consensus)
+        สีเขียว = ดีกว่าคาด · สีแดง = แย่กว่าคาด (เทียบ Consensus)
+        · ข้อมูลย้อนหลัง = ผลจริง · ข้อมูลล่วงหน้า = Consensus นักวิเคราะห์
       </p>
 
       {/* Filter chips */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {CAT_LABELS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key as Cat | 'all')}
-            className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
-              filter === key
-                ? 'bg-sky-600 border-sky-500 text-white'
-                : 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-gray-200 hover:border-gray-600'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <button
+          onClick={() => setImpactFilter('critical')}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+            impactFilter === 'critical'
+              ? 'bg-red-700/60 border-red-500/70 text-red-100'
+              : 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-gray-200 hover:border-gray-600'
+          }`}
+        >
+          🔴 สำคัญที่สุด — Fed · CPI · NFP · PCE
+        </button>
+        <button
+          onClick={() => setImpactFilter('all')}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+            impactFilter === 'all'
+              ? 'bg-sky-700/50 border-sky-500/60 text-sky-100'
+              : 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-gray-200 hover:border-gray-600'
+          }`}
+        >
+          ทั้งหมด (รวม PPI · ADP · GDP · Retail)
+        </button>
         <button
           onClick={() => setShowPast((v) => !v)}
-          className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ml-auto ${
+          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ml-auto ${
             showPast
               ? 'bg-gray-700/50 border-gray-600/50 text-gray-300'
               : 'bg-gray-800/40 border-gray-700/40 text-gray-500'
           }`}
         >
-          {showPast ? '👁 ซ่อนผ่านแล้ว' : '👁 แสดงผ่านแล้ว'}
+          {showPast ? '🙈 ซ่อนผ่านแล้ว' : '👁 แสดงผ่านแล้ว'}
         </button>
       </div>
 
