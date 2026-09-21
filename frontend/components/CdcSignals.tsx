@@ -1,8 +1,47 @@
-// CDC Action Zone signals — BTC & Gold Daily (EMA12/EMA26)
-// Data fetched live from backend /api/cdc on every page load
-// Cache: 30 minutes server-side (stale data still served while refreshing)
+// CDC Action Zone + Weekly Price Summary — BTC & Gold Daily (EMA12/EMA26)
+// Dynamic data: prices, H/L, % WoW, RSI, Fear&Greed, DXY, US10Y, correlation — fetched on load
+// Static notes: key events + support/resistance — update WEEKLY_NOTES every Saturday
 
 import { useEffect, useState } from 'react';
+
+// ─── STATIC WEEKLY NOTES (update every Saturday) ──────────────────────────────
+const WEEKLY_NOTES = {
+  weekLabel: '14–20 กันยายน 2569',
+  btc: {
+    events: [
+      'Fed hike 16 ก.ย. → DXY แข็ง → BTC ร่วง -5% ในคืน hike',
+      'ฟื้นตัวกลับ +9% ใน 3 วัน (short squeeze + ETF inflow)',
+      'CLARITY Act ตกวุฒิสภา — outflow -$450M วันเดียว ก่อนฟื้น',
+      'On-chain: Exchange outflow สุทธิ +18,400 BTC',
+    ],
+    support: ['~$80,500 (EMA21W)', '~$76,000 (แนวรับหลัก)'],
+    resistance: ['~$83,500 (weekly high)', '~$90,000 (ATH zone)'],
+  },
+  gold: {
+    events: [
+      'Fed hike กดดัน real yield → Gold ร่วงแตะต่ำสุด 6 สัปดาห์',
+      'DXY แข็งระยะสั้น จากนั้นอ่อนค่า → Gold เด้งกลับ +2%',
+      'Central bank buying ยังต่อเนื่อง — Poland นำ +20t ปีนี้',
+    ],
+    support: ['~$4,300 (EMA21D)', '~$4,150 (แนวรับสำคัญ)'],
+    resistance: ['~$4,420 (weekly high)'],
+  },
+  watchNext: [
+    'PCE ส.ค. (~26 ก.ย.) — consensus 3.7%',
+    'NFP ก.ย. (~2 ต.ค.) — consensus 162K',
+    'FOMC 28 ต.ค. — ตลาดคาด hike 43.2%',
+  ],
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface WeeklyStat {
+  open: number | null;
+  close: number | null;
+  high: number | null;
+  low: number | null;
+  pct_wow: number | null;
+  volume_avg_daily_usd: number | null;
+}
 
 interface CdcAsset {
   asset: string;
@@ -13,104 +52,101 @@ interface CdcAsset {
   label: string;
   color: string;
   last_zone_change_days_ago: number | null;
-  history: {
-    idx: number;
-    close: number;
-    ema12: number;
-    ema26: number;
-    zone: number;
-    label: string;
-    color: string;
-  }[];
+  history: { idx: number; close: number; ema12: number; ema26: number; zone: number; label: string; color: string }[];
+  weekly: WeeklyStat | null;
+  rsi_14: number | null;
   fetched_utc: string;
   error: string | null;
+}
+
+interface CdcContext {
+  fear_greed: { value: number; label: string } | null;
+  dxy: { close: number; pct_wow: number | null } | null;
+  us10y: { close: number; change_bps: number } | null;
+  btc_gold_corr_4w: number | null;
 }
 
 interface CdcResponse {
   btc: CdcAsset;
   gold: CdcAsset;
+  context: CdcContext;
   timeframe: string;
   ema_periods: number[];
 }
 
+const ZONE_COLORS: Record<number, string> = {
+  1: '#4ADE80', 2: '#86EFAC', 3: '#FB923C', 4: '#F87171',
+};
 const ZONE_BG: Record<number, string> = {
-  1: 'bg-green-500/10 border-green-500/30',
-  2: 'bg-emerald-500/10 border-emerald-500/30',
-  3: 'bg-orange-500/10 border-orange-500/30',
-  4: 'bg-red-500/10 border-red-500/30',
+  1: 'border-green-500/40 bg-green-500/5',
+  2: 'border-emerald-400/40 bg-emerald-500/5',
+  3: 'border-orange-500/40 bg-orange-500/5',
+  4: 'border-red-500/40 bg-red-500/5',
 };
+const ZONE_EMOJI: Record<number, string> = { 1: '▲▲', 2: '▲', 3: '▼', 4: '▼▼' };
 
-const ZONE_EMOJI: Record<number, string> = {
-  1: '▲▲',
-  2: '▲',
-  3: '▼',
-  4: '▼▼',
-};
-
-function fmt(v: number | null, dec = 2): string {
+function f(v: number | null | undefined, dec = 2): string {
   if (v === null || v === undefined) return '—';
   return v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
 
-function PriceDot({ label, value, color }: { label: string; value: number | null; color: string }) {
+function fVol(v: number | null): string {
+  if (!v) return '—';
+  if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B/day`;
+  if (v >= 1e6) return `$${(v / 1e6).toFixed(0)}M/day`;
+  return `$${v.toFixed(0)}`;
+}
+
+function PctBadge({ v }: { v: number | null }) {
+  if (v === null || v === undefined) return <span className="text-gray-500">—</span>;
+  const pos = v >= 0;
   return (
-    <div className="flex items-center justify-between text-xs py-1 border-b border-gray-800/50">
-      <span className="flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />
-        <span className="text-gray-400">{label}</span>
-      </span>
-      <span className="font-mono font-semibold text-gray-200">{fmt(value)}</span>
-    </div>
+    <span className={`font-mono font-bold text-sm ${pos ? 'text-green-400' : 'text-red-400'}`}>
+      {pos ? '+' : ''}{v.toFixed(2)}%
+    </span>
   );
 }
 
-function AssetCard({ data, ticker }: { data: CdcAsset; ticker: string }) {
+function RsiBadge({ v }: { v: number | null }) {
+  if (v === null) return <span className="text-gray-500 font-mono">—</span>;
+  const color = v >= 70 ? '#F87171' : v <= 30 ? '#4ADE80' : '#FBBF24';
+  const label = v >= 70 ? 'Overbought' : v <= 30 ? 'Oversold' : 'Neutral';
+  return (
+    <span className="font-mono font-bold text-sm" style={{ color }}>
+      {v} <span className="text-xs font-normal text-gray-500">({label})</span>
+    </span>
+  );
+}
+
+function AssetCard({
+  data,
+  ticker,
+  notes,
+}: {
+  data: CdcAsset;
+  ticker: string;
+  notes: { events: string[]; support: string[]; resistance: string[] };
+}) {
   const zone = data.zone ?? 0;
-  const bgClass = ZONE_BG[zone] || 'bg-gray-800/20 border-gray-700/40';
+  const bgClass = ZONE_BG[zone] || 'border-gray-700/40 bg-gray-800/20';
+  const w = data.weekly;
 
   return (
     <div className={`rounded-xl border p-4 ${bgClass}`}>
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between mb-3">
+        <span className="text-lg font-bold text-white">{ticker}</span>
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-white">{ticker}</span>
-          <span className="text-xs text-gray-500 font-mono">D1 · EMA(12,26)</span>
-        </div>
-        {data.error && (
-          <span className="text-[10px] text-red-400 bg-red-900/30 px-1.5 py-0.5 rounded">ดึงข้อมูลไม่ได้</span>
-        )}
-      </div>
-
-      {/* Zone badge */}
-      <div className="flex items-center gap-3 mb-3">
-        <span
-          className="text-2xl font-black font-mono"
-          style={{ color: data.color }}
-        >
-          {ZONE_EMOJI[zone] || '?'}
-        </span>
-        <div>
-          <div className="text-base font-bold text-white leading-tight">
-            Zone {zone} — {data.label}
-          </div>
-          {data.last_zone_change_days_ago !== null && (
-            <div className="text-[11px] text-gray-500">
-              เปลี่ยน zone {data.last_zone_change_days_ago === 0 ? 'วันนี้' : `${data.last_zone_change_days_ago} วันที่แล้ว`}
-            </div>
-          )}
-        </div>
-        {/* Zone bar */}
-        <div className="ml-auto flex gap-1">
+          {/* Zone pills */}
           {[1, 2, 3, 4].map((z) => (
             <div
               key={z}
-              className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center transition-all ${
-                z === zone ? 'opacity-100 scale-110' : 'opacity-20'
-              }`}
+              className="w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center"
               style={{
-                backgroundColor: ZONE_BG[z]?.match(/#[0-9A-Fa-f]{6}/)?.[0] || '#6B7280',
-                color: z === zone ? '#fff' : '#9CA3AF',
-                border: z === zone ? `2px solid ${data.color}` : '1px solid #374151',
+                backgroundColor: z === zone ? ZONE_COLORS[z] : 'transparent',
+                border: `1.5px solid ${z === zone ? ZONE_COLORS[z] : '#374151'}`,
+                color: z === zone ? '#000' : '#6B7280',
+                opacity: z === zone ? 1 : 0.5,
               }}
             >
               {z}
@@ -119,34 +155,127 @@ function AssetCard({ data, ticker }: { data: CdcAsset; ticker: string }) {
         </div>
       </div>
 
-      {/* Price vs EMAs */}
-      <div className="mb-3">
-        <PriceDot label="ราคาปัจจุบัน" value={data.price} color={data.color} />
-        <PriceDot label="EMA 12" value={data.ema12} color="#38BDF8" />
-        <PriceDot label="EMA 26" value={data.ema26} color="#FBBF24" />
+      {/* ── Zone badge ── */}
+      <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-700/40">
+        <span className="text-3xl font-black font-mono" style={{ color: data.color }}>
+          {ZONE_EMOJI[zone] || '?'}
+        </span>
+        <div>
+          <div className="text-base font-bold" style={{ color: data.color }}>
+            Zone {zone} — {data.label}
+          </div>
+          <div className="text-[11px] text-gray-500">
+            {data.last_zone_change_days_ago !== null
+              ? `เปลี่ยน zone ${data.last_zone_change_days_ago === 0 ? 'วันนี้' : `${data.last_zone_change_days_ago} วันที่แล้ว`}`
+              : 'ข้อมูลย้อนหลังไม่พอ'}
+            {' · '}EMA(12,26) D1
+          </div>
+        </div>
       </div>
 
-      {/* Price vs EMA distance */}
-      {data.price && data.ema12 && (
-        <div className="text-[11px] text-gray-500 mb-2">
-          ราคา{data.price > data.ema12 ? 'สูงกว่า' : 'ต่ำกว่า'} EMA12 อยู่{' '}
-          <span className="font-mono font-semibold" style={{ color: data.color }}>
-            {fmt(Math.abs(((data.price - data.ema12) / data.ema12) * 100), 2)}%
-          </span>
+      {/* ── Weekly price summary ── */}
+      <div className="mb-3">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5 font-semibold">
+          ราคา (สัปดาห์ที่ผ่านมา)
         </div>
-      )}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-400">ราคาปิด</span>
+            <span className="font-mono font-bold text-white">{f(data.price)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">% สัปดาห์</span>
+            <PctBadge v={w?.pct_wow ?? null} />
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">High</span>
+            <span className="font-mono text-gray-200">{f(w?.high ?? null)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">Low</span>
+            <span className="font-mono text-gray-200">{f(w?.low ?? null)}</span>
+          </div>
+          {w?.volume_avg_daily_usd && (
+            <div className="flex justify-between col-span-2">
+              <span className="text-gray-400">Volume avg</span>
+              <span className="font-mono text-gray-300">{fVol(w.volume_avg_daily_usd)}</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* History mini strip */}
-      {data.history.length > 0 && (
+      {/* ── EMA levels ── */}
+      <div className="mb-3 space-y-1">
+        {[
+          { label: 'EMA 12', v: data.ema12, color: '#38BDF8' },
+          { label: 'EMA 26', v: data.ema26, color: '#FBBF24' },
+        ].map((row) => (
+          <div key={row.label} className="flex justify-between text-xs">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: row.color }} />
+              <span className="text-gray-400">{row.label}</span>
+            </span>
+            <span className="font-mono font-semibold" style={{ color: row.color }}>{f(row.v)}</span>
+          </div>
+        ))}
+        {data.price && data.ema12 && (
+          <div className="text-[11px] text-gray-500 mt-1">
+            ราคา{data.price > data.ema12 ? 'สูงกว่า' : 'ต่ำกว่า'} EMA12{' '}
+            <span className="font-mono" style={{ color: data.color }}>
+              {f(Math.abs(((data.price - data.ema12) / data.ema12) * 100), 2)}%
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ── RSI ── */}
+      <div className="flex items-center justify-between text-xs mb-3 pb-3 border-b border-gray-700/40">
+        <span className="text-gray-400">RSI (14) D1</span>
+        <RsiBadge v={data.rsi_14} />
+      </div>
+
+      {/* ── Key events (static) ── */}
+      <div className="mb-3">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5 font-semibold">
+          เหตุการณ์สำคัญสัปดาห์นี้
+        </div>
+        <ul className="space-y-1">
+          {notes.events.map((e, i) => (
+            <li key={i} className="text-xs text-gray-300 flex gap-1.5">
+              <span className="text-gray-600 shrink-0 mt-0.5">•</span>
+              <span>{e}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* ── Technical levels (static) ── */}
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <div className="text-[10px] text-gray-600 mb-1">Zone ย้อนหลัง (10 วัน ล่าสุดขวา)</div>
+          <div className="text-[10px] text-green-400/70 uppercase tracking-wide mb-1 font-semibold">แนวรับ</div>
+          {notes.support.map((s, i) => (
+            <div key={i} className="text-xs text-gray-400 font-mono">{s}</div>
+          ))}
+        </div>
+        <div>
+          <div className="text-[10px] text-red-400/70 uppercase tracking-wide mb-1 font-semibold">แนวต้าน</div>
+          {notes.resistance.map((r, i) => (
+            <div key={i} className="text-xs text-gray-400 font-mono">{r}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── History strip ── */}
+      {data.history.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-700/40">
+          <div className="text-[10px] text-gray-600 mb-1">CDC Zone ย้อนหลัง 10 วัน (ขวา = ล่าสุด)</div>
           <div className="flex gap-0.5">
             {data.history.map((h, i) => (
               <div
                 key={i}
-                className="flex-1 h-3 rounded-sm"
-                style={{ backgroundColor: h.color, opacity: 0.7 + i * 0.03 }}
-                title={`Zone ${h.zone}: ${h.label} | Close: ${fmt(h.close)}`}
+                className="flex-1 h-2.5 rounded-sm"
+                style={{ backgroundColor: h.color, opacity: 0.5 + i * 0.05 }}
+                title={`Zone ${h.zone}: ${h.label} | ${f(h.close)}`}
               />
             ))}
           </div>
@@ -160,7 +289,7 @@ export default function CdcSignals() {
   const [data, setData] = useState<CdcResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [fetchedAt, setFetchedAt] = useState<string>('');
+  const [fetchedAt, setFetchedAt] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -170,9 +299,11 @@ export default function CdcSignals() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: CdcResponse = await res.json();
       setData(json);
-      setFetchedAt(new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }));
+      setFetchedAt(new Date().toLocaleTimeString('th-TH', {
+        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok',
+      }));
     } catch (e: any) {
-      setError(e.message || 'โหลดข้อมูลไม่สำเร็จ');
+      setError(e.message || 'โหลดไม่สำเร็จ');
     } finally {
       setLoading(false);
     }
@@ -180,65 +311,152 @@ export default function CdcSignals() {
 
   useEffect(() => { load(); }, []);
 
+  const ctx = data?.context;
+  const fgColor = ctx?.fear_greed
+    ? ctx.fear_greed.value >= 75 ? '#F87171'
+      : ctx.fear_greed.value >= 55 ? '#FBBF24'
+      : ctx.fear_greed.value >= 45 ? '#94A3B8'
+      : ctx.fear_greed.value >= 25 ? '#86EFAC'
+      : '#4ADE80'
+    : '#6B7280';
+
   return (
     <div className="card p-6 mb-8">
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
         <h2 className="text-2xl font-bold text-highlight">
           CDC Action Zone — BTC & Gold
         </h2>
         <div className="flex items-center gap-2">
-          {fetchedAt && (
-            <span className="text-xs text-gray-600 font-mono">อัปเดต {fetchedAt} ICT</span>
-          )}
+          {fetchedAt && <span className="text-xs text-gray-600 font-mono">อัปเดต {fetchedAt} ICT</span>}
           <button
             onClick={load}
             disabled={loading}
-            className="text-xs bg-sky-800/40 hover:bg-sky-700/50 disabled:opacity-40 text-sky-300 px-3 py-1 rounded-lg transition-colors border border-sky-700/40"
+            className="text-xs bg-sky-800/40 hover:bg-sky-700/50 disabled:opacity-40 text-sky-300 px-3 py-1 rounded-lg border border-sky-700/40 transition-colors"
           >
             {loading ? 'กำลังโหลด…' : '↻ รีเฟรช'}
           </button>
         </div>
       </div>
-      <p className="text-sm text-gray-400 mb-1">
-        EMA(12, 26) Daily · โซน 1–4 จากราคาและตำแหน่ง EMA — อัปเดตอัตโนมัติทุกครั้งที่โหลดหน้า
-      </p>
+      <p className="text-sm text-orange-300/80 font-semibold mb-1">สัปดาห์ที่ {WEEKLY_NOTES.weekLabel}</p>
 
-      {/* Zone legend */}
+      {/* ── Zone legend ── */}
       <div className="flex flex-wrap gap-3 text-xs mb-5">
         {[
-          { z: 1, label: 'Zone 1 Strong Buy', desc: 'ราคา > EMA12 > EMA26', color: '#4ADE80' },
-          { z: 2, label: 'Zone 2 Buy',        desc: 'EMA12 > ราคา > EMA26', color: '#86EFAC' },
-          { z: 3, label: 'Zone 3 Sell',       desc: 'ราคา > EMA12, EMA12 < EMA26', color: '#FB923C' },
-          { z: 4, label: 'Zone 4 Strong Sell',desc: 'EMA12 < EMA26 < ราคา', color: '#F87171' },
+          { z: 1, label: 'Zone 1 Strong Buy', color: '#4ADE80', cond: 'ราคา > EMA12 > EMA26' },
+          { z: 2, label: 'Zone 2 Buy',        color: '#86EFAC', cond: 'EMA12 > ราคา > EMA26' },
+          { z: 3, label: 'Zone 3 Sell',       color: '#FB923C', cond: 'ราคา > EMA12, EMA12 < EMA26' },
+          { z: 4, label: 'Zone 4 Strong Sell',color: '#F87171', cond: 'EMA12 < EMA26, ราคา < EMA12' },
         ].map((row) => (
           <div key={row.z} className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: row.color }} />
+            <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: row.color }} />
             <span style={{ color: row.color }} className="font-semibold">{row.label}</span>
-            <span className="text-gray-600">— {row.desc}</span>
+            <span className="text-gray-600 hidden sm:inline">— {row.cond}</span>
           </div>
         ))}
       </div>
 
       {loading && (
-        <div className="text-gray-400 text-center py-8 text-sm">กำลังดึงข้อมูลราคาและคำนวณ EMA…</div>
+        <div className="text-gray-400 text-center py-8 text-sm">กำลังดึงราคาและคำนวณ EMA…</div>
       )}
-
       {error && (
         <div className="text-red-400 text-sm bg-red-900/20 border border-red-800/30 rounded-lg px-4 py-3 mb-4">
-          ⚠️ {error} — ลอง↻ รีเฟรชอีกครั้ง
+          ⚠️ {error} — ลองกด ↻ รีเฟรช
         </div>
       )}
 
       {data && !loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AssetCard data={data.btc} ticker="₿ BTC" />
-          <AssetCard data={data.gold} ticker="🥇 Gold (XAU/USD)" />
-        </div>
+        <>
+          {/* ── Asset cards ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <AssetCard data={data.btc} ticker="₿ Bitcoin (BTC)" notes={WEEKLY_NOTES.btc} />
+            <AssetCard data={data.gold} ticker="🥇 Gold (XAU/USD)" notes={WEEKLY_NOTES.gold} />
+          </div>
+
+          {/* ── Macro context strip ── */}
+          <div className="rounded-xl border border-gray-700/40 bg-gray-800/20 p-4 mb-4">
+            <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-3 font-semibold">
+              🌐 Macro Context
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-3">
+              <div>
+                <div className="text-[10px] text-gray-500 mb-0.5">Fed Rate (IORB)</div>
+                <div className="font-mono font-bold text-blue-300">3.90%</div>
+                <div className="text-[10px] text-gray-600">3.75–4.00% target</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-500 mb-0.5">DXY</div>
+                {ctx?.dxy ? (
+                  <>
+                    <div className="font-mono font-bold text-white">{f(ctx.dxy.close, 3)}</div>
+                    <div className="text-[10px]">
+                      <PctBadge v={ctx.dxy.pct_wow} />
+                      <span className="text-gray-600 ml-1">WoW</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="font-mono text-gray-500">—</div>
+                )}
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-500 mb-0.5">US 10Y Yield</div>
+                {ctx?.us10y ? (
+                  <>
+                    <div className="font-mono font-bold text-white">{f(ctx.us10y.close, 3)}%</div>
+                    <div className="text-[10px] text-gray-500">
+                      {ctx.us10y.change_bps > 0 ? '+' : ''}{ctx.us10y.change_bps} bps WoW
+                    </div>
+                  </>
+                ) : (
+                  <div className="font-mono text-gray-500">—</div>
+                )}
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-500 mb-0.5">Fear & Greed</div>
+                {ctx?.fear_greed ? (
+                  <>
+                    <div className="font-mono font-bold text-xl" style={{ color: fgColor }}>
+                      {ctx.fear_greed.value}
+                    </div>
+                    <div className="text-[10px]" style={{ color: fgColor }}>{ctx.fear_greed.label}</div>
+                  </>
+                ) : (
+                  <div className="font-mono text-gray-500">—</div>
+                )}
+              </div>
+            </div>
+
+            {/* Correlation */}
+            {ctx?.btc_gold_corr_4w !== null && ctx?.btc_gold_corr_4w !== undefined && (
+              <div className="flex items-center gap-2 text-xs border-t border-gray-700/40 pt-2 mb-2">
+                <span className="text-gray-400">🔗 BTC × Gold Correlation (4W):</span>
+                <span className="font-mono font-bold text-white">{ctx.btc_gold_corr_4w.toFixed(2)}</span>
+                <span className="text-gray-500">
+                  {Math.abs(ctx.btc_gold_corr_4w) < 0.3
+                    ? '— อ่อน ทั้งคู่เดินอิสระ'
+                    : Math.abs(ctx.btc_gold_corr_4w) < 0.6
+                    ? '— ปานกลาง'
+                    : '— แข็ง เดินไปทิศทางเดียวกัน'}
+                </span>
+              </div>
+            )}
+
+            {/* Watch next week */}
+            <div className="border-t border-gray-700/40 pt-2">
+              <div className="text-[10px] text-gray-500 font-semibold mb-1">สัปดาห์หน้า watch:</div>
+              <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+                {WEEKLY_NOTES.watchNext.map((w, i) => (
+                  <span key={i} className="text-xs text-gray-400">• {w}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
-      <p className="text-[10px] text-gray-600 mt-3">
-        BTC: CoinGecko · Gold: stooq.com (XAUUSD) · Cache server-side 30 นาที · ไม่ใช่คำแนะนำลงทุน
+      <p className="text-[10px] text-gray-600">
+        BTC: CoinGecko · Gold/DXY/US10Y: stooq.com · Fear&Greed: alternative.me ·
+        Cache 30 นาที · ไม่ใช่คำแนะนำลงทุน
       </p>
     </div>
   );

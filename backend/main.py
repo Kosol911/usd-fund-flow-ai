@@ -789,70 +789,161 @@ async def get_ai_event_summary(db: Session = Depends(get_db)):
 
 
 
-# ---- CDC Action Zone (/api/cdc) ----
-# In-memory cache: {asset: {data, fetched_at}}
+# ---- CDC Action Zone + Weekly Summary (/api/cdc) ----
+import math as _math
 _cdc_cache: dict = {}
 _CDC_CACHE_TTL = 1800  # 30 minutes
 
-def _calc_ema(closes: list[float], period: int) -> list[float]:
-    """Exponential Moving Average (standard EMA formula)."""
+
+def _calc_ema(closes: list, period: int) -> list:
     k = 2.0 / (period + 1)
     ema = [closes[0]]
     for price in closes[1:]:
         ema.append(price * k + ema[-1] * (1 - k))
     return ema
 
+
+def _calc_rsi(closes: list, period: int = 14):
+    if len(closes) < period + 1:
+        return None
+    gains, losses = [], []
+    for i in range(1, len(closes)):
+        d = closes[i] - closes[i - 1]
+        gains.append(max(d, 0.0))
+        losses.append(max(-d, 0.0))
+    ag = sum(gains[-period:]) / period
+    al = sum(losses[-period:]) / period
+    if al == 0:
+        return 100.0
+    return round(100 - 100 / (1 + ag / al), 1)
+
+
+def _pearson_corr(x: list, y: list, n: int = 28):
+    pairs = list(zip(x[-n:], y[-n:]))
+    if len(pairs) < 5:
+        return None
+    xs = [p[0] for p in pairs]
+    ys = [p[1] for p in pairs]
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    num = sum((xs[i] - mx) * (ys[i] - my) for i in range(len(xs)))
+    dx = _math.sqrt(sum((v - mx) ** 2 for v in xs))
+    dy = _math.sqrt(sum((v - my) ** 2 for v in ys))
+    if dx == 0 or dy == 0:
+        return None
+    return round(num / (dx * dy), 3)
+
+
 def _cdc_zone(price: float, ema12: float, ema26: float) -> dict:
-    """Return CDC Action Zone number, label, and hex color."""
     if price > ema12 and ema12 > ema26:
         return {"zone": 1, "label": "Strong Buy", "color": "#4ADE80"}
     if price < ema12 and ema12 > ema26:
         return {"zone": 2, "label": "Buy", "color": "#86EFAC"}
     if price > ema12 and ema12 < ema26:
         return {"zone": 3, "label": "Sell", "color": "#FB923C"}
-    # price < ema12 and ema12 < ema26
     return {"zone": 4, "label": "Strong Sell", "color": "#F87171"}
 
-async def _fetch_btc_closes(days: int = 90) -> list[float]:
-    """Fetch BTC daily closes from CoinGecko (free, no key)."""
+
+async def _fetch_btc_ohlcv(days: int = 90) -> dict:
+    """BTC daily prices + volumes from CoinGecko."""
     url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart"
     params = {"vs_currency": "usd", "days": str(days), "interval": "daily"}
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=20) as client:
         r = await client.get(url, params=params)
         r.raise_for_status()
         data = r.json()
-    # data["prices"] is [[timestamp_ms, price], ...]
-    # CoinGecko returns today's incomplete candle last — drop it
     prices = [p[1] for p in data["prices"]]
-    return prices[:-1] if len(prices) > 1 else prices
+    volumes = [v[1] for v in data.get("total_volumes", [])]
+    # drop today's incomplete candle
+    if prices:
+        prices = prices[:-1]
+    if volumes:
+        volumes = volumes[:-1]
+    return {"closes": prices, "volumes": volumes}
 
-async def _fetch_gold_closes(days: int = 90) -> list[float]:
-    """Fetch XAUUSD daily closes from stooq.com (free CSV, no key)."""
-    import io
+
+async def _fetch_stooq_ohlcv(ticker: str, days: int = 90) -> dict:
+    """Generic stooq CSV fetcher — returns closes, highs, lows."""
     from datetime import date, timedelta
     today = date.today()
-    start = today - timedelta(days=days + 10)  # buffer for weekends
+    start = today - timedelta(days=days + 15)
     url = (
-        f"https://stooq.com/q/d/l/?s=xauusd&d1={start.strftime('%Y%m%d')}"
-        f"&d2={today.strftime('%Y%m%d')}&i=d"
+        f"https://stooq.com/q/d/l/?s={ticker}"
+        f"&d1={start.strftime('%Y%m%d')}&d2={today.strftime('%Y%m%d')}&i=d"
     )
     async with httpx.AsyncClient(timeout=15) as client:
         r = await client.get(url, follow_redirects=True)
         r.raise_for_status()
         text = r.text
-    closes: list[float] = []
-    for line in text.strip().splitlines()[1:]:  # skip header
+    rows = []
+    for line in text.strip().splitlines()[1:]:
         parts = line.split(",")
         if len(parts) >= 5:
             try:
-                closes.append(float(parts[4]))  # Close column
+                rows.append({
+                    "open": float(parts[1]),
+                    "high": float(parts[2]),
+                    "low": float(parts[3]),
+                    "close": float(parts[4]),
+                })
             except ValueError:
                 pass
-    # stooq returns ascending order; limit to last `days` trading days
-    return closes[-days:] if len(closes) > days else closes
+    rows = rows[-days:] if len(rows) > days else rows
+    return {
+        "closes": [r["close"] for r in rows],
+        "highs": [r["high"] for r in rows],
+        "lows": [r["low"] for r in rows],
+    }
+
+
+async def _fetch_market_context() -> dict:
+    """Fear & Greed (alternative.me) + DXY + US10Y (stooq)."""
+    ctx: dict = {}
+
+    # Fear & Greed
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            fg_r = await client.get("https://api.alternative.me/fng/?limit=1")
+            fg = fg_r.json()["data"][0]
+            ctx["fear_greed"] = {"value": int(fg["value"]), "label": fg["value_classification"]}
+    except Exception as e:
+        logger.warning(f"Fear&Greed fetch error: {e}")
+        ctx["fear_greed"] = None
+
+    # DXY from stooq (ticker: dxy.b)
+    try:
+        dxy_data = await _fetch_stooq_ohlcv("dxy.b", 14)
+        c = dxy_data["closes"]
+        if len(c) >= 6:
+            ctx["dxy"] = {
+                "close": round(c[-1], 3),
+                "pct_wow": round((c[-1] / c[-6] - 1) * 100, 2) if c[-6] else None,
+            }
+        else:
+            ctx["dxy"] = None
+    except Exception as e:
+        logger.warning(f"DXY fetch error: {e}")
+        ctx["dxy"] = None
+
+    # US 10Y yield from stooq (ticker: 10usb.b)
+    try:
+        tnx_data = await _fetch_stooq_ohlcv("10usb.b", 14)
+        c = tnx_data["closes"]
+        if len(c) >= 6:
+            ctx["us10y"] = {
+                "close": round(c[-1], 3),
+                "change_bps": round((c[-1] - c[-6]) * 100, 1),
+            }
+        else:
+            ctx["us10y"] = None
+    except Exception as e:
+        logger.warning(f"US10Y fetch error: {e}")
+        ctx["us10y"] = None
+
+    return ctx
+
 
 async def _compute_cdc(asset: str, days: int = 90) -> dict:
-    """Fetch closes, compute EMA12/EMA26, return CDC signal + history."""
+    """Compute CDC zone + weekly stats + RSI. Cached 30 min."""
     now_ts = datetime.utcnow().timestamp()
     cached = _cdc_cache.get(asset)
     if cached and (now_ts - cached["fetched_at"]) < _CDC_CACHE_TTL:
@@ -860,9 +951,17 @@ async def _compute_cdc(asset: str, days: int = 90) -> dict:
 
     try:
         if asset == "BTC":
-            closes = await _fetch_btc_closes(days)
+            raw = await _fetch_btc_ohlcv(days)
+            closes = raw["closes"]
+            volumes = raw["volumes"]
+            highs = closes   # CoinGecko market_chart doesn't have H/L; use close as proxy
+            lows = closes
         else:
-            closes = await _fetch_gold_closes(days)
+            raw = await _fetch_stooq_ohlcv("xauusd", days)
+            closes = raw["closes"]
+            highs = raw.get("highs", closes)
+            lows = raw.get("lows", closes)
+            volumes = []
 
         if len(closes) < 27:
             raise ValueError(f"Not enough data: {len(closes)} closes")
@@ -870,12 +969,31 @@ async def _compute_cdc(asset: str, days: int = 90) -> dict:
         ema12_series = _calc_ema(closes, 12)
         ema26_series = _calc_ema(closes, 26)
 
+        # Weekly stats: last 5-7 trading days
+        w = 7
+        week_closes = closes[-w:]
+        week_highs = highs[-w:]
+        week_lows = lows[-w:]
+        week_open = closes[-(w + 1)] if len(closes) > w else closes[0]
+        week_vols = volumes[-w:] if volumes else []
+
+        weekly = {
+            "open": round(week_open, 2),
+            "close": round(closes[-1], 2),
+            "high": round(max(week_highs), 2),
+            "low": round(min(week_lows), 2),
+            "pct_wow": round((closes[-1] / week_open - 1) * 100, 2) if week_open else None,
+            "volume_avg_daily_usd": round(sum(week_vols) / len(week_vols)) if week_vols else None,
+        }
+
+        rsi_val = _calc_rsi(closes, 14)
+
         # Build history of last 10 days
         history = []
         for i in range(max(0, len(closes) - 10), len(closes)):
             z = _cdc_zone(closes[i], ema12_series[i], ema26_series[i])
             history.append({
-                "idx": i - len(closes),  # negative index offset
+                "idx": i - len(closes),
                 "close": round(closes[i], 2),
                 "ema12": round(ema12_series[i], 2),
                 "ema26": round(ema26_series[i], 2),
@@ -883,8 +1001,6 @@ async def _compute_cdc(asset: str, days: int = 90) -> dict:
             })
 
         current = history[-1]
-
-        # Find last zone change
         last_change_idx = None
         for i in range(len(history) - 2, -1, -1):
             if history[i]["zone"] != current["zone"]:
@@ -901,6 +1017,9 @@ async def _compute_cdc(asset: str, days: int = 90) -> dict:
             "color": current["color"],
             "last_zone_change_days_ago": abs(last_change_idx) - 1 if last_change_idx is not None else None,
             "history": history,
+            "weekly": weekly,
+            "rsi_14": rsi_val,
+            "_closes_for_corr": closes[-28:],  # internal — stripped before response
             "fetched_utc": datetime.utcnow().isoformat(),
             "error": None,
         }
@@ -911,7 +1030,8 @@ async def _compute_cdc(asset: str, days: int = 90) -> dict:
             "price": None, "ema12": None, "ema26": None,
             "zone": None, "label": "ข้อมูลไม่พร้อม", "color": "#6B7280",
             "last_zone_change_days_ago": None,
-            "history": [],
+            "history": [], "weekly": None, "rsi_14": None,
+            "_closes_for_corr": [],
             "fetched_utc": datetime.utcnow().isoformat(),
             "error": str(e),
         }
@@ -923,18 +1043,25 @@ async def _compute_cdc(asset: str, days: int = 90) -> dict:
 @app.get("/api/cdc")
 async def get_cdc_signals():
     """
-    CDC Action Zone signals for BTC and Gold (Daily).
-    EMA12 / EMA26 crossover zones. Cached 30 minutes.
-    Zone 1 Strong Buy: price > EMA12 > EMA26
-    Zone 2 Buy:        price < EMA12, EMA12 > EMA26
-    Zone 3 Sell:       price > EMA12, EMA12 < EMA26
-    Zone 4 Strong Sell: price < EMA12, EMA12 < EMA26
+    CDC Action Zone + Weekly Summary for BTC and Gold (Daily D1).
+    Includes: EMA12/26, Zone 1-4, weekly OHLCV, RSI(14),
+    Fear&Greed, DXY, US10Y, BTC×Gold 4W correlation.
+    Server-side cache: 30 minutes.
     """
-    btc, gold = await asyncio.gather(
+    btc, gold, ctx = await asyncio.gather(
         _compute_cdc("BTC"),
         _compute_cdc("GOLD"),
+        _fetch_market_context(),
     )
-    return {"btc": btc, "gold": gold, "timeframe": "D1", "ema_periods": [12, 26]}
+
+    # Compute BTC×Gold correlation from internal closes, then strip field
+    btc_c = btc.pop("_closes_for_corr", [])
+    gold_c = gold.pop("_closes_for_corr", [])
+    corr = _pearson_corr(btc_c, gold_c, 28) if btc_c and gold_c else None
+
+    ctx["btc_gold_corr_4w"] = corr
+
+    return {"btc": btc, "gold": gold, "context": ctx, "timeframe": "D1", "ema_periods": [12, 26]}
 
 
 if __name__ == "__main__":
