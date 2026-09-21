@@ -65,14 +65,14 @@ export default function TradingViewCharts() {
       <h2 className="text-2xl font-bold mb-4 text-highlight">กราฟราคาสด (TradingView)</h2>
       <div className="grid grid-cols-1 gap-6">
         <ChartBlock
-          label="BTC / USDT"
-          snapshotUrl="https://s3.tradingview.com/o/OQ48Orn3_big.png"
-          ideaUrl="https://www.tradingview.com/chart/BTCUSD/OQ48Orn3-BTC-4-HR-CDC-trend/"
+          label="GOLD — Day CDC System (4,000–4,700 Sideway)"
+          snapshotUrl="https://s3.tradingview.com/s/4H5STjbm_big.png"
+          ideaUrl="https://www.tradingview.com/chart/GC1!/4H5STjbm-GOLD-Day-4000-4700-sideway-with-CDC-system/"
         />
         <ChartBlock
-          label="GOLD / USD (XAUUSD)"
-          snapshotUrl="https://s3.tradingview.com/r/rzTvbd0A_big.png"
-          ideaUrl="https://www.tradingview.com/chart/XAUUSD/rzTvbd0A-GOLD-CDC-System-4-Hr/"
+          label="BTC WEEK — 82,500 Main Support/Resistance"
+          snapshotUrl="https://s3.tradingview.com/j/J1GcCSAO_big.png"
+          ideaUrl="https://www.tradingview.com/chart/BTCUSD/J1GcCSAO-BTC-WEEK-82500-Main-support-resistant/"
         />
       </div>
     </div>
