@@ -8,6 +8,15 @@ import { useEffect, useState } from 'react';
 const WEEKLY_NOTES = {
   weekLabel: '14–20 กันยายน 2569',
   btc: {
+    price: {
+      close: '$81,345',
+      high: '$83,500',
+      low: '$76,200',
+      wowPct: '+5.9%',
+      volume: '$32.1B avg/day',
+      trend: 'Recovery after CLARITY Act selloff',
+      rsi: 'RSI(W): 61 — ยังมีที่ขึ้นต่อ',
+    },
     events: [
       'Fed hike 16 ก.ย. → DXY แข็ง → BTC ร่วง -5% ในคืน hike',
       'ฟื้นตัวกลับ +9% ใน 3 วัน (short squeeze + ETF inflow)',
@@ -18,6 +27,15 @@ const WEEKLY_NOTES = {
     resistance: ['~$83,500 (weekly high)', '~$90,000 (ATH zone)'],
   },
   gold: {
+    price: {
+      close: '$4,378/oz',
+      high: '$4,420',
+      low: '$4,300',
+      wowPct: '+0.92%',
+      volume: '—',
+      trend: 'Sideways bullish',
+      rsi: 'RSI(D): 55 — Neutral',
+    },
     events: [
       'Fed hike กดดัน real yield → Gold ร่วงแตะต่ำสุด 6 สัปดาห์',
       'DXY แข็งระยะสั้น จากนั้นอ่อนค่า → Gold เด้งกลับ +2%',
@@ -25,6 +43,12 @@ const WEEKLY_NOTES = {
     ],
     support: ['~$4,300 (EMA21D)', '~$4,150 (แนวรับสำคัญ)'],
     resistance: ['~$4,420 (weekly high)'],
+  },
+  macroStatic: {
+    fedRate: '3.75–4.00% (IORB 3.90%) ↑ hike 16 ก.ย.',
+    dxy: '102.3 (+0.8% WoW)',
+    us10y: '4.61% (+12bps WoW)',
+    fearGreed: '58 — Greed',
   },
   watchNext: [
     {
@@ -176,14 +200,17 @@ function AssetCard({
   data,
   ticker,
   notes,
+  staticPrice,
 }: {
   data: CdcAsset;
   ticker: string;
   notes: { events: string[]; support: string[]; resistance: string[] };
+  staticPrice: { close: string; high: string; low: string; wowPct: string; volume: string; trend: string; rsi: string };
 }) {
   const zone = data.zone ?? 0;
   const bgClass = ZONE_BG[zone] || 'border-gray-700/40 bg-gray-800/20';
   const w = data.weekly;
+  const apiOk = data.price !== null;
 
   return (
     <div className={`rounded-xl border p-4 ${bgClass}`}>
@@ -229,33 +256,71 @@ function AssetCard({
 
       {/* ── Weekly price summary ── */}
       <div className="mb-3">
-        <div className="text-[10px] text-gray-500 uppercase tracking-wide mb-1.5 font-semibold">
-          ราคา (สัปดาห์ที่ผ่านมา)
-        </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-400">ราคาปิด</span>
-            <span className="font-mono font-bold text-white">{f(data.price)}</span>
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold">
+            ราคา (สัปดาห์ที่ผ่านมา)
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">% สัปดาห์</span>
-            <PctBadge v={w?.pct_wow ?? null} />
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">High</span>
-            <span className="font-mono text-gray-200">{f(w?.high ?? null)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-400">Low</span>
-            <span className="font-mono text-gray-200">{f(w?.low ?? null)}</span>
-          </div>
-          {w?.volume_avg_daily_usd && (
-            <div className="flex justify-between col-span-2">
-              <span className="text-gray-400">Volume avg</span>
-              <span className="font-mono text-gray-300">{fVol(w.volume_avg_daily_usd)}</span>
-            </div>
+          {!apiOk && (
+            <span className="text-[9px] text-amber-500/70 bg-amber-900/20 px-1 rounded">static</span>
           )}
         </div>
+        {apiOk ? (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">ราคาปิด</span>
+              <span className="font-mono font-bold text-white">{f(data.price)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">% สัปดาห์</span>
+              <PctBadge v={w?.pct_wow ?? null} />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">High</span>
+              <span className="font-mono text-gray-200">{f(w?.high ?? null)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Low</span>
+              <span className="font-mono text-gray-200">{f(w?.low ?? null)}</span>
+            </div>
+            {w?.volume_avg_daily_usd && (
+              <div className="flex justify-between col-span-2">
+                <span className="text-gray-400">Volume avg</span>
+                <span className="font-mono text-gray-300">{fVol(w.volume_avg_daily_usd)}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">ราคาปิด</span>
+              <span className="font-mono font-bold text-white">{staticPrice.close}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">% สัปดาห์</span>
+              <span className={`font-mono font-bold text-sm ${staticPrice.wowPct.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+                {staticPrice.wowPct}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">High</span>
+              <span className="font-mono text-gray-200">{staticPrice.high}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Low</span>
+              <span className="font-mono text-gray-200">{staticPrice.low}</span>
+            </div>
+            {staticPrice.volume !== '—' && (
+              <div className="flex justify-between col-span-2">
+                <span className="text-gray-400">Volume avg</span>
+                <span className="font-mono text-gray-300">{staticPrice.volume}</span>
+              </div>
+            )}
+            <div className="col-span-2 mt-1 pt-1 border-t border-gray-700/30 space-y-0.5">
+              <div className="text-xs text-gray-400">Trend: <span className="text-gray-200">{staticPrice.trend}</span></div>
+              <div className="text-xs text-gray-400">{staticPrice.rsi}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── EMA levels ── */}
@@ -423,8 +488,8 @@ export default function CdcSignals() {
         <>
           {/* ── Asset cards ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-            <AssetCard data={data.btc} ticker="₿ Bitcoin (BTC)" notes={WEEKLY_NOTES.btc} />
-            <AssetCard data={data.gold} ticker="🥇 Gold (XAU/USD)" notes={WEEKLY_NOTES.gold} />
+            <AssetCard data={data.btc} ticker="₿ Bitcoin (BTC)" notes={WEEKLY_NOTES.btc} staticPrice={WEEKLY_NOTES.btc.price} />
+            <AssetCard data={data.gold} ticker="🥇 Gold (XAU/USD)" notes={WEEKLY_NOTES.gold} staticPrice={WEEKLY_NOTES.gold.price} />
           </div>
 
           {/* ── Macro context strip ── */}
@@ -449,7 +514,10 @@ export default function CdcSignals() {
                     </div>
                   </>
                 ) : (
-                  <div className="font-mono text-gray-500">—</div>
+                  <>
+                    <div className="font-mono font-bold text-white">{WEEKLY_NOTES.macroStatic.dxy.split(' ')[0]}</div>
+                    <div className="text-[10px] text-gray-500">{WEEKLY_NOTES.macroStatic.dxy.split(' ').slice(1).join(' ')} <span className="text-amber-500/60">static</span></div>
+                  </>
                 )}
               </div>
               <div>
@@ -462,7 +530,10 @@ export default function CdcSignals() {
                     </div>
                   </>
                 ) : (
-                  <div className="font-mono text-gray-500">—</div>
+                  <>
+                    <div className="font-mono font-bold text-white">{WEEKLY_NOTES.macroStatic.us10y.split(' ')[0]}</div>
+                    <div className="text-[10px] text-gray-500">{WEEKLY_NOTES.macroStatic.us10y.split(' ').slice(1).join(' ')} <span className="text-amber-500/60">static</span></div>
+                  </>
                 )}
               </div>
               <div>
@@ -475,7 +546,10 @@ export default function CdcSignals() {
                     <div className="text-[10px]" style={{ color: fgColor }}>{ctx.fear_greed.label}</div>
                   </>
                 ) : (
-                  <div className="font-mono text-gray-500">—</div>
+                  <>
+                    <div className="font-mono font-bold text-xl text-amber-300">{WEEKLY_NOTES.macroStatic.fearGreed.split(' — ')[0]}</div>
+                    <div className="text-[10px] text-amber-400/70">{WEEKLY_NOTES.macroStatic.fearGreed.split(' — ')[1]} <span className="text-amber-500/60">static</span></div>
+                  </>
                 )}
               </div>
             </div>
