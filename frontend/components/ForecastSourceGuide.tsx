@@ -35,7 +35,7 @@ const INDICATORS: Indicator[] = [
     verdict: 'win',
     sample: 'ทดสอบย้อนหลัง มี.ค.–ส.ค. 2026 · ตารางเต็ม 44 งวด',
     call: {
-      releaseLabel: 'CPI ก.ย. · ประกาศ 14 ต.ค. 20:30 น.',
+      releaseLabel: 'CPI ก.ย. · ประกาศ 14 ต.ค. 19:30 น.',
       value: '3.7%',
       valueNote: 'YoY · Street Consensus',
       lastRound: 'รอบที่แล้ว CPI ส.ค. จริง 3.4% — Street คาด 3.4%',
@@ -56,7 +56,7 @@ const INDICATORS: Indicator[] = [
     verdict: 'derived',
     sample: 'อ่านจาก CPI + PPI เดือน ส.ค. ที่ประกาศไปแล้ว',
     call: {
-      releaseLabel: 'PCE ส.ค. · ประกาศ 30 ก.ย. 20:30 น.',
+      releaseLabel: 'PCE ส.ค. · ประกาศ 30 ก.ย. 19:30 น.',
       value: '≥ 3.3%',
       valueNote: 'Core YoY · เอียงขึ้นจากฐาน 3.3%',
       lastRound: 'รอบที่แล้ว PCE ก.ค. core 3.3% ตรงคาด · headline 3.7% สูงกว่าคาด 0.1',
@@ -77,7 +77,7 @@ const INDICATORS: Indicator[] = [
     verdict: 'none',
     sample: 'Street 8 เดือน 2026 · โมเดล 24 งวด walk-forward',
     call: {
-      releaseLabel: 'NFP ก.ย. · ประกาศ 2 ต.ค. 20:30 น.',
+      releaseLabel: 'NFP ก.ย. · ประกาศ 2 ต.ค. 19:30 น.',
       value: '+120K',
       valueNote: 'Street Consensus · Nowflation +102K',
       lastRound: 'รอบที่แล้ว NFP ส.ค. จริง +162K — Street คาด +56K พลาด 106K',

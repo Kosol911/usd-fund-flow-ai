@@ -171,7 +171,7 @@ const WEEKLY_DATA: WeeklyData = {
 
   forwardEvents: [
     {
-      date: '~26 ก.ย. 2569',
+      date: '30 ก.ย. 2569',
       time: '19:30 น. ICT',
       event: 'PCE ส.ค.',
       consensus: '3.7% YoY',
@@ -182,7 +182,7 @@ const WEEKLY_DATA: WeeklyData = {
       date: '~2 ต.ค. 2569',
       time: '19:30 น. ICT',
       event: 'NFP ก.ย.',
-      consensus: '162K',
+      consensus: '120K',
       watch:
         'NFP (Nonfarm Payrolls) คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE ในการตัดสินใจดอกเบี้ย ตลาดแรงงาน "ร้อน" หมายความว่า Fed ยังต้องคุมเงินเฟ้อต่อ\n▸ > 200K = ตลาดแรงงานร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n▸ 120–160K = ใกล้เคียงคาด ตลาดรอ PCE ยืนยันก่อนปรับ positioning\n▸ < 100K = ชะลอตัวชัดเจน → Fed อาจ hold → risk-on กลับมา Gold + BTC ฟื้น\n▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings ซึ่งชี้เงินเฟ้อ service-side ที่ PCE จับไม่ครบ',
     },

@@ -113,17 +113,17 @@ const EVENTS: EconEvent[] = [
     forecast: '3.0', actual: '3.1', prev: '3.2', beat: true,
   },
   {
-    date: '2026-07-25', time: '19:30', nameTh: 'PCE มิ.ย. (YoY)', nameEn: 'PCE YoY',
+    date: '2026-07-24', time: '19:30', nameTh: 'PCE มิ.ย. (YoY)', nameEn: 'PCE YoY',
     period: 'มิ.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
     forecast: '3.6', actual: '3.7', prev: '3.5', beat: true, note: 'ร้อนกว่าคาด — เพิ่มโอกาส hike ก.ย.',
   },
   {
-    date: '2026-07-25', time: '19:30', nameTh: 'Core PCE มิ.ย. (YoY)', nameEn: 'Core PCE YoY',
+    date: '2026-07-24', time: '19:30', nameTh: 'Core PCE มิ.ย. (YoY)', nameEn: 'Core PCE YoY',
     period: 'มิ.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
     forecast: '3.2', actual: '3.3', prev: '3.1', beat: true,
   },
   {
-    date: '2026-07-30', time: '01:00', nameTh: 'FOMC ก.ค. — มติดอกเบี้ย', nameEn: 'FOMC Decision',
+    date: '2026-07-31', time: '01:00', nameTh: 'FOMC ก.ค. — มติดอกเบี้ย', nameEn: 'FOMC Decision',
     period: 'ก.ค. 2569', impact: 'critical', cat: 'FOMC', unit: '%',
     forecast: 'hold 70% · hike 28%', actual: '3.50–3.75%', prev: '3.50–3.75%', beat: undefined,
     note: 'HELD ✅ — คง 3.50–3.75% มติ 9:2 · ส่งสัญญาณ "data-dependent" รอ PCE + CPI ก.ย.',
@@ -168,7 +168,7 @@ const EVENTS: EconEvent[] = [
     forecast: '3.2', actual: '3.3', prev: '3.1', beat: true,
   },
   {
-    date: '2026-08-22', time: '20:00', nameTh: 'Jackson Hole — Powell กล่าวสุนทรพจน์', nameEn: 'Jackson Hole Symposium',
+    date: '2026-08-21', time: '21:00', nameTh: 'Jackson Hole — Powell กล่าวสุนทรพจน์', nameEn: 'Jackson Hole Symposium',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'FOMC', unit: '—',
     actual: 'ยืนยัน "data-dependent" · เปิดทาง hike ก.ย. หาก CPI+PCE ยังสูง', beat: undefined,
     note: 'ตลาดรับรู้ว่า hike ก.ย. เป็นไปได้สูง · DXY แข็ง, Gold ร่วงระยะสั้น',
@@ -188,29 +188,29 @@ const EVENTS: EconEvent[] = [
   // กันยายน 2026 / 2569  (ผ่านบางส่วน — EDT)
   // ═══════════════════════════════════════════════════════
   {
-    date: '2026-09-04', time: '19:30', nameTh: 'ADP จ้างงาน ส.ค.', nameEn: 'ADP Employment',
+    date: '2026-09-02', time: '19:30', nameTh: 'ADP จ้างงาน ส.ค.', nameEn: 'ADP Employment',
     period: 'ส.ค. 2569', impact: 'medium', cat: 'employment', unit: 'K',
     forecast: '160', actual: '148', prev: '158', beat: false,
   },
   {
-    date: '2026-09-05', time: '19:30', nameTh: 'NFP จ้างงานนอกภาคเกษตร ส.ค.', nameEn: 'Nonfarm Payrolls',
+    date: '2026-09-04', time: '19:30', nameTh: 'NFP จ้างงานนอกภาคเกษตร ส.ค.', nameEn: 'Nonfarm Payrolls',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'employment', unit: 'K',
-    forecast: '170', actual: '162', prev: '185', beat: false, note: 'ชะลอลงจาก 185K — แต่ยังแข็งแกร่ง',
+    forecast: '56', actual: '162', prev: '185', beat: true, note: 'Massive beat! คาด 56K ออกมา 162K (+106K) — แรงงานร้อนเกินคาด หนุน hike ก.ย.',
   },
   {
-    date: '2026-09-05', time: '19:30', nameTh: 'อัตราว่างงาน ส.ค.', nameEn: 'Unemployment Rate',
+    date: '2026-09-04', time: '19:30', nameTh: 'อัตราว่างงาน ส.ค.', nameEn: 'Unemployment Rate',
     period: 'ส.ค. 2569', impact: 'high', cat: 'employment', unit: '%',
     forecast: '3.9', actual: '4.0', prev: '3.9', beat: false,
   },
   {
     date: '2026-09-10', time: '19:30', nameTh: 'CPI ส.ค. (YoY)', nameEn: 'CPI YoY',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
-    forecast: '4.1', actual: '4.0', prev: '4.1', beat: false, note: 'ต่ำกว่าคาดเล็กน้อย แต่ยังสูง',
+    forecast: '3.4', actual: '3.4', prev: '4.1', beat: undefined, note: 'ตรงคาดพอดี — สัญญาณเงินเฟ้อชะลอ',
   },
   {
     date: '2026-09-10', time: '19:30', nameTh: 'Core CPI ส.ค. (YoY)', nameEn: 'Core CPI YoY',
     period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
-    forecast: '3.5', actual: '3.4', prev: '3.5', beat: false,
+    forecast: '3.4', actual: '3.4', prev: '3.5', beat: undefined,
   },
   {
     date: '2026-09-11', time: '19:30', nameTh: 'PPI ส.ค. (YoY)', nameEn: 'PPI YoY',
@@ -225,13 +225,13 @@ const EVENTS: EconEvent[] = [
   },
   // ─── TODAY: 21 กันยายน 2569 ───────────────────────────────
   {
-    date: '2026-09-26', time: '19:30', nameTh: 'PCE ส.ค. (YoY) ← ตัวชี้วัดหลัก Fed', nameEn: 'PCE YoY',
+    date: '2026-09-30', time: '19:30', nameTh: 'PCE ส.ค. (YoY) ← ตัวชี้วัดหลัก Fed', nameEn: 'PCE YoY',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
     forecast: '3.7', prev: '3.8',
     note: '▸ > 3.7% = แรงกดดัน hike ต.ค. ทันที · ▸ ≤ 3.4% = ตลาด re-price hike ลด',
   },
   {
-    date: '2026-09-26', time: '19:30', nameTh: 'Core PCE ส.ค. (YoY)', nameEn: 'Core PCE YoY',
+    date: '2026-09-30', time: '19:30', nameTh: 'Core PCE ส.ค. (YoY)', nameEn: 'Core PCE YoY',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
     forecast: '3.3', prev: '3.4',
   },
@@ -247,7 +247,7 @@ const EVENTS: EconEvent[] = [
   {
     date: '2026-10-02', time: '19:30', nameTh: 'NFP จ้างงานนอกภาคเกษตร ก.ย.', nameEn: 'Nonfarm Payrolls',
     period: 'ก.ย. 2569', impact: 'critical', cat: 'employment', unit: 'K',
-    forecast: '162', prev: '162',
+    forecast: '120', prev: '162',
     note: '▸ > 200K = ร้อนเกิน → hike ต.ค. odds พุ่ง · ▸ < 100K = Fed อาจ hold',
   },
   {
@@ -256,17 +256,17 @@ const EVENTS: EconEvent[] = [
     forecast: '4.2', prev: '4.0',
   },
   {
-    date: '2026-10-09', time: '19:30', nameTh: 'CPI ก.ย. (YoY)', nameEn: 'CPI YoY',
+    date: '2026-10-14', time: '19:30', nameTh: 'CPI ก.ย. (YoY)', nameEn: 'CPI YoY',
     period: 'ก.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
-    forecast: '3.9', prev: '4.0',
+    forecast: '3.7', prev: '3.4',
   },
   {
-    date: '2026-10-09', time: '19:30', nameTh: 'Core CPI ก.ย. (YoY)', nameEn: 'Core CPI YoY',
+    date: '2026-10-14', time: '19:30', nameTh: 'Core CPI ก.ย. (YoY)', nameEn: 'Core CPI YoY',
     period: 'ก.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.4', prev: '3.4',
   },
   {
-    date: '2026-10-14', time: '19:30', nameTh: 'PPI ก.ย. (YoY)', nameEn: 'PPI YoY',
+    date: '2026-10-15', time: '19:30', nameTh: 'PPI ก.ย. (YoY)', nameEn: 'PPI YoY',
     period: 'ก.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.2', prev: '3.2',
   },
@@ -276,7 +276,7 @@ const EVENTS: EconEvent[] = [
     forecast: '0.3', prev: '0.4',
   },
   {
-    date: '2026-10-29', time: '01:00', nameTh: 'FOMC ต.ค. — มติดอกเบี้ย (ประชุม 28–29 ต.ค.) ไม่มี Dot Plot', nameEn: 'FOMC Decision',
+    date: '2026-10-30', time: '01:00', nameTh: 'FOMC ต.ค. — มติดอกเบี้ย (ประชุม 28–29 ต.ค.) ไม่มี Dot Plot', nameEn: 'FOMC Decision',
     period: 'ต.ค. 2569', impact: 'critical', cat: 'FOMC', unit: '%',
     forecast: 'hold 49.6% · hike 43.2%', prev: '3.75–4.00%',
     note: '▸ hike → 4.00–4.25% | ▸ hold → คง 3.75–4.00% · ไม่มี Dot Plot + SEP ในรอบนี้',
@@ -296,7 +296,7 @@ const EVENTS: EconEvent[] = [
   // พฤศจิกายน 2026 / 2569  (อนาคต — EST หลัง 1 พ.ย. → 20:30 ICT)
   // ═══════════════════════════════════════════════════════
   {
-    date: '2026-11-05', time: '20:30', nameTh: 'ADP จ้างงาน ต.ค.', nameEn: 'ADP Employment',
+    date: '2026-11-04', time: '20:30', nameTh: 'ADP จ้างงาน ต.ค.', nameEn: 'ADP Employment',
     period: 'ต.ค. 2569', impact: 'medium', cat: 'employment', unit: 'K',
     forecast: '150', prev: '155', note: '⚠️ หลัง 1 พ.ย. → เวลาเปลี่ยนเป็น EST (20:30 ICT)',
   },
@@ -321,7 +321,7 @@ const EVENTS: EconEvent[] = [
     forecast: '3.3', prev: '3.4',
   },
   {
-    date: '2026-11-14', time: '20:30', nameTh: 'PPI ต.ค. (YoY)', nameEn: 'PPI YoY',
+    date: '2026-11-12', time: '20:30', nameTh: 'PPI ต.ค. (YoY)', nameEn: 'PPI YoY',
     period: 'ต.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.1', prev: '3.2',
   },
@@ -365,7 +365,7 @@ const EVENTS: EconEvent[] = [
     forecast: '4.2', prev: '4.2',
   },
   {
-    date: '2026-12-10', time: '02:00', nameTh: 'FOMC ธ.ค. — มติดอกเบี้ย + Dot Plot + SEP (ประชุม 9–10 ธ.ค.)', nameEn: 'FOMC Decision',
+    date: '2026-12-11', time: '02:00', nameTh: 'FOMC ธ.ค. — มติดอกเบี้ย + Dot Plot + SEP (ประชุม 9–10 ธ.ค.)', nameEn: 'FOMC Decision',
     period: 'ธ.ค. 2569', impact: 'critical', cat: 'FOMC', unit: '%',
     forecast: 'hike 74.7% · hold 22.7%', prev: '3.75–4.00% (หรือ 4.00–4.25%)',
     note: '▸ Dot Plot + SEP รอบใหม่ · คาดตลาด hike สูง 74.7% · มี.ค. 2570 = Dot Plot ถัดไป',
@@ -381,7 +381,7 @@ const EVENTS: EconEvent[] = [
     forecast: '3.2', prev: '3.3',
   },
   {
-    date: '2026-12-12', time: '20:30', nameTh: 'PPI พ.ย. (YoY)', nameEn: 'PPI YoY',
+    date: '2026-12-11', time: '20:30', nameTh: 'PPI พ.ย. (YoY)', nameEn: 'PPI YoY',
     period: 'พ.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.0', prev: '3.1',
   },
@@ -440,7 +440,7 @@ const EVENTS: EconEvent[] = [
     forecast: '2.9', prev: '3.0',
   },
   {
-    date: '2027-01-16', time: '20:30', nameTh: 'Retail Sales ธ.ค. (MoM)', nameEn: 'Retail Sales',
+    date: '2027-01-15', time: '20:30', nameTh: 'Retail Sales ธ.ค. (MoM)', nameEn: 'Retail Sales',
     period: 'ธ.ค. 2569', impact: 'medium', cat: 'gdp', unit: '% MoM',
     forecast: '0.5', prev: '0.4', note: 'เทศกาลคริสต์มาส/ปีใหม่ — ค้าปลีกมักดีในธ.ค.',
   },
@@ -453,7 +453,7 @@ const EVENTS: EconEvent[] = [
 
 // ──────────────────────────────────────────────────────────────────────────────
 
-const TODAY = '2026-09-21';
+const TODAY = '2026-09-23';
 
 const MONTH_COLORS: Record<string, string> = {
   '2026-6':  '#60A5FA', // blue
@@ -618,7 +618,7 @@ export default function EconCalendar() {
                       <tr key={`today-${dateKey}`}>
                         <td colSpan={7} className="py-1">
                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 border border-white/30">
-                            <span className="text-base font-black text-white">▶ วันนี้ — 21 ก.ย. 2569</span>
+                            <span className="text-base font-black text-white">▶ วันนี้ — 23 ก.ย. 2569</span>
                             <span className="text-xs text-gray-400">│ อีเวนต์ด้านล่าง = ยังไม่เกิด</span>
                           </div>
                         </td>

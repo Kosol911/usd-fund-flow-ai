@@ -18,7 +18,7 @@ interface Meeting {
 const CURRENT_RATE = '3.75–4.00%';
 const CURRENT_IORB = '3.90%';
 const NEXT_MEETING_LABEL = '28 ต.ค. 2569';
-const SCRAPE_LABEL = '13 ก.ย. 2569 (ก่อนประชุม Sep 16)';
+const SCRAPE_LABEL = '13 ก.ย. 2569 · ⚠️ pre-hike odds — อัปเดตหลัง Sep 16 confirmed hike';
 
 const MEETINGS: Meeting[] = [
   {
@@ -172,12 +172,14 @@ function MeetingCard({ m }: { m: Meeting }) {
 function RatePathTimeline() {
   const steps = [
     { label: 'ก.ย.', value: '4.00%', done: true, hike: true },
-    ...MEETINGS.map((m) => ({
-      label: m.labelShort,
-      value: m.mostLikelyRange.split('–')[0] + '%',
-      done: false,
-      hike: m.hike > m.hold,
-    })),
+    ...MEETINGS.map((m) => {
+      const isHike = m.hike > m.hold && m.hike > m.cut;
+      const parts = m.mostLikelyRange.split('–');
+      const displayValue = isHike
+        ? (parts[1] ?? parts[0])    // upper bound of hiked range
+        : 'HOLD';
+      return { label: m.labelShort, value: displayValue, done: false, hike: isHike };
+    }),
   ];
 
   return (
