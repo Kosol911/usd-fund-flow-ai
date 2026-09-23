@@ -163,6 +163,19 @@ const ZONE_BG: Record<number, string> = {
 };
 const ZONE_EMOJI: Record<number, string> = { 1: '▲▲', 2: '▲', 3: '▼', 4: '▼▼' };
 
+const FALLBACK_ASSET: CdcAsset = {
+  asset: '', price: null, ema12: null, ema26: null, zone: null,
+  label: 'ข้อมูลไม่พร้อม', color: '#6B7280',
+  last_zone_change_days_ago: null, history: [], weekly: null,
+  rsi_14: null, fetched_utc: '', error: 'API unavailable',
+};
+const FALLBACK_CDC: CdcResponse = {
+  btc: { ...FALLBACK_ASSET, asset: 'BTC' },
+  gold: { ...FALLBACK_ASSET, asset: 'GOLD' },
+  context: { fear_greed: null, dxy: null, us10y: null, btc_gold_corr_4w: null },
+  timeframe: '', ema_periods: [12, 26],
+};
+
 function f(v: number | null | undefined, dec = 2): string {
   if (v === null || v === undefined) return '—';
   return v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
@@ -207,8 +220,11 @@ function AssetCard({
   notes: { events: string[]; support: string[]; resistance: string[] };
   staticPrice: { close: string; high: string; low: string; wowPct: string; volume: string; trend: string; rsi: string };
 }) {
+  const noData = data.price === null && data.zone === null;
   const zone = data.zone ?? 0;
-  const bgClass = ZONE_BG[zone] || 'border-gray-700/40 bg-gray-800/20';
+  const bgClass = noData
+    ? 'border-amber-600/40 bg-amber-900/10'
+    : (ZONE_BG[zone] || 'border-gray-700/40 bg-gray-800/20');
   const w = data.weekly;
   const apiOk = data.price !== null;
 
@@ -217,42 +233,61 @@ function AssetCard({
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-lg font-bold text-white">{ticker}</span>
-        <div className="flex items-center gap-2">
-          {/* Zone pills */}
-          {[1, 2, 3, 4].map((z) => (
-            <div
-              key={z}
-              className="w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center"
-              style={{
-                backgroundColor: z === zone ? ZONE_COLORS[z] : 'transparent',
-                border: `1.5px solid ${z === zone ? ZONE_COLORS[z] : '#374151'}`,
-                color: z === zone ? '#000' : '#6B7280',
-                opacity: z === zone ? 1 : 0.5,
-              }}
-            >
-              {z}
-            </div>
-          ))}
-        </div>
+        {noData ? (
+          <span className="text-[10px] font-semibold text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">
+            ⚠️ ไม่มีข้อมูล
+          </span>
+        ) : (
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4].map((z) => (
+              <div
+                key={z}
+                className="w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center"
+                style={{
+                  backgroundColor: z === zone ? ZONE_COLORS[z] : 'transparent',
+                  border: `1.5px solid ${z === zone ? ZONE_COLORS[z] : '#374151'}`,
+                  color: z === zone ? '#000' : '#6B7280',
+                  opacity: z === zone ? 1 : 0.5,
+                }}
+              >
+                {z}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Zone badge ── */}
-      <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-700/40">
-        <span className="text-3xl font-black font-mono" style={{ color: data.color }}>
-          {ZONE_EMOJI[zone] || '?'}
-        </span>
-        <div>
-          <div className="text-base font-bold" style={{ color: data.color }}>
-            Zone {zone} — {data.label}
-          </div>
-          <div className="text-[11px] text-gray-500">
-            {data.last_zone_change_days_ago !== null
-              ? `เปลี่ยน zone ${data.last_zone_change_days_ago === 0 ? 'วันนี้' : `${data.last_zone_change_days_ago} วันที่แล้ว`}`
-              : 'ข้อมูลย้อนหลังไม่พอ'}
-            {' · '}EMA(12,26) D1
+      {noData ? (
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-amber-700/30">
+          <span className="text-3xl">⏳</span>
+          <div>
+            <div className="text-base font-bold text-amber-400">
+              Backend ไม่พร้อม — ใช้ข้อมูล static
+            </div>
+            <div className="text-[11px] text-amber-500/70">
+              Railway อาจยัง cold-start · กดรีเฟรชอีกครั้ง
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-700/40">
+          <span className="text-3xl font-black font-mono" style={{ color: data.color }}>
+            {ZONE_EMOJI[zone] || '?'}
+          </span>
+          <div>
+            <div className="text-base font-bold" style={{ color: data.color }}>
+              Zone {zone} — {data.label}
+            </div>
+            <div className="text-[11px] text-gray-500">
+              {data.last_zone_change_days_ago !== null
+                ? `เปลี่ยน zone ${data.last_zone_change_days_ago === 0 ? 'วันนี้' : `${data.last_zone_change_days_ago} วันที่แล้ว`}`
+                : 'ข้อมูลย้อนหลังไม่พอ'}
+              {' · '}EMA(12,26) D1
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Weekly price summary ── */}
       <div className="mb-3">
@@ -440,6 +475,7 @@ export default function CdcSignals() {
       } else {
         setRetrying(false);
         setError(e.message === 'no_data' ? 'ข้อมูลตลาดยังไม่พร้อม (กด รีเฟรช อีกครั้ง)' : (e.message || 'โหลดไม่สำเร็จ'));
+        if (!data) setData(FALLBACK_CDC);
       }
     } finally {
       if (!isRetry) setLoading(false);
@@ -501,8 +537,8 @@ export default function CdcSignals() {
         <div className="text-gray-400 text-center py-8 text-sm">กำลังดึงราคาและคำนวณ EMA…</div>
       )}
       {error && (
-        <div className="text-red-400 text-sm bg-red-900/20 border border-red-800/30 rounded-lg px-4 py-3 mb-4">
-          ⚠️ {error} — ลองกด ↻ รีเฟรช
+        <div className="text-amber-400 text-sm bg-amber-900/20 border border-amber-700/30 rounded-lg px-4 py-3 mb-4">
+          ⚠️ Backend ไม่พร้อม — แสดงข้อมูล static · ลองกด ↻ รีเฟรช
         </div>
       )}
 

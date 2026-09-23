@@ -455,6 +455,58 @@ const EVENTS: EconEvent[] = [
 
 const TODAY = '2026-09-23';
 
+function computeSurpriseStats(events: EconEvent[]) {
+  const groups: Record<string, number[]> = {};
+  events.forEach((e) => {
+    if (e.actual == null || e.forecast == null || e.cat === 'FOMC') return;
+    const a = parseFloat(e.actual);
+    const f = parseFloat(e.forecast);
+    if (isNaN(a) || isNaN(f)) return;
+    if (!groups[e.nameEn]) groups[e.nameEn] = [];
+    groups[e.nameEn].push(a - f);
+  });
+  const stats: Record<string, { mean: number; sd: number }> = {};
+  for (const [name, surprises] of Object.entries(groups)) {
+    if (surprises.length < 2) continue;
+    const mean = surprises.reduce((s, v) => s + v, 0) / surprises.length;
+    const variance = surprises.reduce((s, v) => s + (v - mean) ** 2, 0) / (surprises.length - 1);
+    const sd = Math.sqrt(variance);
+    if (sd > 0) stats[name] = { mean, sd };
+  }
+  return stats;
+}
+
+function getSurpriseZ(ev: EconEvent, stats: Record<string, { mean: number; sd: number }>): number | null {
+  if (ev.actual == null || ev.forecast == null || ev.cat === 'FOMC') return null;
+  const a = parseFloat(ev.actual);
+  const f = parseFloat(ev.forecast);
+  if (isNaN(a) || isNaN(f)) return null;
+  const s = stats[ev.nameEn];
+  if (!s) return null;
+  return (a - f) / s.sd;
+}
+
+function ZBadge({ z }: { z: number | null }) {
+  if (z === null) return null;
+  const absZ = Math.abs(z);
+  if (absZ < 0.5) return null;
+  const color = absZ >= 2 ? (z > 0 ? '#4ADE80' : '#F87171')
+    : absZ >= 1 ? (z > 0 ? '#86EFAC' : '#FB923C')
+    : '#9CA3AF';
+  const label = absZ >= 2 ? 'Extreme' : absZ >= 1 ? 'Notable' : '';
+  return (
+    <span
+      className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0 rounded text-[10px] font-bold font-mono"
+      style={{ color, backgroundColor: color + '15', border: `1px solid ${color}40` }}
+      title={`Surprise z-score: ${z > 0 ? '+' : ''}${z.toFixed(2)}σ${label ? ` (${label})` : ''}`}
+    >
+      {z > 0 ? '+' : ''}{z.toFixed(1)}σ
+    </span>
+  );
+}
+
+const SURPRISE_STATS = computeSurpriseStats(EVENTS);
+
 const MONTH_COLORS: Record<string, string> = {
   '2026-6':  '#60A5FA', // blue
   '2026-7':  '#34D399', // emerald
@@ -523,6 +575,7 @@ export default function EconCalendar() {
       <p className="text-xs text-gray-500 mb-4">
         สีเขียว = ดีกว่าคาด · สีแดง = แย่กว่าคาด (เทียบ Consensus)
         · ข้อมูลย้อนหลัง = ผลจริง · ข้อมูลล่วงหน้า = Consensus นักวิเคราะห์
+        · <span className="font-mono text-gray-400">±Nσ</span> = surprise z-score (ขนาดความเซอร์ไพรส์เทียบค่าเฉลี่ย)
       </p>
 
       {/* Filter chips */}
@@ -682,10 +735,13 @@ export default function EconCalendar() {
                             {ev.period}
                           </td>
 
-                          {/* Actual */}
+                          {/* Actual + surprise z-score */}
                           <td className={`py-2 pr-4 text-right whitespace-nowrap font-mono text-sm ${actualColor}`}>
                             {ev.actual
-                              ? <>{ev.actual}{ev.unit && ev.unit !== '—' ? <span className="text-xs text-gray-600 ml-0.5">{ev.unit}</span> : null}</>
+                              ? <>
+                                  {ev.actual}{ev.unit && ev.unit !== '—' ? <span className="text-xs text-gray-600 ml-0.5">{ev.unit}</span> : null}
+                                  <ZBadge z={getSurpriseZ(ev, SURPRISE_STATS)} />
+                                </>
                               : <span className="text-gray-700">—</span>
                             }
                           </td>

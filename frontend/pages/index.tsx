@@ -9,6 +9,7 @@ import FedRatePath from '../components/FedRatePath';
 import PreReleaseSignals from '../components/PreReleaseSignals';
 import ForecastSourceGuide from '../components/ForecastSourceGuide';
 import EconCalendar from '../components/EconCalendar';
+import EventReactionTable from '../components/EventReactionTable';
 import {
   translateRegime,
   regimeExplain,
@@ -198,7 +199,15 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <div className="text-gray-400">ไม่มีข้อมูล</div>
+                <div className="rounded-lg bg-amber-900/20 border border-amber-700/30 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">⏳</span>
+                    <span className="text-amber-400 font-semibold">ไม่สามารถเชื่อมต่อ Backend</span>
+                  </div>
+                  <p className="text-sm text-amber-500/70">
+                    Railway อาจยัง cold-start · รีเฟรชหน้าเพื่อลองใหม่
+                  </p>
+                </div>
               )}
             </div>
 
@@ -250,6 +259,8 @@ export default function Home() {
 
           <EconCalendar />
 
+          <EventReactionTable />
+
           {/* Cross Asset Panel */}
           <div className="card p-6 mb-8">
             <h2 className="text-2xl font-bold mb-2 text-highlight">
@@ -269,32 +280,15 @@ export default function Home() {
                   </div>
                 ))
               ) : (
-                <>
-                  <div className="text-center p-4 bg-accent rounded-lg">
-                    <div className="font-bold text-xl mb-2">BTC</div>
-                    <div className="text-green-400 font-semibold">ขาขึ้น</div>
+                <div className="col-span-full rounded-lg bg-amber-900/20 border border-amber-700/30 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">⏳</span>
+                    <span className="text-amber-400 font-semibold">ไม่มีข้อมูล Cross Asset</span>
                   </div>
-                  <div className="text-center p-4 bg-accent rounded-lg">
-                    <div className="font-bold text-xl mb-2">GOLD</div>
-                    <div className="text-green-400 font-semibold">ขาขึ้น</div>
-                  </div>
-                  <div className="text-center p-4 bg-accent rounded-lg">
-                    <div className="font-bold text-xl mb-2">SPX</div>
-                    <div className="text-yellow-400 font-semibold">เป็นกลาง</div>
-                  </div>
-                  <div className="text-center p-4 bg-accent rounded-lg">
-                    <div className="font-bold text-xl mb-2">NASDAQ</div>
-                    <div className="text-green-400 font-semibold">ขาขึ้น</div>
-                  </div>
-                  <div className="text-center p-4 bg-accent rounded-lg">
-                    <div className="font-bold text-xl mb-2">BONDS</div>
-                    <div className="text-green-400 font-semibold">ขาขึ้น</div>
-                  </div>
-                  <div className="text-center p-4 bg-accent rounded-lg">
-                    <div className="font-bold text-xl mb-2">DXY</div>
-                    <div className="text-red-400 font-semibold">ขาลง</div>
-                  </div>
-                </>
+                  <p className="text-sm text-amber-500/70">
+                    Backend ไม่พร้อม — ข้อมูลจะแสดงเมื่อเชื่อมต่อได้
+                  </p>
+                </div>
               )}
             </div>
           </div>
