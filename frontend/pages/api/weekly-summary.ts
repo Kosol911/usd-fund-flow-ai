@@ -82,12 +82,42 @@ async function fetchETFFlows(): Promise<string> {
   }
 }
 
+// ── News Headlines (Google News RSS) ──
+async function fetchNewsHeadlines(): Promise<string> {
+  const queries = [
+    'bitcoin+crypto+regulation',
+    'fed+interest+rate+inflation',
+    'gold+price+geopolitics',
+    'US+China+trade+tariff',
+  ];
+  const allHeadlines: string[] = [];
+  for (const q of queries) {
+    try {
+      const url = `https://news.google.com/rss/search?q=${q}&hl=en&gl=US&ceid=US:en`;
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+      });
+      if (!res.ok) continue;
+      const xml = await res.text();
+      const titles = xml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/g) || [];
+      const items = titles.slice(1, 6).map((t) =>
+        t.replace(/<title><!\[CDATA\[/, '').replace(/\]\]><\/title>/, '').trim()
+      );
+      if (items.length) allHeadlines.push(`[${q.replace(/\+/g, ' ')}]\n${items.join('\n')}`);
+    } catch {
+      // skip failed queries
+    }
+  }
+  return allHeadlines.join('\n\n') || 'ไม่สามารถดึงข่าวได้';
+}
+
 // ── AI Analysis ──
 async function analyzeWithAI(rawData: {
   btc: any;
   gold: any;
   dxy: any;
   etfFlows: string;
+  newsHeadlines: string;
 }): Promise<any> {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -120,6 +150,9 @@ ${JSON.stringify(rawData.dxy, null, 2)}
 
 ### BTC ETF Flows (Farside)
 ${rawData.etfFlows}
+
+### ข่าวล่าสุดจาก Google News (ใช้ประกอบการวิเคราะห์ forwardEvents และ geopolitics)
+${rawData.newsHeadlines}
 
 ## คำสั่ง
 
@@ -176,7 +209,13 @@ ${rawData.etfFlows}
 - ทุกข้อความ user-facing ต้องเป็นภาษาไทย
 - ตัวเลขทุกตัวต้องมาจากข้อมูลดิบที่ให้ไป ห้ามสร้างขึ้นเอง
 - แต่ละ section ต้องมี 3-6 bullets
-- forwardEvents ต้องมี 3-5 events สำคัญใน 2-3 สัปดาห์ข้างหน้า
+- forwardEvents ต้องมี 5-8 events สำคัญใน 3 สัปดาห์ข้างหน้า ครอบคลุมทุกมิติ ไม่ใช่แค่ตัวเลขเศรษฐกิจ:
+  A) ตัวเลขเศรษฐกิจตามปฏิทิน: PCE, NFP, CPI, ISM, FOMC, GDP, Retail Sales ฯลฯ — ใส่วันเวลา ICT + consensus
+  B) ภูมิรัฐศาสตร์: การประชุม US-China, G7, NATO, ตะวันออกกลาง, สงครามการค้า, tariff deadlines, sanctions
+  C) นโยบาย Fed / ธนาคารกลาง: Fed speech ที่กำหนดไว้, blackout period, ECB/BOJ meeting, bond auction สำคัญ
+  D) กฎหมาย / กำกับดูแล: crypto bills, SEC rulings, stablecoin legislation, CFTC rulemaking, EU MiCA deadlines
+  E) events เฉพาะตลาด: options expiry ใหญ่, ETF deadline, token unlock, protocol upgrade
+  - เรียงตามวันที่
   - เชื่อมโยงข้อมูลสัปดาห์นี้กับ outlook เช่น "ETF flow +$2B สัปดาห์นี้ ถ้า PCE ออกต่ำกว่าคาด flow อาจเร่งขึ้นอีก"
   - ใส่ scenario analysis: ถ้า > X จะเกิด Y / ถ้า < X จะเกิด Z
   - watch field ใช้ \\n สำหรับขึ้นบรรทัดใหม่ และ ▸ นำหน้า scenario
@@ -250,14 +289,15 @@ export default async function handler(
   }
 
   try {
-    const [btc, gold, dxy, etfFlows] = await Promise.all([
+    const [btc, gold, dxy, etfFlows, newsHeadlines] = await Promise.all([
       fetchBTC(),
       fetchYahoo('GC=F'),
       fetchYahoo('DX-Y.NYB'),
       fetchETFFlows(),
+      fetchNewsHeadlines(),
     ]);
 
-    const rawData = { btc, gold, dxy, etfFlows };
+    const rawData = { btc, gold, dxy, etfFlows, newsHeadlines };
 
     let analysis: any;
     let lastErr: any;
