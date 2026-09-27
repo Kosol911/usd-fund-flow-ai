@@ -31,10 +31,10 @@ interface WeeklyData {
 }
 
 const WEEKLY_DATA: WeeklyData = {
-  weekLabel: '14–20 กันยายน 2569',
-  updatedISO: '2026-09-20',
+  weekLabel: '21–27 กันยายน 2569',
+  updatedISO: '2026-09-27',
   context:
-    'ช่วงสัปดาห์นี้ทั้ง Bitcoin และทองคำเผชิญกับแรงกดดันพร้อมกันจากสองทิศทางหลัก คือการขึ้นดอกเบี้ยของ Fed วันพุธ 16 ก.ย. และแรงเทขายเฉพาะของ BTC จากการล้มเหลวทางนิติบัญญัติ (CLARITY Act) ก่อนที่ทั้งคู่จะทยอยฟื้นตัวในช่วงปลายสัปดาห์ Gold บันทึกกำไรสัปดาห์แรกในรอบ 4 สัปดาห์ ขณะที่ BTC ฟื้นจากต่ำกว่า $76K กลับมาแถว $81K ภายในเวลาไม่กี่วัน',
+    'สัปดาห์นี้ BTC พุ่งแรงจาก $81K → $84.5K (+4.3% WoW) ด้วยแรงซื้อ ETF มหาศาล +$2,385.8M ใน 5 วัน — มากสุดในรอบหลายเดือน ขณะที่ Gold ร่วง -2.1% สู่ ~$4,285/oz จากแรงกดดัน rate hike expectations ที่เพิ่มขึ้น DXY แข็งค่าต่อเนื่องแตะ 101.0 สัปดาห์นี้ BTC กับ Gold เดินสวนทางกันชัดเจน — BTC ตอบรับ institutional demand ส่วน Gold ถูกกด real yield',
 
   sections: [
     {
@@ -43,29 +43,29 @@ const WEEKLY_DATA: WeeklyData = {
       bullets: [
         {
           label: 'BTC ETF (สัปดาห์)',
-          text: 'Net outflow รวม -$6.2M — แต่มีความผันผวนภายในสัปดาห์สูงมาก',
+          text: 'Net inflow รวม +$2,385.8M — สัปดาห์ที่ดีที่สุดในรอบหลายเดือน inflow ทุกวันไม่มีวันติดลบ',
         },
         {
-          label: '14 ก.ย.',
-          text: 'inflow +$160M (ก่อนข่าว)',
-          sub: 'Demand ยังมีก่อนเหตุการณ์',
+          label: '21 ก.ย.',
+          text: 'inflow +$999.0M (เกือบ $1B วันเดียว)',
+          sub: 'IBIT +$381M · FBTC +$239M · ARKB +$289M — สถาบันกลับมาซื้อพร้อมกันหลายกอง',
         },
         {
-          label: '15 ก.ย.',
-          text: 'outflow -$450M หลัง CLARITY Act ตกในวุฒิสภา',
-          sub: 'ARKB -$141.9M · GBTC -$62.3M คือกองทุนที่ถอนเงินมากสุด',
+          label: '22 ก.ย.',
+          text: 'inflow +$714.7M ต่อเนื่อง',
+          sub: 'IBIT +$350M · FBTC +$257M · MSBT +$99M — Fidelity + BlackRock ยังซื้อหนัก',
         },
         {
-          label: '16 ก.ย.',
-          text: 'outflow -$296M วัน Fed hike',
+          label: '23–25 ก.ย.',
+          text: 'inflow ชะลอลง +$347M → +$191M → +$135M แต่ยังเป็นบวกทุกวัน',
         },
         {
           label: 'นัยสำคัญ',
-          text: 'ปิดสัปดาห์ net ใกล้ศูนย์ = สถาบันไม่ได้ถอนทุนขนาดใหญ่ แม้มีข่าวลบสองชิ้นพร้อมกัน — demand ยังทรงตัว',
+          text: 'BTC ETF cumulative flows กลับมาเป็นบวก +$800M YTD หลังลบ -$5.8B ณ กลาง ก.ค. — ลบล้าง deficit ทั้งหมดแล้ว',
         },
         {
-          label: 'Gold ETF',
-          text: 'ข้อมูล GLD/IAU weekly flow ยังไม่ชัดเจน แต่ราคาฟื้นตัว +0.92% WoW บ่งชี้ demand รองรับ downside ได้',
+          label: 'Gold',
+          text: 'ราคาร่วง -2.1% WoW สู่ ~$4,285/oz จาก rate hike bets ที่เพิ่มขึ้น — Gold ETF flow ยังไม่ชัดเจนแต่ราคาบ่งชี้แรงขายเหนือกว่า',
         },
       ],
     },
@@ -74,28 +74,28 @@ const WEEKLY_DATA: WeeklyData = {
       title: 'นโยบาย Fed, เงินเฟ้อ, ดอลลาร์ และ Bond Yield',
       bullets: [
         {
-          label: 'FOMC 16 ก.ย.',
-          text: 'มีมติเป็นเอกฉันท์ขึ้นดอกเบี้ย +0.25pp → 3.75–4.00% (IORB=3.90% มีผล 17 ก.ย.)',
+          label: 'Fed Speech',
+          text: 'Cleveland Fed Hammack เตือน "inflationary mindset could start to set in" หลังเงินเฟ้อเหนือเป้ามากกว่า 5 ปี — สัญญาณ hawkish ต่อเนื่อง',
         },
         {
-          label: 'CPI 13 ก.ย.',
-          text: 'เกิดจริง 3.4% — ออกก่อนการประชุม ไม่ได้เปลี่ยนทิศ hike',
+          label: 'Bond Volatility',
+          text: 'ความผันผวนตลาดพันธบัตรพุ่งสูงสุดตั้งแต่ มี.ค. ขณะที่ BTC VIX ยังอยู่ใกล้ต่ำสุดของปี — divergence ชัดเจน',
         },
         {
           label: 'DXY',
-          text: 'แข็งค่าทันทีหลัง hike — สร้างแรงต้านต่อ Gold และ BTC',
+          text: 'แข็งค่าต่อเนื่อง +0.78% WoW → 101.0 — Morgan Stanley ปรับมุมมอง bullish USD ส่งสัญญาณ dollar squeeze ยาวไปถึง 2027',
         },
         {
           label: 'Real Yield',
-          text: 'ปรับขึ้นตาม nominal yield — กดดันสินทรัพย์ที่ไม่มีดอกเบี้ยทั้งคู่',
+          text: 'ยังอยู่สูง rate hike expectations ค้ำ — เป็นแรงกดดันหลักต่อ Gold',
         },
         {
           label: 'Gold',
-          text: 'ร่วงแตะต่ำสุด 6 สัปดาห์วันพุธ → ฟื้น +2% วันพฤหัสฯ เมื่อ DXY เริ่มอ่อนค่า · ปิดสัปดาห์ ~$4,378/oz',
+          text: 'ร่วง -2.17% สู่ ~$4,285/oz — ขาดทุนสัปดาห์ที่ 2 จาก 3 สัปดาห์ หลัง rate hike bets เพิ่ม',
         },
         {
           label: 'BTC',
-          text: 'ดิ่งต่ำกว่า $76K วันพุธ → ฟื้นกลับ $81K ปลายสัปดาห์ — ฟื้นเร็วกว่า Gold สัดส่วน',
+          text: 'พุ่งจาก $81K → $84.5K (+4.3% WoW) — ETF demand ดัน BTC ขึ้นแม้ DXY แข็ง แสดงว่า institutional flow แยกจาก macro',
         },
       ],
     },
@@ -105,15 +105,15 @@ const WEEKLY_DATA: WeeklyData = {
       bullets: [
         {
           label: 'ตะวันออกกลาง',
-          text: 'ความตึงเครียดยังอยู่ในระดับที่ตลาดจับตา — เม็ดเงิน safe-haven ไหลเข้า Gold เป็นระยะ ช่วยรองรับ downside',
+          text: 'มีรายงานจาก Axios/CBS ว่าการเจรจา US-Iran มีความคืบหน้าเชิงบวก — น้ำมันร่วง Gold ถูกกดเพิ่มจาก safe-haven premium ที่ลดลง',
         },
         {
-          label: 'De-dollarization',
-          text: 'กระแส emerging market สะสม Gold แทน USD reserves ยังเป็นโครงสร้างระยะยาว — กรณีทรัพย์สินธนาคารกลางรัสเซียถูกอายัดปี 2022 ยังเป็น motivation',
+          label: 'Trump-Xi',
+          text: 'ประธานาธิบดี Trump พบ Xi Jinping — สัญญาณ trade de-escalation เบื้องต้น แม้ยังไม่มีข้อตกลงชัดเจน',
         },
         {
           label: 'BTC vs Gold',
-          text: 'BTC ยังตอบสนองในฐานะ risk-on สัปดาห์นี้ ไม่ใช่ safe-haven — ดิ่งและฟื้นพร้อมกับ sentiment ตลาดมากกว่าจะไหลตาม geopolitical flow',
+          text: 'สัปดาห์นี้ BTC กับ Gold เดินสวนทางชัดเจน — BTC +4.3% vs Gold -2.1% · BTC ถูกขับเคลื่อนด้วย ETF flow ไม่ใช่ macro risk',
         },
       ],
     },
@@ -122,21 +122,25 @@ const WEEKLY_DATA: WeeklyData = {
       title: 'ปัจจัยเฉพาะ Bitcoin',
       bullets: [
         {
-          label: 'CLARITY Act ล้ม',
-          text: 'วุฒิสภาสหรัฐฯ ลงมติไม่ถึงเกณฑ์ 60 เสียง — กลุ่ม Democrat ส่วนหนึ่งขัดขวางเพราะประเด็นจริยธรรมเรื่องทรัพย์สินดิจิทัลของประธานาธิบดี Trump',
-          sub: 'ผลทันที: BTC ดิ่ง -$450M ETF outflow วันเดียวกัน / อุตสาหกรรมมองว่า CLARITY ตายในปีนี้',
+          label: 'ETF Milestone',
+          text: 'BTC ETF cumulative flows กลับมาเป็นบวก YTD (+$800M) หลังลบ -$5.8B ณ กลาง ก.ค. — sentiment สถาบันพลิกกลับ',
         },
         {
-          label: 'CFTC Rulemaking',
-          text: 'CFTC ส่งแพ็คเกจกฎระเบียบ crypto ไปให้ White House พิจารณา หลัง CLARITY ล้ม',
+          label: 'Hester Peirce',
+          text: 'SEC Commissioner "Crypto Mom" ประกาศลาออก 2 ต.ค. — สูญเสียผู้สนับสนุนคริปโตในคณะกรรมการ SEC',
         },
         {
-          label: 'SEC',
-          text: 'เสนอ "Regulation Crypto Assets" — กรอบเสนอขายใหม่ มีช่องยกเว้น startup ≤$5M, fundraising ≤$75M',
+          label: 'CLARITY Act',
+          text: 'ถือว่าตายสนิท — Blockchain Association เปลี่ยนผู้นำกลับมาใช้ CEO เดิม Kristin Smith หลัง Summer Mersinger ออก',
+          sub: 'CFTC ยังเดินหน้าออกกฎเองผ่าน 8 rulemaking items ตั้งแต่ มิ.ย. — ไม่รอ Congress',
         },
         {
-          label: 'ภาพรวม',
-          text: 'BTC แสดง resilience สูง — ดิ่งหนัก ฟื้นเร็ว ปิด $81K แม้มีข่าวลบขนาดใหญ่สองชิ้นพร้อมกัน',
+          label: '21 Banks Stablecoin',
+          text: '21 ธนาคารใหญ่ (BofA, Citi, Goldman, Deutsche, UBS) ประกาศตั้งบริษัท stablecoin ร่วม เปิดตัว H1/2027 — แข่ง USDC/USDT โดยตรง',
+        },
+        {
+          label: 'Bitget Hack',
+          text: 'Bitget ถูกแฮ็ก $352M ผ่าน spoofed transfers — Circle/Tether freeze ได้บางส่วน แต่ส่วนใหญ่เป็น ETH ที่ freeze ไม่ได้',
         },
       ],
     },
@@ -145,25 +149,25 @@ const WEEKLY_DATA: WeeklyData = {
       title: 'ปัจจัยเฉพาะทองคำ',
       bullets: [
         {
-          label: 'ธนาคารกลาง Q2/2026',
-          text: 'ซื้อรวม 289 ตัน (+62–74% YoY) — ซื้อเพิ่มตอนราคาร่วง ไม่ถอยออก · WGC คาดทั้งปี ~850 ตัน',
+          label: 'Rate Hike Bets',
+          text: 'ตลาดยังคาดว่า Fed อาจขึ้นดอกเบี้ยอีก — กดดัน Gold ผ่าน real yield ที่สูง · Reuters ชี้ "weekly loss in sight for gold"',
         },
         {
-          label: 'ผู้ซื้อนำ',
-          text: 'Poland +20 ตัน (มากสุด) เป้าระยะยาว 700 ตัน · หลายประเทศ emerging market สะสมต่อเนื่อง',
+          label: 'DXY แข็ง',
+          text: 'DXY ขึ้นสู่ 101.0 (+0.78% WoW) — Morgan Stanley ปรับมุมมอง bullish USD ยาว เป็นลมต้านหลักของ Gold',
         },
         {
-          label: 'ผู้ขาย',
-          text: 'Russia & Turkey เป็นผู้ขายสุทธิ — Russia เพราะแรงกดดันงบประมาณจากสงครามและมาตรการคว่ำบาตร',
+          label: 'Oil ร่วง',
+          text: 'น้ำมันร่วงจากความคืบหน้าเจรจา US-Iran — ลด inflation expectation ทางอ้อม ลด safe-haven premium ของ Gold',
         },
         {
           label: 'ราคาปิดสัปดาห์',
-          text: '~$4,378/oz · กำไรสัปดาห์แรกในรอบ 4 สัปดาห์ (+0.92% WoW)',
-          sub: 'ยังเหนือ $4,000 floor ที่ central bank demand รองรับ',
+          text: '~$4,285/oz · ขาดทุน -2.1% WoW จาก ~$4,378 สัปดาห์ก่อน',
+          sub: 'ยังเหนือ $4,000 floor ที่ central bank demand รองรับ — แต่ momentum ระยะสั้นเป็นขาลง',
         },
         {
-          label: 'HSBC',
-          text: 'ปรับเพิ่ม Gold price forecast เพราะความตึงเครียดภูมิรัฐศาสตร์',
+          label: 'ธนาคารกลาง',
+          text: 'Demand ระยะยาวจาก emerging market ยังเป็นฐานรองรับ Gold — Q2/2026 ซื้อรวม 289 ตัน ส่วนใหญ่ซื้อเพิ่มตอนราคาร่วง',
         },
       ],
     },
@@ -176,35 +180,35 @@ const WEEKLY_DATA: WeeklyData = {
       event: 'PCE ส.ค.',
       consensus: '3.7% YoY',
       watch:
-        'PCE (Personal Consumption Expenditures) คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ใช้กำหนดนโยบายดอกเบี้ย — แม่นกว่า CPI เพราะวัดจากฝั่งต้นทุนจริงของผู้บริโภค ออกโดย BEA พร้อมรายงาน Personal Income & Spending\n▸ > 3.7% YoY = แรงกดดัน hike ต่อ 28 ต.ค. ทันที → real yield เพิ่ม → กดดัน Gold + BTC risk-off\n▸ ≤ 3.4% = ตลาด re-price hike odds ลด → DXY อ่อน → เงื่อนไขดีขึ้นสำหรับ Gold + BTC\n▸ PCE core (ไม่รวมอาหาร/พลังงาน) มีน้ำหนักมากกว่าในการตัดสินของ Fed — ดูทั้งคู่\n▸ ตัวเลขนี้เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
+        'PCE คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ใช้กำหนดนโยบาย — จะเป็นตัวกำหนด sentiment ก่อน NFP 3 วันถัดมา\n▸ > 3.7% YoY = แรงกดดัน hike 28 ต.ค. เพิ่มทันที → real yield พุ่ง → Gold ร่วงต่อ · BTC อาจชะงักแม้ ETF flow ดี\n▸ ≤ 3.4% = ตลาด re-price hike odds ลดลง → DXY อ่อน → Gold ฟื้น · BTC ได้แรงหนุนเพิ่ม\n▸ PCE core (ไม่รวมอาหาร/พลังงาน) มีน้ำหนักมากกว่าในการตัดสินของ Fed — ดูทั้งคู่\n▸ ตัวเลขนี้เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
     },
     {
-      date: '~2 ต.ค. 2569',
+      date: '~3 ต.ค. 2569',
       time: '19:30 น. ICT',
       event: 'NFP ก.ย.',
       consensus: '120K',
       watch:
-        'NFP (Nonfarm Payrolls) คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE ในการตัดสินใจดอกเบี้ย ตลาดแรงงาน "ร้อน" หมายความว่า Fed ยังต้องคุมเงินเฟ้อต่อ\n▸ > 200K = ตลาดแรงงานร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n▸ 120–160K = ใกล้เคียงคาด ตลาดรอ PCE ยืนยันก่อนปรับ positioning\n▸ < 100K = ชะลอตัวชัดเจน → Fed อาจ hold → risk-on กลับมา Gold + BTC ฟื้น\n▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings ซึ่งชี้เงินเฟ้อ service-side ที่ PCE จับไม่ครบ',
+        'NFP คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE — ตลาดแรงงาน "ร้อน" หมายความว่า Fed ยังต้องคุมเงินเฟ้อต่อ\n▸ > 200K = ตลาดแรงงานร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n▸ 120–160K = ใกล้เคียงคาด ตลาดรอ FOMC statement\n▸ < 100K = ชะลอตัวชัดเจน → Fed อาจ hold → risk-on กลับมา Gold + BTC ฟื้น\n▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings ซึ่งชี้เงินเฟ้อ service-side',
+    },
+    {
+      date: '2 ต.ค. 2569',
+      event: 'Hester Peirce ลาออกจาก SEC',
+      watch:
+        'Commissioner "Crypto Mom" ลาออก — SEC เหลือ commissioners ที่ไม่ได้สนับสนุนคริปโตชัดเจน\n▸ ระยะสั้น: ไม่มีผลต่อราคาทันที แต่ลด regulatory friendliness ใน SEC\n▸ ระยะกลาง: "Regulation Crypto Assets" ของ SEC ที่เปิด comment period 60 วัน อาจถูกชะลอหรือเปลี่ยนทิศ\n▸ ดูควบคู่: CFTC ยังเดินหน้ากฎเอง 8 rulemaking items — อาจกลายเป็น primary regulator de facto',
     },
     {
       date: 'ต่อเนื่อง',
-      event: 'CFTC / SEC Crypto Rulemaking',
+      event: 'DXY vs Gold Divergence',
       watch:
-        'หลัง CLARITY Act ล้มเหลวในวุฒิสภา 15 ก.ย. ทำเนียบขาวยังผลักดัน CFTC มีอำนาจกำกับ spot crypto markets ผ่านช่องทาง Executive Order ทางเลือก\n▸ EO ออกภายใน 2–3 สัปดาห์ = regulatory clarity แม้ไม่ใช่กฎหมาย → BTC ETF demand ฟื้น sentiment กลับบวก\n▸ SEC ออก Guidance เรื่อง crypto custody = หนุน institutional confidence ระยะกลาง\n▸ ไม่มีอะไรออกมา = CLARITY Act failure ยังคงเป็นหัวข้อกดดัน → ระวัง outflow จาก ETF ต่อเนื่อง\n▸ ติดตาม: crypto.news · SEC.gov daily filing · White House press briefing',
-    },
-    {
-      date: 'ต่อเนื่อง',
-      event: 'DXY Trajectory หลัง Fed hike',
-      watch:
-        'DXY (US Dollar Index) เป็น inverse ของ Gold + BTC ระยะกลาง — หลัง hike 16 ก.ย. DXY พุ่งสั้นแล้วอ่อนค่าผิดปกติ บ่งชี้ตลาดอาจมองว่า Fed ใกล้สิ้นสุด cycle แล้ว\n▸ DXY < 102 = เงื่อนไขดี Gold ทดสอบ $4,400+ และ BTC ได้แรงหนุนสินทรัพย์เสี่ยง\n▸ DXY > 104 = real yield กระโดด → Gold มีแรงกดดันเทขาย ระวัง pullback\n▸ Watch: US10Y yield movement, PCE surprise, และ Fed speech ก่อน blackout (21 ต.ค.–28 ต.ค.)\n▸ สัญญาณสำคัญ: ถ้า DXY อ่อนแม้ yield ขึ้น = เงินไหลออกจาก USD จริง ไม่ใช่แค่ technical',
+        'DXY แข็งค่าต่อเนื่องหลัง hike 16 ก.ย. + Morgan Stanley ปรับมุมมอง bullish USD ยาวถึง 2027 — Gold ถูกกดดัน\n▸ DXY > 102 = Gold อาจทดสอบ $4,200 support · BTC ยังทน DXY แข็งได้เพราะ ETF flow แยก\n▸ DXY กลับลง < 100 = Gold มีโอกาสฟื้นเหนือ $4,350\n▸ สัญญาณสำคัญ: ถ้า BTC ยังขึ้นแม้ DXY แข็ง = institutional demand decoupled จาก macro — bullish sign',
     },
     {
       date: '28 ต.ค. 2569',
       time: '01:00 น. ICT (29 ต.ค.)',
       event: 'FOMC (ไม่มี Dot Plot)',
-      consensus: 'hike 43.2% · hold 49.6%',
+      consensus: 'รอ PCE + NFP กำหนด odds',
       watch:
-        'ครั้งนี้ไม่มี SEP / Dot Plot — ตลาดฟังเฉพาะ statement + แถลงข่าว Powell เป็น "กล่องดำ" กว่าปกติ ณ วันนี้ hike กับ hold "ใกล้เคียงกัน" มากผิดปกติ (43% vs 50%)\n▸ hike + Powell ส่งสัญญาณขึ้นต่อ = real yield พุ่ง → Gold ร่วงระยะสั้น แต่ถ้าเป็น "last hike" ตลาดมักทำ sell-news-buy-dip ใน 24–48 ชม.\n▸ hold + พูดถึง data-dependency = risk-on กลับมา → Gold + BTC ฟื้น\n▸ PCE 26 ก.ย. และ NFP 2 ต.ค. จะกำหนดว่า odds เอียงไปทางใดก่อนประชุม — ดูตัวเลขทั้งสองก่อนแล้วค่อย position\n▸ ถ้า hike+hold odds ยังใกล้เคียงกันจนถึงวัน FOMC = ตลาดมีความผันผวนสูงผิดปกติช่วงค่ำวันนั้น',
+        'ครั้งนี้ไม่มี SEP / Dot Plot — ตลาดฟังเฉพาะ statement + แถลงข่าว Powell\n▸ hike + Powell ส่งสัญญาณขึ้นต่อ = real yield พุ่ง → Gold ร่วงระยะสั้น แต่ถ้าเป็น "last hike" ตลาดมักทำ sell-news-buy-dip ใน 24–48 ชม.\n▸ hold + พูดถึง data-dependency = risk-on กลับมา → Gold + BTC ฟื้น\n▸ PCE 30 ก.ย. และ NFP ~3 ต.ค. จะกำหนดว่า odds เอียงไปทางใดก่อนประชุม — ดูตัวเลขทั้งสองก่อนแล้วค่อย position\n▸ Cleveland Fed Hammack เตือน inflationary mindset — ถ้า Fed members อื่นพูดทำนองเดียวกัน hike odds จะเพิ่ม',
     },
   ],
 
@@ -212,7 +216,7 @@ const WEEKLY_DATA: WeeklyData = {
     { name: 'Farside Investors — BTC ETF Flow', url: 'https://farside.co.uk/btc/', use: 'BTC ETF net flow รายวัน (อัปเดตทุกวันทำการ)' },
     { name: 'CoinGlass ETF', url: 'https://www.coinglass.com/etf/bitcoin', use: 'Open Interest, Liquidation map, ETF holdings รวม' },
     { name: 'TradingView XAUUSD', url: 'https://www.tradingview.com/symbols/XAUUSD/', use: 'Gold spot + BTC/Gold ratio (BTCXAU)' },
-    { name: 'Gold.org Central Banks', url: 'https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-q2-2026/central-banks', use: 'ข้อมูล Central bank buying/selling quarterly' },
+    { name: 'CoinDesk', url: 'https://www.coindesk.com/', use: 'ข่าว BTC ETF flows, regulation, institutional adoption' },
     { name: 'crypto.news Regulation Tracker', url: 'https://crypto.news/us/', use: 'สถานะกฎหมายคริปโตฯ สหรัฐฯ ทุก bill' },
     { name: 'CME FedWatch', url: 'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html', use: 'ความน่าจะเป็น FOMC rate path สด' },
   ],
