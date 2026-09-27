@@ -82,32 +82,38 @@ async function fetchETFFlows(): Promise<string> {
   }
 }
 
-// ── News Headlines (Google News RSS) ──
+// ── News Headlines (multiple RSS sources) ──
 async function fetchNewsHeadlines(): Promise<string> {
-  const queries = [
-    'bitcoin+crypto+regulation',
-    'fed+interest+rate+inflation',
-    'gold+price+geopolitics',
-    'US+China+trade+tariff',
+  const feeds: { label: string; url: string }[] = [
+    { label: 'Crypto', url: 'https://www.coindesk.com/arc/outboundfeeds/rss/' },
+    { label: 'Crypto 2', url: 'https://cointelegraph.com/rss' },
+    { label: 'Markets', url: 'https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines' },
+    { label: 'Economy', url: 'https://feeds.content.dowjones.io/public/rss/mw_topstories' },
   ];
+
   const allHeadlines: string[] = [];
-  for (const q of queries) {
-    try {
-      const url = `https://news.google.com/rss/search?q=${q}&hl=en&gl=US&ceid=US:en`;
-      const res = await fetch(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
+
+  const results = await Promise.allSettled(
+    feeds.map(async (feed) => {
+      const res = await fetch(feed.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; USDFundFlowAI/1.0)' },
+        signal: AbortSignal.timeout(8000),
       });
-      if (!res.ok) continue;
+      if (!res.ok) return null;
       const xml = await res.text();
-      const titles = xml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/g) || [];
-      const items = titles.slice(1, 6).map((t) =>
-        t.replace(/<title><!\[CDATA\[/, '').replace(/\]\]><\/title>/, '').trim()
-      );
-      if (items.length) allHeadlines.push(`[${q.replace(/\+/g, ' ')}]\n${items.join('\n')}`);
-    } catch {
-      // skip failed queries
-    }
+      // match both CDATA and plain title tags
+      const titles = xml.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/gi) || [];
+      const items = titles.slice(1, 8).map((t) =>
+        t.replace(/<\/?title>/gi, '').replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '').trim()
+      ).filter((t) => t.length > 10);
+      return items.length ? `[${feed.label}]\n${items.join('\n')}` : null;
+    })
+  );
+
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) allHeadlines.push(r.value);
   }
+
   return allHeadlines.join('\n\n') || 'ไม่สามารถดึงข่าวได้';
 }
 
