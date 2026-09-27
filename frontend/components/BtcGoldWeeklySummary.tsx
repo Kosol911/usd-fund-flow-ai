@@ -1,5 +1,4 @@
-// BTC & Gold weekly market summary — updated every Saturday morning
-// To update: change WEEKLY_DATA below; all rendering is automatic
+import { useState, useEffect } from 'react';
 
 interface SectionItem {
   id: number;
@@ -253,7 +252,32 @@ function SectionBlock({ section }: { section: SectionItem }) {
 }
 
 export default function BtcGoldWeeklySummary() {
-  const d = WEEKLY_DATA;
+  const [aiData, setAiData] = useState<WeeklyData | null>(null);
+  const [aiStatus, setAiStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  const [aiModel, setAiModel] = useState('');
+
+  useEffect(() => {
+    setAiStatus('loading');
+    fetch('/api/weekly-summary')
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((json) => {
+        const { _cached, _cachedAt, _model, _generatedAt, ...data } = json;
+        if (data.weekLabel && data.sections) {
+          setAiData(data as WeeklyData);
+          setAiStatus('ok');
+          setAiModel(_model || '');
+        } else {
+          setAiStatus('error');
+        }
+      })
+      .catch(() => setAiStatus('error'));
+  }, []);
+
+  const d = aiData || WEEKLY_DATA;
+  const isAI = aiStatus === 'ok' && aiData != null;
   const updatedDate = new Date(d.updatedISO);
   const updatedLabel = `${updatedDate.getDate()} ${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][updatedDate.getMonth()]} ${updatedDate.getFullYear() + 543}`;
 
@@ -264,8 +288,20 @@ export default function BtcGoldWeeklySummary() {
         <h2 className="text-2xl font-bold text-highlight">
           ₿ BTC & 🥇 Gold — สรุปสัปดาห์ที่ผ่านมา และคาดการณ์ล่วงหน้า 2 สัปดาห์
         </h2>
-        <div className="text-xs text-gray-500 font-mono bg-gray-800/60 px-2 py-1 rounded">
-          อัปเดต {updatedLabel}
+        <div className="flex items-center gap-2">
+          {aiStatus === 'loading' && (
+            <span className="text-xs text-yellow-400 font-mono bg-yellow-900/30 px-2 py-1 rounded animate-pulse">
+              ⏳ AI กำลังวิเคราะห์...
+            </span>
+          )}
+          {isAI && (
+            <span className="text-xs text-green-400 font-mono bg-green-900/30 px-2 py-1 rounded">
+              🤖 AI ({aiModel})
+            </span>
+          )}
+          <span className="text-xs text-gray-500 font-mono bg-gray-800/60 px-2 py-1 rounded">
+            อัปเดต {updatedLabel}
+          </span>
         </div>
       </div>
       <div className="text-[42px] text-orange-300 font-semibold mb-1 leading-tight">
