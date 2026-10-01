@@ -56,11 +56,11 @@ const INDICATORS: Indicator[] = [
     verdict: 'derived',
     sample: 'อ่านจาก CPI + PPI เดือน ส.ค. ที่ประกาศไปแล้ว',
     call: {
-      releaseLabel: 'Core PCE Price Index ส.ค. (m/m) · ประกาศ 30 ก.ย. 19:30 น.',
+      releaseLabel: 'Core PCE Price Index ก.ย. (m/m) · ประกาศ 30 ต.ค. 19:30 น.',
       value: '≥ 0.2%',
       valueNote: 'Core m/m · Fed ให้น้ำหนักตัวเลข m/m มากที่สุด ไม่ใช่ YoY',
-      lastRound: 'รอบที่แล้ว Core PCE ก.ค. m/m 0.2% ตรงคาด · YoY 3.3%',
-      hit: 'mixed',
+      lastRound: 'รอบที่แล้ว Core PCE ส.ค. m/m 0.2% ตรงคาด · YoY 3.3%',
+      hit: 'hit',
     },
     sources: [
       { name: 'คำนวณจาก CPI + PPI', mae: 'แม่นสุด', detail: 'รู้ก่อนประกาศ 2-3 สัปดาห์', winner: true },

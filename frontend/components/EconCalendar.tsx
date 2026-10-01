@@ -223,22 +223,22 @@ const EVENTS: EconEvent[] = [
     forecast: 'hike 68% · hold 28%', actual: '3.75–4.00%', prev: '3.50–3.75%', beat: undefined,
     note: 'HIKED +0.25pp ✅ → 3.75–4.00% (IORB 3.90%) · มติเป็นเอกฉันท์ · มีผล 17 ก.ย. 2569',
   },
-  // ─── TODAY: 21 กันยายน 2569 ───────────────────────────────
+  // ─── PCE ส.ค. ประกาศ 30 ก.ย. 2569 (ผ่านแล้ว) ──────────────
   {
     date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (m/m) ← ตัวชี้วัดหลัก Fed', nameEn: 'Core PCE m/m',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
-    forecast: '0.2', prev: '0.2',
-    note: '▸ > 0.3% = แรงกดดัน hike ต.ค. ทันที · ▸ ≤ 0.1% = ตลาด re-price hike ลด\n▸ Core PCE m/m คือตัวเลขที่ Fed ให้น้ำหนักมากที่สุด ไม่ใช่ YoY',
+    forecast: '0.2', actual: '0.2', prev: '0.2', beat: undefined,
+    note: 'ตรงคาดพอดี 0.2% m/m — สอดคล้องกับ Core CPI ส.ค. ที่ตรงคาด · ไม่เพิ่มแรงกดดัน hike ต.ค.',
   },
   {
     date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (YoY)', nameEn: 'Core PCE YoY',
     period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
-    forecast: '3.3', prev: '3.4',
+    forecast: '3.3', actual: '3.3', prev: '3.4', beat: undefined,
   },
   {
     date: '2026-09-30', time: '19:30', nameTh: 'PCE Price Index ส.ค. (m/m)', nameEn: 'PCE m/m',
     period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% m/m',
-    forecast: '0.1', prev: '0.2',
+    forecast: '0.1', actual: '0.1', prev: '0.2', beat: undefined,
   },
 
   // ═══════════════════════════════════════════════════════
@@ -482,7 +482,7 @@ const EVENTS: EconEvent[] = [
 
 // ──────────────────────────────────────────────────────────────────────────────
 
-const TODAY = '2026-10-01';
+const TODAY = new Date().toISOString().slice(0, 10);
 
 function computeSurpriseStats(events: EconEvent[]) {
   const groups: Record<string, number[]> = {};
@@ -700,7 +700,7 @@ export default function EconCalendar() {
                       <tr key={`today-${dateKey}`}>
                         <td colSpan={7} className="py-1">
                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 border border-white/30">
-                            <span className="text-base font-black text-white">▶ วันนี้ — 23 ก.ย. 2569</span>
+                            <span className="text-base font-black text-white">▶ วันนี้ — {(() => { const t = new Date(); return `${t.getDate()} ${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][t.getMonth()]} ${t.getFullYear() + 543}`; })()}</span>
                             <span className="text-xs text-gray-400">│ อีเวนต์ด้านล่าง = ยังไม่เกิด</span>
                           </div>
                         </td>
