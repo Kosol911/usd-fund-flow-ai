@@ -38,18 +38,43 @@ function cdcZone(price: number, ema12: number, ema26: number): { zone: number; l
   return { zone: 4, label: 'Strong Sell', color: '#F87171' };
 }
 
-// ── Binance: BTC daily klines (40 days for EMA warmup) ──
+// ── BTC daily: try Binance first, fallback to CoinGecko ──
 async function fetchBtcDaily(): Promise<{ dates: string[]; closes: number[]; highs: number[]; lows: number[]; volumes: number[] } | null> {
+  // Try Binance first
   try {
-    const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=40');
+    const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=40', {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.ok) {
+      const rows: any[] = await res.json();
+      if (rows.length >= 26) {
+        return {
+          dates: rows.map(r => new Date(r[0]).toISOString().slice(0, 10)),
+          closes: rows.map(r => parseFloat(r[4])),
+          highs: rows.map(r => parseFloat(r[2])),
+          lows: rows.map(r => parseFloat(r[3])),
+          volumes: rows.map(r => parseFloat(r[5]) * parseFloat(r[4])),
+        };
+      }
+    }
+  } catch { /* fall through to CoinGecko */ }
+
+  // Fallback: CoinGecko (free, no key, 45 days)
+  try {
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=45&interval=daily',
+      { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; USDFundFlowAI/1.0)' }, signal: AbortSignal.timeout(10000) }
+    );
     if (!res.ok) return null;
-    const rows: any[] = await res.json();
+    const json = await res.json();
+    const prices: [number, number][] = json.prices || [];
+    if (prices.length < 26) return null;
     return {
-      dates: rows.map(r => new Date(r[0]).toISOString().slice(0, 10)),
-      closes: rows.map(r => parseFloat(r[4])),
-      highs: rows.map(r => parseFloat(r[2])),
-      lows: rows.map(r => parseFloat(r[3])),
-      volumes: rows.map(r => parseFloat(r[5]) * parseFloat(r[4])), // volume in USD
+      dates: prices.map(p => new Date(p[0]).toISOString().slice(0, 10)),
+      closes: prices.map(p => p[1]),
+      highs: prices.map(p => p[1]),   // CoinGecko daily doesn't give H/L, approximate
+      lows: prices.map(p => p[1]),
+      volumes: (json.total_volumes || []).map((v: [number, number]) => v[1]),
     };
   } catch { return null; }
 }
