@@ -655,16 +655,16 @@ export default function EconCalendar() {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse text-base">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-700/60 text-xs uppercase tracking-wide">
-              <th className="pb-2 pr-3 pl-3 whitespace-nowrap font-medium">วันที่</th>
-              <th className="pb-2 pr-3 font-medium">เวลา (ICT)</th>
-              <th className="pb-2 pr-3 font-medium">อีเวนต์</th>
-              <th className="pb-2 pr-3 font-medium">งวด</th>
-              <th className="pb-2 pr-3 text-right font-medium">เกิดจริง</th>
-              <th className="pb-2 pr-3 text-right font-medium">Consensus</th>
-              <th className="pb-2 pr-3 text-right font-medium">ครั้งก่อน</th>
+            <tr className="text-left text-gray-400 border-b border-gray-700/60 text-sm uppercase tracking-wide">
+              <th className="pb-3 pr-4 pl-3 whitespace-nowrap font-semibold">วันที่</th>
+              <th className="pb-3 pr-4 font-semibold">เวลา (ICT)</th>
+              <th className="pb-3 pr-4 font-semibold">อีเวนต์</th>
+              <th className="pb-3 pr-4 font-semibold">งวด</th>
+              <th className="pb-3 pr-4 text-right font-semibold">เกิดจริง</th>
+              <th className="pb-3 pr-4 text-right font-semibold">Consensus</th>
+              <th className="pb-3 pr-4 text-right font-semibold">ครั้งก่อน</th>
             </tr>
           </thead>
           <tbody>
@@ -712,8 +712,8 @@ export default function EconCalendar() {
                       <tr key={`today-${dateKey}`}>
                         <td colSpan={7} className="py-1">
                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 border border-white/30">
-                            <span className="text-base font-black text-white">▶ วันนี้ — {(() => { const t = new Date(); return `${t.getDate()} ${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][t.getMonth()]} ${t.getFullYear() + 543}`; })()}</span>
-                            <span className="text-xs text-gray-400">│ อีเวนต์ด้านล่าง = ยังไม่เกิด</span>
+                            <span className="text-lg font-black text-white">▶ วันนี้ — {(() => { const t = new Date(); return `${t.getDate()} ${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][t.getMonth()]} ${t.getFullYear() + 543}`; })()}</span>
+                            <span className="text-sm text-gray-400">│ อีเวนต์ด้านล่าง = ยังไม่เกิด</span>
                           </div>
                         </td>
                       </tr>
@@ -742,45 +742,45 @@ export default function EconCalendar() {
                           style={{ borderLeft: `3px solid ${isFomc ? '#F59E0B' : color}` }}
                         >
                           {/* Date (only first row of day) */}
-                          <td className={`py-2 pr-3 pl-3 whitespace-nowrap ${isFomc ? 'text-amber-300 font-bold' : 'text-gray-400'}`}>
+                          <td className={`py-3 pr-4 pl-3 whitespace-nowrap ${isFomc ? 'text-amber-300 font-bold' : 'text-gray-400'}`}>
                             {ei === 0 ? (
                               <div>
-                                <div className={`text-sm font-semibold ${isFomc ? 'text-amber-300' : 'text-gray-300'}`}>{dayStr}</div>
-                                <div className="text-xs text-gray-600">{dayOfWeek}</div>
+                                <div className={`text-base font-semibold ${isFomc ? 'text-amber-300' : 'text-gray-300'}`}>{dayStr}</div>
+                                <div className="text-sm text-gray-500">{dayOfWeek}</div>
                               </div>
                             ) : null}
                           </td>
 
                           {/* Time */}
-                          <td className={`py-2 pr-4 whitespace-nowrap font-mono text-sm ${isFomc ? 'text-amber-300 font-bold' : 'text-gray-400'}`}>
+                          <td className={`py-3 pr-4 whitespace-nowrap font-mono text-base ${isFomc ? 'text-amber-300 font-bold' : 'text-gray-400'}`}>
                             {ev.time} น.
                           </td>
 
                           {/* Event name */}
-                          <td className="py-2 pr-4">
+                          <td className="py-3 pr-4">
                             <div className="flex flex-wrap items-start gap-1.5">
-                              <span className="text-base shrink-0">{imp.dot}</span>
-                              <span className={`text-sm leading-snug ${isFomc ? 'font-bold text-amber-200' : past ? 'text-gray-400' : 'text-gray-200 font-medium'}`}>
+                              <span className="text-lg shrink-0">{imp.dot}</span>
+                              <span className={`text-base leading-snug ${isFomc ? 'font-bold text-amber-200' : past ? 'text-gray-400' : 'text-gray-200 font-medium'}`}>
                                 {ev.nameTh}
                               </span>
                             </div>
                             {ev.note && (
-                              <div className={`text-xs mt-1 leading-relaxed pl-5 ${isFomc ? 'text-amber-400/80' : 'text-gray-500'}`}>
+                              <div className={`text-sm mt-1.5 leading-relaxed pl-6 ${isFomc ? 'text-amber-400/80' : 'text-gray-500'}`}>
                                 {ev.note}
                               </div>
                             )}
                           </td>
 
                           {/* Period */}
-                          <td className="py-2 pr-4 whitespace-nowrap text-xs text-gray-600">
+                          <td className="py-3 pr-4 whitespace-nowrap text-sm text-gray-500">
                             {ev.period}
                           </td>
 
                           {/* Actual + surprise z-score */}
-                          <td className={`py-2 pr-4 text-right whitespace-nowrap font-mono text-sm ${actualColor}`}>
+                          <td className={`py-3 pr-4 text-right whitespace-nowrap font-mono text-base ${actualColor}`}>
                             {ev.actual
                               ? <>
-                                  {ev.actual}{ev.unit && ev.unit !== '—' ? <span className="text-xs text-gray-600 ml-0.5">{ev.unit}</span> : null}
+                                  {ev.actual}{ev.unit && ev.unit !== '—' ? <span className="text-sm text-gray-500 ml-0.5">{ev.unit}</span> : null}
                                   <ZBadge z={getSurpriseZ(ev, SURPRISE_STATS)} />
                                 </>
                               : <span className="text-gray-700">—</span>
@@ -788,15 +788,15 @@ export default function EconCalendar() {
                           </td>
 
                           {/* Forecast/Consensus */}
-                          <td className="py-2 pr-4 text-right whitespace-nowrap font-mono text-sm text-gray-400">
+                          <td className="py-3 pr-4 text-right whitespace-nowrap font-mono text-base text-gray-400">
                             {ev.forecast
-                              ? <>{ev.forecast}{ev.unit && ev.unit !== '—' ? <span className="text-xs text-gray-600 ml-0.5">{ev.unit}</span> : null}</>
+                              ? <>{ev.forecast}{ev.unit && ev.unit !== '—' ? <span className="text-sm text-gray-500 ml-0.5">{ev.unit}</span> : null}</>
                               : <span className="text-gray-700">—</span>
                             }
                           </td>
 
                           {/* Previous */}
-                          <td className="py-2 pr-3 text-right whitespace-nowrap font-mono text-xs text-gray-600">
+                          <td className="py-3 pr-4 text-right whitespace-nowrap font-mono text-sm text-gray-500">
                             {ev.prev
                               ? <>{ev.prev}{ev.unit && ev.unit !== '—' ? <span className="ml-0.5">{ev.unit}</span> : null}</>
                               : '—'
