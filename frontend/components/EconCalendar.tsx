@@ -223,6 +223,13 @@ const EVENTS: EconEvent[] = [
     forecast: 'hike 68% · hold 28%', actual: '3.75–4.00%', prev: '3.50–3.75%', beat: undefined,
     note: 'HIKED +0.25pp ✅ → 3.75–4.00% (IORB 3.90%) · มติเป็นเอกฉันท์ · มีผล 17 ก.ย. 2569',
   },
+  // ─── GDP Q2 Final ประกาศ 24 ก.ย. 2569 (ผ่านแล้ว) ──────────
+  {
+    date: '2026-09-24', time: '19:30', nameTh: 'GDP Q2 2026 (Final) ← ตัวเลขสุดท้าย', nameEn: 'GDP Q2 Final',
+    period: 'Q2/2569', impact: 'high', cat: 'gdp', unit: '% QoQ ann.',
+    forecast: '2.3', actual: '2.4', prev: '2.3', beat: true,
+    note: 'ปรับขึ้นเล็กน้อยจาก Second Est. 2.3% → Final 2.4% — เศรษฐกิจ Q2 ยังแข็งแกร่ง',
+  },
   // ─── PCE ส.ค. ประกาศ 30 ก.ย. 2569 (ผ่านแล้ว) ──────────────
   {
     date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (m/m) ← ตัวชี้วัดหลัก Fed', nameEn: 'Core PCE m/m',
@@ -287,10 +294,15 @@ const EVENTS: EconEvent[] = [
     note: '▸ hike → 4.00–4.25% | ▸ hold → คง 3.75–4.00% · ไม่มี Dot Plot + SEP ในรอบนี้',
   },
   {
-    date: '2026-10-30', time: '19:30', nameTh: 'Core PCE Price Index ก.ย. (m/m)', nameEn: 'Core PCE m/m',
+    date: '2026-10-30', time: '19:30', nameTh: 'Core PCE Price Index ก.ย. (m/m) ← ตัวชี้วัดหลัก Fed', nameEn: 'Core PCE m/m',
     period: 'ก.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
     forecast: '0.2', prev: '0.2',
-    note: 'Core PCE m/m คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ให้น้ำหนักสูงสุด',
+    note: 'ตัวชี้วัดเงินเฟ้อหลักที่สุดของ Fed (สำคัญกว่า CPI)\n▸ ถ้า > 0.3% m/m → Fed ชะลอลดดอกเบี้ย, Dollar แข็งมาก (อาจทะลุ 102.5), ทองคำและ BTC กดดันหนัก\n▸ ถ้า ≤ 0.1% m/m → Fed อาจเร่งลดดอกเบี้ย 0.50% ในประชุมหน้า, Dollar อ่อน, ทองคำฟื้น, BTC rally\n▸ เชื่อมโยง: ทองคำร่วงจาก dollar strength สัปดาห์ก่อน ถ้า PCE ออกต่ำ flow อาจกลับเข้าแรง',
+  },
+  {
+    date: '2026-10-30', time: '19:30', nameTh: 'Core PCE Price Index ก.ย. (YoY)', nameEn: 'Core PCE YoY',
+    period: 'ก.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
+    forecast: '2.6', prev: '3.3',
   },
   {
     date: '2026-10-30', time: '19:30', nameTh: 'PCE Price Index ก.ย. (YoY)', nameEn: 'PCE YoY',
