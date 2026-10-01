@@ -51,15 +51,15 @@ const INDICATORS: Indicator[] = [
   },
   {
     key: 'PCE',
-    title: 'PCE',
+    title: 'Core PCE Price Index (m/m)',
     winner: 'CPI + PPI ที่ออกไปแล้ว',
     verdict: 'derived',
     sample: 'อ่านจาก CPI + PPI เดือน ส.ค. ที่ประกาศไปแล้ว',
     call: {
-      releaseLabel: 'PCE ส.ค. · ประกาศ 30 ก.ย. 19:30 น.',
-      value: '≥ 3.3%',
-      valueNote: 'Core YoY · เอียงขึ้นจากฐาน 3.3%',
-      lastRound: 'รอบที่แล้ว PCE ก.ค. core 3.3% ตรงคาด · headline 3.7% สูงกว่าคาด 0.1',
+      releaseLabel: 'Core PCE Price Index ส.ค. (m/m) · ประกาศ 30 ก.ย. 19:30 น.',
+      value: '≥ 0.2%',
+      valueNote: 'Core m/m · Fed ให้น้ำหนักตัวเลข m/m มากที่สุด ไม่ใช่ YoY',
+      lastRound: 'รอบที่แล้ว Core PCE ก.ค. m/m 0.2% ตรงคาด · YoY 3.3%',
       hit: 'mixed',
     },
     sources: [

@@ -216,7 +216,7 @@ ${rawData.newsHeadlines}
 - ตัวเลขทุกตัวต้องมาจากข้อมูลดิบที่ให้ไป ห้ามสร้างขึ้นเอง
 - แต่ละ section ต้องมี 3-6 bullets
 - forwardEvents ต้องมี 5-8 events สำคัญใน 3 สัปดาห์ข้างหน้า ครอบคลุมทุกมิติ ไม่ใช่แค่ตัวเลขเศรษฐกิจ:
-  A) ตัวเลขเศรษฐกิจตามปฏิทิน: PCE, NFP, CPI, ISM, FOMC, GDP, Retail Sales ฯลฯ — ใส่วันเวลา ICT + consensus
+  A) ตัวเลขเศรษฐกิจตามปฏิทิน: Core PCE Price Index m/m (ตัวชี้วัดหลักที่สุดของ Fed ไม่ใช่ YoY), NFP, CPI, ISM, FOMC, GDP, Retail Sales ฯลฯ — ใส่วันเวลา ICT + consensus
   B) ภูมิรัฐศาสตร์: การประชุม US-China, G7, NATO, ตะวันออกกลาง, สงครามการค้า, tariff deadlines, sanctions
   C) นโยบาย Fed / ธนาคารกลาง: Fed speech ที่กำหนดไว้, blackout period, ECB/BOJ meeting, bond auction สำคัญ
   D) กฎหมาย / กำกับดูแล: crypto bills, SEC rulings, stablecoin legislation, CFTC rulemaking, EU MiCA deadlines

@@ -448,6 +448,7 @@ export default function CdcSignals() {
   const [error, setError] = useState<string | null>(null);
   const [fetchedAt, setFetchedAt] = useState('');
   const [retrying, setRetrying] = useState(false);
+  const [aiForwardEvents, setAiForwardEvents] = useState<any[] | null>(null);
 
   const load = async (isRetry = false) => {
     if (!isRetry) setLoading(true);
@@ -485,6 +486,11 @@ export default function CdcSignals() {
   useEffect(() => {
     load();
     const timer = setInterval(() => load(), AUTO_REFRESH_MS);
+    // Fetch AI-generated forwardEvents from weekly-summary
+    fetch('/api/weekly-summary')
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j?.forwardEvents?.length) setAiForwardEvents(j.forwardEvents); })
+      .catch(() => {});
     return () => clearInterval(timer);
   }, []);
 
@@ -633,44 +639,79 @@ export default function CdcSignals() {
                 <span className="text-[20px] font-black bg-amber-800/60 text-amber-300 px-2 py-0.5 rounded font-mono leading-none">07</span>
                 <div>
                   <span className="text-[18px] font-black text-amber-200 leading-tight block">คาดการณ์ปัจจัยสำคัญ 3 สัปดาห์ข้างหน้า</span>
-                  <span className="text-xs text-gray-600">(ไม่ทำนายราคา)</span>
+                  <span className="text-xs text-gray-600">(ไม่ทำนายราคา){aiForwardEvents ? ' · 🤖 AI' : ' · static'}</span>
                 </div>
               </div>
               <div className="space-y-3">
-                {WEEKLY_NOTES.watchNext.map((w, i) => (
-                  <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-3">
-                    {/* Date + time + event header */}
-                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                      <span className="text-[18px] font-mono text-amber-400 shrink-0 leading-none">{w.date}</span>
-                      {w.time !== '—' && (
-                        <span className="text-sm font-mono text-gray-500 bg-gray-800/60 px-2 py-0.5 rounded shrink-0 leading-none">
-                          🕐 {w.time}
-                        </span>
-                      )}
-                      <span className="text-[20px] font-black text-white leading-none">{w.event}</span>
-                      {w.consensus && (
-                        <span className="text-sm text-gray-400 bg-gray-800/50 px-2 py-0.5 rounded">
-                          consensus: {w.consensus}
-                        </span>
-                      )}
-                    </div>
-                    {/* Expanded detail — split by \n for multi-line */}
-                    <div className="space-y-0.5 pl-1">
-                      {w.detail.split('\n').map((line, li) => (
-                        <div
-                          key={li}
-                          className={`text-[18px] leading-relaxed ${
-                            line.startsWith('▸')
-                              ? 'text-gray-400 pl-2'
-                              : 'text-gray-300'
-                          }`}
-                        >
-                          {line}
+                {aiForwardEvents ? (
+                  aiForwardEvents.map((ev: any, i: number) => (
+                    <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-3">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <span className="text-[18px] font-mono text-amber-400 shrink-0 leading-none">{ev.date}</span>
+                        {ev.time && ev.time !== '—' && (
+                          <span className="text-sm font-mono text-gray-500 bg-gray-800/60 px-2 py-0.5 rounded shrink-0 leading-none">
+                            🕐 {ev.time}
+                          </span>
+                        )}
+                        <span className="text-[20px] font-black text-white leading-none">{ev.event}</span>
+                        {ev.consensus && ev.consensus !== '-' && (
+                          <span className="text-sm text-gray-400 bg-gray-800/50 px-2 py-0.5 rounded">
+                            consensus: {ev.consensus}
+                          </span>
+                        )}
+                      </div>
+                      {ev.watch && (
+                        <div className="space-y-0.5 pl-1">
+                          {ev.watch.split('\\n').join('\n').split('\n').map((line: string, li: number) => (
+                            <div
+                              key={li}
+                              className={`text-[18px] leading-relaxed ${
+                                line.startsWith('▸')
+                                  ? 'text-gray-400 pl-2'
+                                  : 'text-gray-300'
+                              }`}
+                            >
+                              {line}
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  WEEKLY_NOTES.watchNext.map((w, i) => (
+                    <div key={i} className="rounded-lg bg-amber-900/10 border border-amber-800/25 p-3">
+                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                        <span className="text-[18px] font-mono text-amber-400 shrink-0 leading-none">{w.date}</span>
+                        {w.time !== '—' && (
+                          <span className="text-sm font-mono text-gray-500 bg-gray-800/60 px-2 py-0.5 rounded shrink-0 leading-none">
+                            🕐 {w.time}
+                          </span>
+                        )}
+                        <span className="text-[20px] font-black text-white leading-none">{w.event}</span>
+                        {w.consensus && (
+                          <span className="text-sm text-gray-400 bg-gray-800/50 px-2 py-0.5 rounded">
+                            consensus: {w.consensus}
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-0.5 pl-1">
+                        {w.detail.split('\n').map((line, li) => (
+                          <div
+                            key={li}
+                            className={`text-[18px] leading-relaxed ${
+                              line.startsWith('▸')
+                                ? 'text-gray-400 pl-2'
+                                : 'text-gray-300'
+                            }`}
+                          >
+                            {line}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

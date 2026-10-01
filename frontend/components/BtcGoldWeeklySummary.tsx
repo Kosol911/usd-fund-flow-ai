@@ -176,10 +176,10 @@ const WEEKLY_DATA: WeeklyData = {
     {
       date: '30 ก.ย. 2569',
       time: '19:30 น. ICT',
-      event: 'PCE ส.ค.',
-      consensus: '3.7% YoY',
+      event: 'Core PCE Price Index ส.ค. (m/m)',
+      consensus: '0.2% m/m',
       watch:
-        'PCE คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ใช้กำหนดนโยบาย — จะเป็นตัวกำหนด sentiment ก่อน NFP 3 วันถัดมา\n▸ > 3.7% YoY = แรงกดดัน hike 28 ต.ค. เพิ่มทันที → real yield พุ่ง → Gold ร่วงต่อ · BTC อาจชะงักแม้ ETF flow ดี\n▸ ≤ 3.4% = ตลาด re-price hike odds ลดลง → DXY อ่อน → Gold ฟื้น · BTC ได้แรงหนุนเพิ่ม\n▸ PCE core (ไม่รวมอาหาร/พลังงาน) มีน้ำหนักมากกว่าในการตัดสินของ Fed — ดูทั้งคู่\n▸ ตัวเลขนี้เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
+        'Core PCE Price Index m/m คือตัวชี้วัดเงินเฟ้อหลักที่สุดที่ Fed ใช้กำหนดนโยบาย — จะเป็นตัวกำหนด sentiment ก่อน NFP 3 วันถัดมา\n▸ > 0.3% m/m = แรงกดดัน hike 28 ต.ค. เพิ่มทันที → real yield พุ่ง → Gold ร่วงต่อ · BTC อาจชะงักแม้ ETF flow ดี\n▸ ≤ 0.1% = ตลาด re-price hike odds ลดลง → DXY อ่อน → Gold ฟื้น · BTC ได้แรงหนุนเพิ่ม\n▸ Core PCE m/m (ไม่รวมอาหาร/พลังงาน) มีน้ำหนักมากที่สุดในการตัดสินของ Fed — ไม่ใช่ YoY\n▸ ตัวเลขนี้เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
     },
     {
       date: '~3 ต.ค. 2569',

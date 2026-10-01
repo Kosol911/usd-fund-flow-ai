@@ -225,15 +225,20 @@ const EVENTS: EconEvent[] = [
   },
   // ─── TODAY: 21 กันยายน 2569 ───────────────────────────────
   {
-    date: '2026-09-30', time: '19:30', nameTh: 'PCE ส.ค. (YoY) ← ตัวชี้วัดหลัก Fed', nameEn: 'PCE YoY',
-    period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
-    forecast: '3.7', prev: '3.8',
-    note: '▸ > 3.7% = แรงกดดัน hike ต.ค. ทันที · ▸ ≤ 3.4% = ตลาด re-price hike ลด',
+    date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (m/m) ← ตัวชี้วัดหลัก Fed', nameEn: 'Core PCE m/m',
+    period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
+    forecast: '0.2', prev: '0.2',
+    note: '▸ > 0.3% = แรงกดดัน hike ต.ค. ทันที · ▸ ≤ 0.1% = ตลาด re-price hike ลด\n▸ Core PCE m/m คือตัวเลขที่ Fed ให้น้ำหนักมากที่สุด ไม่ใช่ YoY',
   },
   {
-    date: '2026-09-30', time: '19:30', nameTh: 'Core PCE ส.ค. (YoY)', nameEn: 'Core PCE YoY',
-    period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (YoY)', nameEn: 'Core PCE YoY',
+    period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.3', prev: '3.4',
+  },
+  {
+    date: '2026-09-30', time: '19:30', nameTh: 'PCE Price Index ส.ค. (m/m)', nameEn: 'PCE m/m',
+    period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% m/m',
+    forecast: '0.1', prev: '0.2',
   },
 
   // ═══════════════════════════════════════════════════════
@@ -282,8 +287,14 @@ const EVENTS: EconEvent[] = [
     note: '▸ hike → 4.00–4.25% | ▸ hold → คง 3.75–4.00% · ไม่มี Dot Plot + SEP ในรอบนี้',
   },
   {
-    date: '2026-10-30', time: '19:30', nameTh: 'PCE ก.ย. (YoY)', nameEn: 'PCE YoY',
-    period: 'ก.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2026-10-30', time: '19:30', nameTh: 'Core PCE Price Index ก.ย. (m/m)', nameEn: 'Core PCE m/m',
+    period: 'ก.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
+    forecast: '0.2', prev: '0.2',
+    note: 'Core PCE m/m คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ให้น้ำหนักสูงสุด',
+  },
+  {
+    date: '2026-10-30', time: '19:30', nameTh: 'PCE Price Index ก.ย. (YoY)', nameEn: 'PCE YoY',
+    period: 'ก.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.7', prev: '3.8',
   },
   {
@@ -331,13 +342,19 @@ const EVENTS: EconEvent[] = [
     forecast: '0.3', prev: '0.3',
   },
   {
-    date: '2026-11-25', time: '20:30', nameTh: 'PCE ต.ค. (YoY)', nameEn: 'PCE YoY',
-    period: 'ต.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2026-11-25', time: '20:30', nameTh: 'Core PCE Price Index ต.ค. (m/m)', nameEn: 'Core PCE m/m',
+    period: 'ต.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
+    forecast: '0.2', prev: '0.2',
+    note: 'Core PCE m/m คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ให้น้ำหนักสูงสุด',
+  },
+  {
+    date: '2026-11-25', time: '20:30', nameTh: 'PCE Price Index ต.ค. (YoY)', nameEn: 'PCE YoY',
+    period: 'ต.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.6', prev: '3.7',
   },
   {
-    date: '2026-11-25', time: '20:30', nameTh: 'Core PCE ต.ค. (YoY)', nameEn: 'Core PCE YoY',
-    period: 'ต.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2026-11-25', time: '20:30', nameTh: 'Core PCE Price Index ต.ค. (YoY)', nameEn: 'Core PCE YoY',
+    period: 'ต.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.2', prev: '3.3',
   },
   {
@@ -396,13 +413,19 @@ const EVENTS: EconEvent[] = [
     forecast: '1.9', prev: '1.9',
   },
   {
-    date: '2026-12-24', time: '20:30', nameTh: 'PCE พ.ย. (YoY)', nameEn: 'PCE YoY',
-    period: 'พ.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2026-12-24', time: '20:30', nameTh: 'Core PCE Price Index พ.ย. (m/m)', nameEn: 'Core PCE m/m',
+    period: 'พ.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
+    forecast: '0.2', prev: '0.2',
+    note: 'Core PCE m/m คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ให้น้ำหนักสูงสุด',
+  },
+  {
+    date: '2026-12-24', time: '20:30', nameTh: 'PCE Price Index พ.ย. (YoY)', nameEn: 'PCE YoY',
+    period: 'พ.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.5', prev: '3.6',
   },
   {
-    date: '2026-12-24', time: '20:30', nameTh: 'Core PCE พ.ย. (YoY)', nameEn: 'Core PCE YoY',
-    period: 'พ.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2026-12-24', time: '20:30', nameTh: 'Core PCE Price Index พ.ย. (YoY)', nameEn: 'Core PCE YoY',
+    period: 'พ.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.1', prev: '3.2',
   },
 
@@ -445,15 +468,21 @@ const EVENTS: EconEvent[] = [
     forecast: '0.5', prev: '0.4', note: 'เทศกาลคริสต์มาส/ปีใหม่ — ค้าปลีกมักดีในธ.ค.',
   },
   {
-    date: '2027-01-29', time: '20:30', nameTh: 'PCE ธ.ค. (YoY)', nameEn: 'PCE YoY',
-    period: 'ธ.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
+    date: '2027-01-29', time: '20:30', nameTh: 'Core PCE Price Index ธ.ค. (m/m)', nameEn: 'Core PCE m/m',
+    period: 'ธ.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
+    forecast: '0.2', prev: '0.2',
+    note: 'Core PCE m/m คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ให้น้ำหนักสูงสุด',
+  },
+  {
+    date: '2027-01-29', time: '20:30', nameTh: 'PCE Price Index ธ.ค. (YoY)', nameEn: 'PCE YoY',
+    period: 'ธ.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
     forecast: '3.4', prev: '3.5',
   },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────
 
-const TODAY = '2026-09-23';
+const TODAY = '2026-10-01';
 
 function computeSurpriseStats(events: EconEvent[]) {
   const groups: Record<string, number[]> = {};

@@ -28,7 +28,7 @@ const PAST_EVENTS: EventRow[] = [
   { id: 'nfp_aug',  date: '4 ก.ย. 2569', name: 'NFP ส.ค.',              surprise: '+106K (คาด 56K ออก 162K)',        zScore: 2.5 },
   { id: 'cpi_aug',  date: '10 ก.ย. 2569', name: 'CPI ส.ค. (YoY)',       surprise: '0.0 (ตรงคาด 3.4%)',              zScore: 0.0 },
   { id: 'fomc_sep', date: '17 ก.ย. 2569', name: 'FOMC ก.ย. — Hike +25bps', surprise: 'ตามคาด (hike 68%)',           zScore: null },
-  { id: 'pce_jul',  date: '28 ส.ค. 2569', name: 'PCE ก.ค. (YoY)',       surprise: '+0.1pp (คาด 3.7% ออก 3.8%)',    zScore: 0.8 },
+  { id: 'pce_jul',  date: '28 ส.ค. 2569', name: 'Core PCE Price Index ก.ค. (m/m)', surprise: 'ตรงคาด 0.2% m/m (YoY 3.3%)', zScore: 0.2 },
   { id: 'cpi_jul',  date: '12 ส.ค. 2569', name: 'CPI ก.ค. (YoY)',       surprise: '+0.2pp (คาด 3.9% ออก 4.1%)',    zScore: 1.4 },
   { id: 'nfp_jul',  date: '7 ส.ค. 2569',  name: 'NFP ก.ค.',              surprise: '+20K (คาด 165K ออก 185K)',       zScore: 0.5 },
   { id: 'cpi_jun',  date: '10 ก.ค. 2569', name: 'CPI มิ.ย. (YoY)',      surprise: '+0.2pp (คาด 3.7% ออก 3.9%)',    zScore: 1.4 },
