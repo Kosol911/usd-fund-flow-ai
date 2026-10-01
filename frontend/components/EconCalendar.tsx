@@ -225,27 +225,27 @@ const EVENTS: EconEvent[] = [
   },
   // ─── GDP Q2 Final ประกาศ 24 ก.ย. 2569 (ผ่านแล้ว) ──────────
   {
-    date: '2026-09-24', time: '19:30', nameTh: 'GDP Q2 2026 (Final) ← ตัวเลขสุดท้าย', nameEn: 'GDP Q2 Final',
+    date: '2026-09-30', time: '19:30', nameTh: 'Final GDP Q2 (q/q) ← ตัวเลขสุดท้าย', nameEn: 'Final GDP q/q',
     period: 'Q2/2569', impact: 'critical', cat: 'gdp', unit: '% QoQ ann.',
-    forecast: '2.3', actual: '2.4', prev: '2.3', beat: true,
-    note: 'ปรับขึ้นเล็กน้อยจาก Second Est. 2.3% → Final 2.4% — เศรษฐกิจ Q2 ยังแข็งแกร่ง',
+    forecast: '1.5', actual: '2.2', prev: '1.5', beat: true,
+    note: 'Beat มาก! คาด 1.5% ออก 2.2% — เศรษฐกิจ Q2 แข็งกว่าคาดมาก หนุน hike sentiment',
   },
   // ─── PCE ส.ค. ประกาศ 30 ก.ย. 2569 (ผ่านแล้ว) ──────────────
   {
     date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (m/m) ← ตัวชี้วัดหลัก Fed', nameEn: 'Core PCE m/m',
     period: 'ส.ค. 2569', impact: 'critical', cat: 'inflation', unit: '% m/m',
-    forecast: '0.2', actual: '0.2', prev: '0.2', beat: undefined,
-    note: 'ตรงคาดพอดี 0.2% m/m — สอดคล้องกับ Core CPI ส.ค. ที่ตรงคาด · ไม่เพิ่มแรงกดดัน hike ต.ค.',
+    forecast: '0.3', actual: '0.2', prev: '0.1', beat: false,
+    note: 'ต่ำกว่าคาด! คาด 0.3% ออก 0.2% — เงินเฟ้อชะลอตัว สอดคล้องกับ Core CPI ส.ค.',
   },
   {
     date: '2026-09-30', time: '19:30', nameTh: 'Core PCE Price Index ส.ค. (YoY)', nameEn: 'Core PCE YoY',
     period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
-    forecast: '3.3', actual: '3.3', prev: '3.4', beat: undefined,
+    forecast: '3.5', actual: '3.3', prev: '3.4', beat: false,
   },
   {
     date: '2026-09-30', time: '19:30', nameTh: 'PCE Price Index ส.ค. (m/m)', nameEn: 'PCE m/m',
     period: 'ส.ค. 2569', impact: 'high', cat: 'inflation', unit: '% m/m',
-    forecast: '0.1', actual: '0.1', prev: '0.2', beat: undefined,
+    forecast: '0.2', actual: '0.1', prev: '0.2', beat: false,
   },
 
   // ═══════════════════════════════════════════════════════

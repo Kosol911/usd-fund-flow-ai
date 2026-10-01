@@ -52,61 +52,65 @@ const WEEKLY_NOTES = {
   },
   watchNext: [
     {
-      date: '~26 ก.ย. 2569',
-      time: '19:30 น. ICT',
-      event: 'PCE ส.ค.',
-      consensus: '3.7% YoY',
-      detail:
-        'PCE (Personal Consumption Expenditures) คือตัวชี้วัดเงินเฟ้อหลักที่ Fed ใช้กำหนดนโยบายดอกเบี้ย — แม่นกว่า CPI เพราะวัดจากฝั่งต้นทุนจริงของผู้บริโภค\n' +
-        '▸ > 3.7% = แรงกดดัน hike ต่อ 28 ต.ค. ทันที → real yield เพิ่ม → Gold ร่วง, BTC ปรับลงตาม risk-off\n' +
-        '▸ ≤ 3.4% = ตลาด re-price hike odds ลด → DXY อ่อน → หนุน Gold และ BTC ฟื้น\n' +
-        '▸ เป็น "ก้าวแรก" กำหนด positioning ก่อน NFP และ FOMC 28 ต.ค.',
-    },
-    {
-      date: '~2 ต.ค. 2569',
+      date: '2 ต.ค. 2569',
       time: '19:30 น. ICT',
       event: 'NFP ก.ย.',
-      consensus: '162K',
+      consensus: '120K',
       detail:
         'NFP (Nonfarm Payrolls) คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE — ตลาดแรงงาน "ร้อน" = Fed ต้อง hike ต่อ\n' +
         '▸ > 200K = ร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n' +
-        '▸ 120–160K = ใกล้คาด ตลาดรอ PCE ยืนยัน\n' +
+        '▸ 100–160K = ใกล้คาด ตลาดรอ CPI/PCE ยืนยัน\n' +
         '▸ < 100K = ตลาดแรงงานชะลอ → Fed อาจ hold → risk-on กลับมา\n' +
-        '▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings (ชี้เงินเฟ้อ service-side)',
+        '▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings (ชี้เงินเฟ้อ service-side)\n' +
+        '▸ เชื่อมโยง: NFP ส.ค. beat มหาศาล (คาด 56K ออก 162K) — ถ้า ก.ย. ชะลอแรง จะเป็นสัญญาณว่า ส.ค. เป็น outlier',
     },
     {
-      date: 'ต่อเนื่อง',
-      time: '—',
-      event: 'CFTC / SEC Crypto Rulemaking',
-      consensus: undefined,
+      date: '14 ต.ค. 2569',
+      time: '19:30 น. ICT',
+      event: 'CPI ก.ย. (YoY)',
+      consensus: '3.7%',
       detail:
-        'หลัง CLARITY Act ล้มเหลว ทำเนียบขาวผลักดัน CFTC มีอำนาจกำกับ spot crypto ผ่าน Executive Order ทางเลือก\n' +
-        '▸ EO ออกภายใน 2–3 สัปดาห์ = regulatory clarity แม้ไม่ใช่กฎหมาย → BTC ETF demand ฟื้น\n' +
-        '▸ SEC ออก Guidance เรื่อง crypto custody = หนุน institutional confidence\n' +
-        '▸ ไม่มีอะไรออกมา = CLARITY Act failure ยังกดดัน sentiment ต่อเนื่อง\n' +
-        '▸ ติดตาม: crypto.news · SEC.gov daily filing · White House briefing',
+        'CPI เป็นข้อมูลเงินเฟ้อตัวแรกที่ออก — กำหนดทิศทาง market expectation ก่อน PCE\n' +
+        '▸ > 3.8% = เงินเฟ้อกลับมาร้อน → hike ต.ค. แทบแน่นอน → DXY พุ่ง, Gold/BTC กดดัน\n' +
+        '▸ 3.5–3.7% = ตรงคาด ตลาด wait-and-see รอ PCE ยืนยัน\n' +
+        '▸ < 3.4% = เงินเฟ้อชะลอชัด → hike odds ลดฮวบ → Gold/BTC rally\n' +
+        '▸ CPI ส.ค. ออกตรงคาด 3.4% — ถ้า ก.ย. เร่งตัวกลับ 3.7% จะสร้างแรงกดดัน hike',
     },
     {
-      date: 'ต่อเนื่อง',
-      time: '—',
-      event: 'DXY Trajectory หลัง Fed hike',
-      consensus: undefined,
+      date: '30 ต.ค. 2569',
+      time: '19:30 น. ICT',
+      event: 'Core PCE Price Index ก.ย. (m/m)',
+      consensus: '0.2% m/m, 2.6% YoY',
       detail:
-        'DXY (US Dollar Index) เป็น inverse ของ Gold + BTC ระยะกลาง — หลัง hike 16 ก.ย. DXY พุ่งสั้นแล้วอ่อนผิดปกติ บ่งชี้ตลาดอาจมองว่า Fed ใกล้สิ้นสุด cycle\n' +
-        '▸ DXY < 102 = เงื่อนไขดี Gold ทดสอบ ATH ใหม่ + BTC ได้แรงหนุน\n' +
-        '▸ DXY > 104 = real yield กดดัน → Gold มีแรงเทขาย ระวัง\n' +
-        '▸ ตัวชี้วัดที่ต้องดู: US10Y yield movement, PCE surprise, Fed speech ก่อน blackout (21 ต.ค.–28 ต.ค.)',
+        'Core PCE m/m คือตัวชี้วัดเงินเฟ้อหลักที่สุดของ Fed (สำคัญกว่า CPI) — วัดจากฝั่งต้นทุนจริงของผู้บริโภค\n' +
+        '▸ > 0.3% m/m → Fed ชะลอลดดอกเบี้ย, Dollar แข็งมาก (อาจทะลุ 102.5), ทองคำและ BTC กดดันหนัก\n' +
+        '▸ ≤ 0.1% m/m → Fed อาจเร่งลดดอกเบี้ย 0.50% ในประชุมหน้า, Dollar อ่อน, ทองคำฟื้น, BTC rally\n' +
+        '▸ เชื่อมโยง: Core PCE ส.ค. ออก 0.2% (ต่ำกว่าคาด 0.3%) → ถ้า ก.ย. ต่ำอีก จะเป็น trend ชะลอตัวชัด\n' +
+        '▸ เป็นตัวเลขสุดท้ายก่อน FOMC — กำหนด positioning ทั้งตลาด',
     },
     {
-      date: '28 ต.ค. 2569',
-      time: '01:00 น. ICT (29 ต.ค.)',
-      event: 'FOMC (ไม่มี Dot Plot)',
-      consensus: 'hike 43.2% · hold 49.6%',
+      date: '30 ต.ค. 2569',
+      time: '19:30 น. ICT',
+      event: 'GDP Q3 Advance',
+      consensus: '1.9% QoQ ann.',
       detail:
-        'ครั้งนี้ไม่มี SEP / Dot Plot — ตลาดฟังเฉพาะ statement + แถลงข่าว Powell หาก hike กับ hold "ใกล้เคียงกัน" (43% vs 50%) นับว่า tension สูงมาก\n' +
-        '▸ hike + Powell ส่งสัญญาณยังขึ้นต่อ = real yield พุ่ง → Gold ร่วงสั้น แต่ถ้าเป็น "last hike" ตลาดอาจ sell-news-buy-dip ใน 24–48 ชม.\n' +
+        'GDP Advance คือตัวเลขแรกของเศรษฐกิจ Q3 — สำคัญเพราะชี้ว่า Fed hike ทำเศรษฐกิจชะลอแค่ไหน\n' +
+        '▸ > 2.5% = เศรษฐกิจยังแข็ง Fed ไม่มีเหตุผลหยุด hike → กดดัน Gold/BTC\n' +
+        '▸ 1.5–2.0% = ชะลอพอดี soft landing narrative → risk-on\n' +
+        '▸ < 1.0% = ชะลอแรง recession fear → safe-haven Gold ขึ้น, BTC อาจร่วงตาม risk-off\n' +
+        '▸ เชื่อมโยง: Final GDP Q2 ออก 2.2% (beat คาด 1.5%) → ถ้า Q3 ชะลอจาก 2.2% → 1.9% แสดงว่า hike เริ่มกัด',
+    },
+    {
+      date: '29 ต.ค. 2569',
+      time: '01:00 น. ICT',
+      event: 'FOMC ต.ค. (ไม่มี Dot Plot)',
+      consensus: 'hold 49.6% · hike 43.2%',
+      detail:
+        'ครั้งนี้ไม่มี SEP / Dot Plot — ตลาดฟังเฉพาะ statement + แถลงข่าว Powell\n' +
+        '▸ hike → 4.00–4.25% + Powell ส่งสัญญาณยังขึ้นต่อ = real yield พุ่ง → Gold ร่วง, BTC กดดัน\n' +
         '▸ hold + พูดถึง data-dependency = risk-on กลับมา → Gold + BTC ฟื้น\n' +
-        '▸ PCE 26 ก.ย. และ NFP 2 ต.ค. จะกำหนดว่า odds เอียงไปทางใดก่อนประชุม',
+        '▸ NFP (2 ต.ค.) + CPI (14 ต.ค.) + Core PCE (30 ต.ค.) จะกำหนดว่า odds เอียงไปทางใดก่อนประชุม\n' +
+        '▸ hike กับ hold "ใกล้เคียงกัน" (43% vs 50%) นับว่า tension สูงมาก',
     },
   ],
 };
