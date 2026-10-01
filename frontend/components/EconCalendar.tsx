@@ -226,7 +226,7 @@ const EVENTS: EconEvent[] = [
   // ─── GDP Q2 Final ประกาศ 24 ก.ย. 2569 (ผ่านแล้ว) ──────────
   {
     date: '2026-09-24', time: '19:30', nameTh: 'GDP Q2 2026 (Final) ← ตัวเลขสุดท้าย', nameEn: 'GDP Q2 Final',
-    period: 'Q2/2569', impact: 'high', cat: 'gdp', unit: '% QoQ ann.',
+    period: 'Q2/2569', impact: 'critical', cat: 'gdp', unit: '% QoQ ann.',
     forecast: '2.3', actual: '2.4', prev: '2.3', beat: true,
     note: 'ปรับขึ้นเล็กน้อยจาก Second Est. 2.3% → Final 2.4% — เศรษฐกิจ Q2 ยังแข็งแกร่ง',
   },
@@ -311,7 +311,7 @@ const EVENTS: EconEvent[] = [
   },
   {
     date: '2026-10-30', time: '19:30', nameTh: 'GDP Q3 2026 (Advance)', nameEn: 'GDP Q3 Advance',
-    period: 'Q3/2569', impact: 'high', cat: 'gdp', unit: '% QoQ ann.',
+    period: 'Q3/2569', impact: 'critical', cat: 'gdp', unit: '% QoQ ann.',
     forecast: '1.9', prev: '2.3',
   },
 
@@ -421,7 +421,7 @@ const EVENTS: EconEvent[] = [
   },
   {
     date: '2026-12-23', time: '20:30', nameTh: 'GDP Q3 2026 (Third/Final)', nameEn: 'GDP Q3 Final',
-    period: 'Q3/2569', impact: 'medium', cat: 'gdp', unit: '% QoQ ann.',
+    period: 'Q3/2569', impact: 'critical', cat: 'gdp', unit: '% QoQ ann.',
     forecast: '1.9', prev: '1.9',
   },
   {
@@ -629,7 +629,7 @@ export default function EconCalendar() {
               : 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-gray-200 hover:border-gray-600'
           }`}
         >
-          🔴 สำคัญที่สุด — Fed · CPI · NFP · PCE
+          🔴 สำคัญที่สุด — Fed · CPI · NFP · PCE · GDP
         </button>
         <button
           onClick={() => setImpactFilter('all')}
