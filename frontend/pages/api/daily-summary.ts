@@ -8,31 +8,85 @@ let cache: { data: any; ts: number } | null = null;
 const CACHE_TTL = 4 * 3600 * 1000; // 4 hours
 
 async function fetchBTC24h() {
+  // Try Binance first
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
     const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
-      signal: AbortSignal.timeout(10000),
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0' },
     });
-    if (!tickerRes.ok) throw new Error(`Binance 24hr: ${tickerRes.status}`);
-    const ticker = await tickerRes.json();
-    return {
-      price: parseFloat(ticker.lastPrice),
-      change24h: parseFloat(ticker.priceChangePercent),
-      high24h: parseFloat(ticker.highPrice),
-      low24h: parseFloat(ticker.lowPrice),
-      volume24h: parseFloat(ticker.quoteVolume),
-    };
-  } catch {
-    try {
-      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!res.ok) return null;
-      const json = await res.json();
-      return { price: parseFloat(json.price), change24h: 0, high24h: 0, low24h: 0, volume24h: 0 };
-    } catch {
-      return null;
+    clearTimeout(timer);
+    if (tickerRes.ok) {
+      const ticker = await tickerRes.json();
+      return {
+        price: parseFloat(ticker.lastPrice),
+        change24h: parseFloat(ticker.priceChangePercent),
+        high24h: parseFloat(ticker.highPrice),
+        low24h: parseFloat(ticker.lowPrice),
+        volume24h: parseFloat(ticker.quoteVolume),
+      };
     }
+  } catch (e) {
+    console.error('Binance 24hr failed:', e);
   }
+  // Fallback: CoinGecko
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false', {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    });
+    clearTimeout(timer);
+    if (res.ok) {
+      const json = await res.json();
+      const md = json.market_data;
+      return {
+        price: md?.current_price?.usd ?? 0,
+        change24h: md?.price_change_percentage_24h ?? 0,
+        high24h: md?.high_24h?.usd ?? 0,
+        low24h: md?.low_24h?.usd ?? 0,
+        volume24h: md?.total_volume?.usd ?? 0,
+      };
+    }
+  } catch (e) {
+    console.error('CoinGecko BTC failed:', e);
+  }
+  // Fallback: Yahoo Finance BTC-USD
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const from = now - 3 * 86400;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?period1=${from}&period2=${now}&interval=1d`, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    });
+    clearTimeout(timer);
+    if (res.ok) {
+      const json = await res.json();
+      const result = json?.chart?.result?.[0];
+      const closes: number[] = result?.indicators?.quote?.[0]?.close || [];
+      const highs: number[] = result?.indicators?.quote?.[0]?.high || [];
+      const lows: number[] = result?.indicators?.quote?.[0]?.low || [];
+      const valid = closes.filter((c: any) => c != null);
+      if (valid.length >= 1) {
+        const price = valid[valid.length - 1];
+        const prev = valid.length >= 2 ? valid[valid.length - 2] : price;
+        return {
+          price,
+          change24h: ((price - prev) / prev) * 100,
+          high24h: highs[highs.length - 1] ?? price,
+          low24h: lows[lows.length - 1] ?? price,
+          volume24h: 0,
+        };
+      }
+    }
+  } catch (e) {
+    console.error('Yahoo BTC failed:', e);
+  }
+  return null;
 }
 
 async function fetchGoldDXY(symbol: string) {
