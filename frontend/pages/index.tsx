@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { liquidityApi, crossAssetApi, eventApi } from '../lib/api';
 import TradingViewCharts from '../components/TradingViewCharts';
 import BtcGoldWeeklySummary from '../components/BtcGoldWeeklySummary';
+import BtcGoldDailySummary from '../components/BtcGoldDailySummary';
 import CdcSignals from '../components/CdcSignals';
 import FedRatePath from '../components/FedRatePath';
 import PreReleaseSignals from '../components/PreReleaseSignals';
@@ -244,6 +245,8 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          <BtcGoldDailySummary />
 
           <BtcGoldWeeklySummary />
 
