@@ -228,8 +228,28 @@ export default function BtcGoldDailySummary() {
 
       {/* Asset cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <AssetCard asset={data.btc} label="Bitcoin (BTC)" icon="₿" />
-        <AssetCard asset={data.gold} label="Gold (XAU/USD)" icon="🥇" />
+        {data.btc ? (
+          <AssetCard asset={data.btc} label="Bitcoin (BTC)" icon="₿" />
+        ) : (
+          <div style={{ background: '#111c30', border: '1px solid #1e3050', borderRadius: 10, padding: '18px 20px' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ fontSize: 24 }}>₿</span>
+              <span className="text-base font-bold text-white">Bitcoin (BTC)</span>
+            </div>
+            <div className="text-sm text-amber-400">ไม่สามารถดึงข้อมูล BTC จาก Binance ได้</div>
+          </div>
+        )}
+        {data.gold ? (
+          <AssetCard asset={data.gold} label="Gold (XAU/USD)" icon="🥇" />
+        ) : (
+          <div style={{ background: '#111c30', border: '1px solid #1e3050', borderRadius: 10, padding: '18px 20px' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ fontSize: 24 }}>🥇</span>
+              <span className="text-base font-bold text-white">Gold (XAU/USD)</span>
+            </div>
+            <div className="text-sm text-amber-400">ไม่สามารถดึงข้อมูล Gold จาก Yahoo Finance ได้</div>
+          </div>
+        )}
       </div>
 
       {/* Headlines */}

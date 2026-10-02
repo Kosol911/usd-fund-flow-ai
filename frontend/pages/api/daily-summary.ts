@@ -9,30 +9,29 @@ const CACHE_TTL = 4 * 3600 * 1000; // 4 hours
 
 async function fetchBTC24h() {
   try {
-    const [tickerRes, klineRes] = await Promise.all([
-      fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
-      fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=24'),
-    ]);
-    if (!tickerRes.ok || !klineRes.ok) return null;
+    const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!tickerRes.ok) throw new Error(`Binance 24hr: ${tickerRes.status}`);
     const ticker = await tickerRes.json();
-    const klines: any[] = await klineRes.json();
     return {
       price: parseFloat(ticker.lastPrice),
       change24h: parseFloat(ticker.priceChangePercent),
       high24h: parseFloat(ticker.highPrice),
       low24h: parseFloat(ticker.lowPrice),
       volume24h: parseFloat(ticker.quoteVolume),
-      hourlyCandles: klines.map((k: any) => ({
-        time: new Date(k[0]).toISOString(),
-        open: parseFloat(k[1]),
-        high: parseFloat(k[2]),
-        low: parseFloat(k[3]),
-        close: parseFloat(k[4]),
-        volume: parseFloat(k[5]),
-      })),
     };
   } catch {
-    return null;
+    try {
+      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return { price: parseFloat(json.price), change24h: 0, high24h: 0, low24h: 0, volume24h: 0 };
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -238,13 +237,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     if (!analysis) throw lastErr;
 
+    const now = new Date();
+    const ict = new Date(now.getTime() + 7 * 3600 * 1000);
+    const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+      'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    const serverDateLabel = `${ict.getUTCDate()} ${thaiMonths[ict.getUTCMonth()]} ${ict.getUTCFullYear() + 543}`;
+    const hh = String(ict.getUTCHours()).padStart(2, '0');
+    const mm = String(ict.getUTCMinutes()).padStart(2, '0');
+    const serverUpdatedTime = `${hh}:${mm} น. ICT`;
+
+    analysis.dateLabel = serverDateLabel;
+    analysis.updatedISO = now.toISOString().slice(0, 10);
+    analysis.updatedTime = serverUpdatedTime;
+
+    if (btc) {
+      if (!analysis.btc || analysis.btc === null) {
+        analysis.btc = { price: btc.price, change24h: btc.change24h, high24h: btc.high24h, low24h: btc.low24h, sentiment: 'neutral', keyDriver: 'ไม่มีข้อมูลเพียงพอ', outlook: 'รอข้อมูลเพิ่มเติม' };
+      } else {
+        analysis.btc.price = btc.price;
+        analysis.btc.change24h = btc.change24h;
+        analysis.btc.high24h = btc.high24h;
+        analysis.btc.low24h = btc.low24h;
+      }
+    }
+    if (gold) {
+      if (!analysis.gold || analysis.gold === null) {
+        analysis.gold = { price: gold.price, change1d: gold.change1d, high: gold.high, low: gold.low, sentiment: 'neutral', keyDriver: 'ไม่มีข้อมูลเพียงพอ', outlook: 'รอข้อมูลเพิ่มเติม' };
+      } else {
+        analysis.gold.price = gold.price;
+        analysis.gold.change1d = gold.change1d;
+        analysis.gold.high = gold.high;
+        analysis.gold.low = gold.low;
+      }
+    }
+    if (dxy) {
+      analysis.dxy = { price: dxy.price, change1d: dxy.change1d };
+    }
+
     cache = { data: analysis, ts: Date.now() };
 
     return res.status(200).json({
       ...analysis,
       _cached: false,
       _model: AI_MODEL,
-      _generatedAt: new Date().toISOString(),
+      _generatedAt: now.toISOString(),
     });
   } catch (err: any) {
     console.error('Daily summary error:', err);
