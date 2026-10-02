@@ -857,7 +857,7 @@ export default function EconCalendar() {
                                 </div>
 
                                 {/* Mobile: stacked cards */}
-                                <div className="sm:hidden" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <div className="flex flex-col gap-2 sm:hidden">
                                   {ev.marketImpact.map((row, ri) => (
                                     <div key={ri} style={{
                                       background: '#111c30',
