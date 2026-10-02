@@ -102,49 +102,40 @@ async function analyzeDaily(rawData: { btc: any; gold: any; dxy: any; news: stri
 
   const prompt = `คุณเป็นนักวิเคราะห์ macro finance ระดับสูง วิเคราะห์ข้อมูลราคา BTC และ Gold วันนี้แล้วสร้าง JSON สำหรับ daily dashboard
 
+วันนี้คือ: ${dayLabel}
+
 ## ข้อมูลดิบ
 
 ### BTC (Binance 24h)
-${JSON.stringify(rawData.btc, null, 2)}
+${rawData.btc ? JSON.stringify(rawData.btc, null, 2) : 'ข้อมูล BTC ไม่พร้อมใช้งาน — ถ้าไม่มีข้อมูลให้ใส่ null ใน btc field'}
 
 ### Gold - XAUUSD (Yahoo Finance)
-${JSON.stringify(rawData.gold, null, 2)}
+${rawData.gold ? JSON.stringify(rawData.gold, null, 2) : 'ข้อมูล Gold ไม่พร้อมใช้งาน'}
 
 ### DXY (Yahoo Finance)
-${JSON.stringify(rawData.dxy, null, 2)}
+${rawData.dxy ? JSON.stringify(rawData.dxy, null, 2) : 'ข้อมูล DXY ไม่พร้อมใช้งาน'}
 
 ### ข่าวล่าสุด
 ${rawData.news}
 
 ## คำสั่ง
 
-สร้าง JSON ตาม format นี้ (ตอบ JSON เท่านั้น ไม่ต้อง markdown ไม่ต้อง code fence):
+สร้าง JSON ตาม format นี้เท่านั้น (ตอบ JSON เท่านั้น ไม่ต้อง markdown ไม่ต้อง code fence):
+
+- ถ้าข้อมูล BTC ไม่พร้อม → ใส่ "btc": null
+- ถ้าข้อมูล Gold ไม่พร้อม → ใส่ "gold": null
+- ห้ามตอบ error object หรือโครงสร้างอื่น ต้องตอบ format นี้เสมอ
 
 {
-  "dateLabel": "${dayLabel}",
-  "updatedISO": "${now.toISOString().slice(0, 10)}",
-  "updatedTime": "HH:MM น. ICT",
   "btc": {
-    "price": ราคาล่าสุด (number),
-    "change24h": % เปลี่ยนแปลง 24 ชม. (number),
-    "high24h": จุดสูงสุด 24 ชม. (number),
-    "low24h": จุดต่ำสุด 24 ชม. (number),
     "sentiment": "bullish" | "bearish" | "neutral",
     "keyDriver": "ปัจจัยขับเคลื่อนหลักของวัน 1 ประโยค ภาษาไทย",
     "outlook": "มุมมองระยะสั้น 1-2 ประโยค ภาษาไทย"
   },
   "gold": {
-    "price": ราคาล่าสุด (number),
-    "change1d": % เปลี่ยนแปลง 1 วัน (number),
-    "high": จุดสูงสุดวัน (number),
-    "low": จุดต่ำสุดวัน (number),
     "sentiment": "bullish" | "bearish" | "neutral",
     "keyDriver": "ปัจจัยขับเคลื่อนหลักของวัน 1 ประโยค ภาษาไทย",
     "outlook": "มุมมองระยะสั้น 1-2 ประโยค ภาษาไทย"
-  },
-  "dxy": {
-    "price": ราคาล่าสุด (number),
-    "change1d": % เปลี่ยนแปลง 1 วัน (number)
   },
   "correlation": "อธิบายความสัมพันธ์ BTC/Gold/DXY วันนี้ 1-2 ประโยค ภาษาไทย",
   "headlines": [
@@ -155,11 +146,12 @@ ${rawData.news}
 
 ## กฎ
 - ทุกข้อความ user-facing ต้องเป็นภาษาไทย
-- ตัวเลขทุกตัวต้องมาจากข้อมูลดิบที่ให้ไป ห้ามสร้างขึ้นเอง
+- ตัวเลขราคาจะถูกเพิ่มเข้าไปในตัว response ที่ฝั่ง server อย่าใส่ตัวเลขราคาเอง
 - เวลาแสดงเป็น ICT (UTC+7) เสมอ
 - ปี พ.ศ. (ค.ศ. + 543)
 - ห้ามมีคำแนะนำลงทุน ราคาเป้าหมาย หรือเทคนิคอล
-- headlines ต้องเป็นข่าวจริงจากข้อมูลที่ให้ ห้ามแต่งเอง`;
+- headlines ต้องเป็นข่าวจริงจากข้อมูลที่ให้ ห้ามแต่งเอง
+- ห้ามตอบเป็น error/missing_data object ต้องตอบ format ข้างบนเท่านั้น`;
 
   const res = await fetch(`${KNPLAB_BASE_URL}/v1/chat/completions`, {
     method: 'POST',
@@ -225,59 +217,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const rawData = { btc, gold, dxy, news };
 
-    let analysis: any;
+    let ai: any;
     let lastErr: any;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        analysis = await analyzeDaily(rawData);
+        ai = await analyzeDaily(rawData);
         break;
       } catch (e) {
         lastErr = e;
       }
     }
-    if (!analysis) throw lastErr;
+    if (!ai) throw lastErr;
 
     const now = new Date();
     const ict = new Date(now.getTime() + 7 * 3600 * 1000);
     const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
       'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-    const serverDateLabel = `${ict.getUTCDate()} ${thaiMonths[ict.getUTCMonth()]} ${ict.getUTCFullYear() + 543}`;
     const hh = String(ict.getUTCHours()).padStart(2, '0');
     const mm = String(ict.getUTCMinutes()).padStart(2, '0');
-    const serverUpdatedTime = `${hh}:${mm} น. ICT`;
 
-    analysis.dateLabel = serverDateLabel;
-    analysis.updatedISO = now.toISOString().slice(0, 10);
-    analysis.updatedTime = serverUpdatedTime;
+    const result: any = {
+      dateLabel: `${ict.getUTCDate()} ${thaiMonths[ict.getUTCMonth()]} ${ict.getUTCFullYear() + 543}`,
+      updatedISO: now.toISOString().slice(0, 10),
+      updatedTime: `${hh}:${mm} น. ICT`,
+      btc: btc ? {
+        price: btc.price,
+        change24h: btc.change24h,
+        high24h: btc.high24h,
+        low24h: btc.low24h,
+        sentiment: ai.btc?.sentiment || 'neutral',
+        keyDriver: ai.btc?.keyDriver || 'ไม่มีข้อมูลเพียงพอ',
+        outlook: ai.btc?.outlook || 'รอข้อมูลเพิ่มเติม',
+      } : null,
+      gold: gold ? {
+        price: gold.price,
+        change1d: gold.change1d,
+        high: gold.high,
+        low: gold.low,
+        sentiment: ai.gold?.sentiment || 'neutral',
+        keyDriver: ai.gold?.keyDriver || 'ไม่มีข้อมูลเพียงพอ',
+        outlook: ai.gold?.outlook || 'รอข้อมูลเพิ่มเติม',
+      } : null,
+      dxy: dxy ? { price: dxy.price, change1d: dxy.change1d } : { price: 0, change1d: 0 },
+      correlation: ai.correlation || '',
+      headlines: ai.headlines || [],
+      riskLevel: ai.riskLevel || 'medium',
+    };
 
-    if (btc) {
-      if (!analysis.btc || analysis.btc === null) {
-        analysis.btc = { price: btc.price, change24h: btc.change24h, high24h: btc.high24h, low24h: btc.low24h, sentiment: 'neutral', keyDriver: 'ไม่มีข้อมูลเพียงพอ', outlook: 'รอข้อมูลเพิ่มเติม' };
-      } else {
-        analysis.btc.price = btc.price;
-        analysis.btc.change24h = btc.change24h;
-        analysis.btc.high24h = btc.high24h;
-        analysis.btc.low24h = btc.low24h;
-      }
-    }
-    if (gold) {
-      if (!analysis.gold || analysis.gold === null) {
-        analysis.gold = { price: gold.price, change1d: gold.change1d, high: gold.high, low: gold.low, sentiment: 'neutral', keyDriver: 'ไม่มีข้อมูลเพียงพอ', outlook: 'รอข้อมูลเพิ่มเติม' };
-      } else {
-        analysis.gold.price = gold.price;
-        analysis.gold.change1d = gold.change1d;
-        analysis.gold.high = gold.high;
-        analysis.gold.low = gold.low;
-      }
-    }
-    if (dxy) {
-      analysis.dxy = { price: dxy.price, change1d: dxy.change1d };
-    }
-
-    cache = { data: analysis, ts: Date.now() };
+    cache = { data: result, ts: Date.now() };
 
     return res.status(200).json({
-      ...analysis,
+      ...result,
       _cached: false,
       _model: AI_MODEL,
       _generatedAt: now.toISOString(),
