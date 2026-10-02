@@ -77,10 +77,10 @@ const INDICATORS: Indicator[] = [
     verdict: 'none',
     sample: 'Street 8 เดือน 2026 · โมเดล 24 งวด walk-forward',
     call: {
-      releaseLabel: 'NFP ก.ย. · ประกาศ 2 ต.ค. 19:30 น.',
-      value: '+120K',
-      valueNote: 'Street Consensus · Nowflation +102K',
-      lastRound: 'รอบที่แล้ว NFP ส.ค. จริง +162K — Street คาด +56K พลาด 106K',
+      releaseLabel: 'NFP ต.ค. · ประกาศ 6 พ.ย. 20:30 น.',
+      value: 'TBD',
+      valueNote: 'รอ consensus',
+      lastRound: 'รอบที่แล้ว NFP ก.ย. จริง +29K — Street คาด +120K พลาด -91K (miss หนักมาก)',
       hit: 'miss',
     },
     sources: [

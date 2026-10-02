@@ -259,8 +259,8 @@ const EVENTS: EconEvent[] = [
   {
     date: '2026-10-02', time: '19:30', nameTh: 'NFP จ้างงานนอกภาคเกษตร ก.ย.', nameEn: 'Nonfarm Payrolls',
     period: 'ก.ย. 2569', impact: 'critical', cat: 'employment', unit: 'K',
-    forecast: '120', prev: '162',
-    note: '▸ > 200K = ร้อนเกิน → hike ต.ค. odds พุ่ง · ▸ < 100K = Fed อาจ hold',
+    forecast: '120', prev: '162', actual: '29', beat: false,
+    note: 'Actual 29K ต่ำกว่าคาด 120K มาก — ตลาดแรงงานเย็นลงแรง → Fed hold odds พุ่ง',
   },
   {
     date: '2026-10-02', time: '19:30', nameTh: 'อัตราว่างงาน ก.ย.', nameEn: 'Unemployment Rate',

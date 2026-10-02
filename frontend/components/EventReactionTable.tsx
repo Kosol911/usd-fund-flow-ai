@@ -25,6 +25,7 @@ interface EventRow {
 }
 
 const PAST_EVENTS: EventRow[] = [
+  { id: 'nfp_sep',  date: '2 ต.ค. 2569', name: 'NFP ก.ย.',              surprise: '-91K (คาด 120K ออก 29K)',         zScore: -2.1 },
   { id: 'nfp_aug',  date: '4 ก.ย. 2569', name: 'NFP ส.ค.',              surprise: '+106K (คาด 56K ออก 162K)',        zScore: 2.5 },
   { id: 'cpi_aug',  date: '10 ก.ย. 2569', name: 'CPI ส.ค. (YoY)',       surprise: '0.0 (ตรงคาด 3.4%)',              zScore: 0.0 },
   { id: 'fomc_sep', date: '17 ก.ย. 2569', name: 'FOMC ก.ย. — Hike +25bps', surprise: 'ตามคาด (hike 68%)',           zScore: null },

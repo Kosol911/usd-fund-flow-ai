@@ -54,15 +54,16 @@ const WEEKLY_NOTES = {
     {
       date: '2 ต.ค. 2569',
       time: '19:30 น. ICT',
-      event: 'NFP ก.ย.',
-      consensus: '120K',
+      event: 'NFP ก.ย. — ออกแล้ว 29K',
+      consensus: '120K → จริง 29K',
       detail:
-        'NFP (Nonfarm Payrolls) คือตัวชี้วัดตลาดแรงงานที่ Fed ใช้ควบคู่ PCE — ตลาดแรงงาน "ร้อน" = Fed ต้อง hike ต่อ\n' +
-        '▸ > 200K = ร้อนเกิน → hike ต.ค. odds พุ่ง → กดดัน BTC + Gold ระยะสั้น\n' +
-        '▸ 100–160K = ใกล้คาด ตลาดรอ CPI/PCE ยืนยัน\n' +
-        '▸ < 100K = ตลาดแรงงานชะลอ → Fed อาจ hold → risk-on กลับมา\n' +
-        '▸ ดูควบคู่: Unemployment Rate (consensus 4.2%) + Avg Hourly Earnings (ชี้เงินเฟ้อ service-side)\n' +
-        '▸ เชื่อมโยง: NFP ส.ค. beat มหาศาล (คาด 56K ออก 162K) — ถ้า ก.ย. ชะลอแรง จะเป็นสัญญาณว่า ส.ค. เป็น outlier',
+        'NFP ก.ย. ออก 29K ต่ำกว่าคาด 120K อย่างมาก (-91K miss) — ตลาดแรงงานเย็นลงแรงสุดในรอบหลายเดือน\n' +
+        '▸ ผลต่อ Fed: Hold odds พุ่ง — ไม่มีเหตุผล hike เมื่อจ้างงานอ่อนขนาดนี้\n' +
+        '▸ ผลต่อ DXY: กดดันดอลลาร์ — yield expectation ลดลง\n' +
+        '▸ ผลต่อ Gold: Bullish — real yield ลดรับ + safe-haven demand\n' +
+        '▸ ผลต่อ BTC: Bullish ระยะสั้น — risk-on กลับมาถ้า Fed dovish\n' +
+        '▸ ยืนยันว่า NFP ส.ค. (+162K) เป็น outlier ตามที่คาด\n' +
+        '▸ ต้องรอ CPI (14 ต.ค.) + PCE (30 ต.ค.) ยืนยันว่าเงินเฟ้อชะลอด้วยหรือไม่',
     },
     {
       date: '14 ต.ค. 2569',
