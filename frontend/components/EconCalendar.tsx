@@ -21,6 +21,8 @@ interface EconEvent {
   prev?: string;      // ครั้งก่อน
   beat?: boolean;     // true=ดีกว่าคาด, false=แย่กว่าคาด, undefined=รอข้อมูล
   note?: string;      // หมายเหตุพิเศษ เช่น "HIKED +0.25pp ✅"
+  impact?: { asset: string; effect: string; reason: string }[];
+  impactSummary?: string;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -260,7 +262,14 @@ const EVENTS: EconEvent[] = [
     date: '2026-10-02', time: '19:30', nameTh: 'NFP จ้างงานนอกภาคเกษตร ก.ย.', nameEn: 'Nonfarm Payrolls',
     period: 'ก.ย. 2569', impact: 'critical', cat: 'employment', unit: 'K',
     forecast: '120', prev: '162', actual: '29', beat: false,
-    note: 'Actual 29K ต่ำกว่าคาด 120K มาก — ตลาดแรงงานเย็นลงแรง → Fed hold odds พุ่ง',
+    note: '29K vs คาด 120K = miss หนักมาก (-91K) — ตลาดแรงงานเย็นลงแรงสุดในรอบหลายเดือน',
+    impact: [
+      { asset: 'USD/DXY', effect: 'Bearish', reason: 'yield expectation ลด เพราะ Fed ไม่มีเหตุ hike' },
+      { asset: 'Gold', effect: 'Bullish', reason: 'real yield ลดรับ + safe-haven demand เมื่อเศรษฐกิจชะลอ' },
+      { asset: 'BTC', effect: 'Bullish ระยะสั้น', reason: 'risk-on ถ้า Fed dovish; แต่ถ้าตีความเป็น recession fear อาจกลับลง' },
+      { asset: 'Bond Yield', effect: 'ลดลง', reason: 'ตลาดปรับลด hike odds → Treasury rally' },
+    ],
+    impactSummary: 'ยืนยันว่า NFP ส.ค. (+162K) เป็น outlier · Fed hold ต.ค. odds พุ่ง · รอ CPI (14 ต.ค.) + PCE (30 ต.ค.) ยืนยัน',
   },
   {
     date: '2026-10-02', time: '19:30', nameTh: 'อัตราว่างงาน ก.ย.', nameEn: 'Unemployment Rate',
@@ -767,6 +776,37 @@ export default function EconCalendar() {
                             {ev.note && (
                               <div className={`text-sm mt-1.5 leading-relaxed pl-6 ${isFomc ? 'text-amber-400/80' : 'text-gray-500'}`}>
                                 {ev.note}
+                              </div>
+                            )}
+                            {ev.impact && ev.impact.length > 0 && (
+                              <div className="pl-6 mt-2">
+                                <table className="text-xs w-full" style={{ maxWidth: 520 }}>
+                                  <thead>
+                                    <tr className="text-gray-500">
+                                      <th className="text-left pr-2 pb-1 font-medium">สินทรัพย์</th>
+                                      <th className="text-left pr-2 pb-1 font-medium">ผลกระทบ</th>
+                                      <th className="text-left pb-1 font-medium">เหตุผล</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {ev.impact.map((row, ri) => (
+                                      <tr key={ri} className="border-t border-gray-800/40">
+                                        <td className="pr-2 py-1 text-gray-300 font-medium whitespace-nowrap">{row.asset}</td>
+                                        <td className={`pr-2 py-1 font-semibold whitespace-nowrap ${
+                                          row.effect.includes('Bullish') ? 'text-green-400' :
+                                          row.effect.includes('Bearish') || row.effect.includes('ลดลง') ? 'text-red-400' :
+                                          'text-yellow-400'
+                                        }`}>{row.effect}</td>
+                                        <td className="py-1 text-gray-500">{row.reason}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                                {ev.impactSummary && (
+                                  <div className="text-xs text-cyan-400/80 mt-1.5 leading-relaxed">
+                                    {ev.impactSummary}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </td>
