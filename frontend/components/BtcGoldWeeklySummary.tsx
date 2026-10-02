@@ -262,7 +262,9 @@ export default function BtcGoldWeeklySummary() {
 
   useEffect(() => {
     setAiStatus('loading');
-    fetch('/api/weekly-summary')
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    fetch('/api/weekly-summary', { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -277,7 +279,8 @@ export default function BtcGoldWeeklySummary() {
           setAiStatus('error');
         }
       })
-      .catch(() => setAiStatus('error'));
+      .catch(() => setAiStatus('error'))
+      .finally(() => clearTimeout(timer));
   }, []);
 
   const d = aiData || WEEKLY_DATA;
@@ -293,11 +296,6 @@ export default function BtcGoldWeeklySummary() {
           ₿ BTC & 🥇 Gold — สรุปสัปดาห์ที่ผ่านมา และคาดการณ์ล่วงหน้า 2 สัปดาห์
         </h2>
         <div className="flex items-center gap-2">
-          {aiStatus === 'loading' && (
-            <span className="text-xs text-yellow-400 font-mono bg-yellow-900/30 px-2 py-1 rounded animate-pulse">
-              ⏳ AI กำลังวิเคราะห์...
-            </span>
-          )}
           {isAI && (
             <span className="text-xs text-green-400 font-mono bg-green-900/30 px-2 py-1 rounded">
               🤖 AI ({aiModel})

@@ -138,7 +138,9 @@ export default function BtcGoldDailySummary() {
   const [model, setModel] = useState('');
 
   useEffect(() => {
-    fetch('/api/daily-summary')
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    fetch('/api/daily-summary', { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -150,7 +152,8 @@ export default function BtcGoldDailySummary() {
         setStatus('ok');
         setModel(_model || '');
       })
-      .catch(() => setStatus('error'));
+      .catch(() => setStatus('error'))
+      .finally(() => clearTimeout(timer));
   }, []);
 
   if (status === 'loading') {

@@ -1,11 +1,29 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import fs from 'fs';
 
 const KNPLAB_API_KEY = process.env.KNPLAB_API_KEY || '';
 const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
-const AI_MODEL = process.env.WEEKLY_AI_MODEL || 'deepseek-v4-pro';
+const AI_MODEL = process.env.KNPLAB_AI_MODEL || 'deepseek-v4-pro';
 
 let cache: { data: any; ts: number } | null = null;
 const CACHE_TTL = 7 * 24 * 3600 * 1000; // 7 days
+const CACHE_FILE = '/tmp/usd-weekly-summary.json';
+
+function readFileCache(): { data: any; ts: number } | null {
+  try {
+    if (!fs.existsSync(CACHE_FILE)) return null;
+    const raw = fs.readFileSync(CACHE_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.ts && Date.now() - parsed.ts < CACHE_TTL) return parsed;
+    return null;
+  } catch { return null; }
+}
+
+function writeFileCache(data: any) {
+  try {
+    fs.writeFileSync(CACHE_FILE, JSON.stringify({ data, ts: Date.now() }), 'utf-8');
+  } catch {}
+}
 
 // ── Binance: BTC price ──
 async function fetchBTC(): Promise<{ price: number; change7d: number } | null> {
@@ -294,6 +312,19 @@ export default async function handler(
     });
   }
 
+  if (!forceRefresh) {
+    const fileCache = readFileCache();
+    if (fileCache) {
+      cache = fileCache;
+      return res.status(200).json({
+        ...fileCache.data,
+        _cached: true,
+        _cachedAt: new Date(fileCache.ts).toISOString(),
+        _model: AI_MODEL,
+      });
+    }
+  }
+
   try {
     const [btc, gold, dxy, etfFlows, newsHeadlines] = await Promise.all([
       fetchBTC(),
@@ -318,6 +349,7 @@ export default async function handler(
     if (!analysis) throw lastErr;
 
     cache = { data: analysis, ts: Date.now() };
+    writeFileCache(analysis);
 
     return res.status(200).json({
       ...analysis,

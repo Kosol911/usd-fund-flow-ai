@@ -1,11 +1,28 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import fs from 'fs';
 
 const KNPLAB_API_KEY = process.env.KNPLAB_API_KEY || '';
 const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
-const AI_MODEL = process.env.WEEKLY_AI_MODEL || 'deepseek-v4-pro';
+const AI_MODEL = process.env.KNPLAB_AI_MODEL || 'deepseek-v4-pro';
 
 let cache: { data: any; ts: number } | null = null;
-const CACHE_TTL = 4 * 3600 * 1000; // 4 hours
+const CACHE_TTL = 20 * 3600 * 1000; // 20 hours — generate once per day
+const CACHE_FILE = '/tmp/usd-daily-summary.json';
+
+function readFileCache(): { data: any; ts: number } | null {
+  try {
+    const raw = fs.readFileSync(CACHE_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.ts && Date.now() - parsed.ts < CACHE_TTL) return parsed;
+  } catch {}
+  return null;
+}
+
+function writeFileCache(data: any) {
+  try {
+    fs.writeFileSync(CACHE_FILE, JSON.stringify({ data, ts: Date.now() }));
+  } catch {}
+}
 
 async function fetchBTC24h() {
   // Try Binance first
@@ -252,6 +269,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const forceRefresh = req.query.refresh === 'true';
 
+  // Check in-memory cache first
   if (cache && !forceRefresh && Date.now() - cache.ts < CACHE_TTL) {
     return res.status(200).json({
       ...cache.data,
@@ -259,6 +277,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       _cachedAt: new Date(cache.ts).toISOString(),
       _model: AI_MODEL,
     });
+  }
+
+  // Check file cache (survives cold starts)
+  if (!forceRefresh) {
+    const fileCache = readFileCache();
+    if (fileCache) {
+      cache = fileCache;
+      return res.status(200).json({
+        ...fileCache.data,
+        _cached: true,
+        _cachedAt: new Date(fileCache.ts).toISOString(),
+        _model: AI_MODEL,
+      });
+    }
   }
 
   try {
@@ -319,6 +351,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     cache = { data: result, ts: Date.now() };
+    writeFileCache(result);
 
     return res.status(200).json({
       ...result,
