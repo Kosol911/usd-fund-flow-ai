@@ -21,7 +21,7 @@ interface EconEvent {
   prev?: string;      // ครั้งก่อน
   beat?: boolean;     // true=ดีกว่าคาด, false=แย่กว่าคาด, undefined=รอข้อมูล
   note?: string;      // หมายเหตุพิเศษ เช่น "HIKED +0.25pp ✅"
-  impact?: { asset: string; effect: string; reason: string }[];
+  marketImpact?: { asset: string; effect: string; reason: string }[];
   impactSummary?: string;
 }
 
@@ -263,7 +263,7 @@ const EVENTS: EconEvent[] = [
     period: 'ก.ย. 2569', impact: 'critical', cat: 'employment', unit: 'K',
     forecast: '120', prev: '162', actual: '29', beat: false,
     note: '29K vs คาด 120K = miss หนักมาก (-91K) — ตลาดแรงงานเย็นลงแรงสุดในรอบหลายเดือน',
-    impact: [
+    marketImpact: [
       { asset: 'USD/DXY', effect: 'Bearish', reason: 'yield expectation ลด เพราะ Fed ไม่มีเหตุ hike' },
       { asset: 'Gold', effect: 'Bullish', reason: 'real yield ลดรับ + safe-haven demand เมื่อเศรษฐกิจชะลอ' },
       { asset: 'BTC', effect: 'Bullish ระยะสั้น', reason: 'risk-on ถ้า Fed dovish; แต่ถ้าตีความเป็น recession fear อาจกลับลง' },
@@ -778,7 +778,7 @@ export default function EconCalendar() {
                                 {ev.note}
                               </div>
                             )}
-                            {ev.impact && ev.impact.length > 0 && (
+                            {ev.marketImpact && ev.marketImpact.length > 0 && (
                               <div className="pl-6 mt-2">
                                 <table className="text-xs w-full" style={{ maxWidth: 520 }}>
                                   <thead>
@@ -789,7 +789,7 @@ export default function EconCalendar() {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {ev.impact.map((row, ri) => (
+                                    {ev.marketImpact.map((row, ri) => (
                                       <tr key={ri} className="border-t border-gray-800/40">
                                         <td className="pr-2 py-1 text-gray-300 font-medium whitespace-nowrap">{row.asset}</td>
                                         <td className={`pr-2 py-1 font-semibold whitespace-nowrap ${
