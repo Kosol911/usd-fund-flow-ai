@@ -22,7 +22,7 @@ interface EconEvent {
   beat?: boolean;     // true=ดีกว่าคาด, false=แย่กว่าคาด, undefined=รอข้อมูล
   note?: string;      // หมายเหตุพิเศษ เช่น "HIKED +0.25pp ✅"
   marketImpact?: { asset: string; effect: string; reason: string }[];
-  impactSummary?: string;
+  impactSummary?: string[];
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -269,7 +269,11 @@ const EVENTS: EconEvent[] = [
       { asset: 'BTC', effect: 'Bullish ระยะสั้น', reason: 'risk-on ถ้า Fed dovish; แต่ถ้าตีความเป็น recession fear อาจกลับลง' },
       { asset: 'Bond Yield', effect: 'ลดลง', reason: 'ตลาดปรับลด hike odds → Treasury rally' },
     ],
-    impactSummary: 'ยืนยันว่า NFP ส.ค. (+162K) เป็น outlier · Fed hold ต.ค. odds พุ่ง · รอ CPI (14 ต.ค.) + PCE (30 ต.ค.) ยืนยัน',
+    impactSummary: [
+      'ยืนยันว่า NFP ส.ค. (+162K) เป็น outlier — ก.ย. กลับมาอ่อนแรง',
+      'Fed hold ต.ค. odds พุ่ง — ไม่มีเหตุผลขึ้นดอกเบี้ยเมื่อจ้างงานแค่ 29K',
+      'ต้องรอยืนยัน: CPI ก.ย. (14 ต.ค.) + Core PCE (30 ต.ค.) — ถ้าเงินเฟ้อชะลอด้วย = Gold/BTC bullish ต่อ ถ้าเงินเฟ้อยังร้อน = stagflation fear',
+    ],
   },
   {
     date: '2026-10-02', time: '19:30', nameTh: 'อัตราว่างงาน ก.ย.', nameEn: 'Unemployment Rate',
@@ -729,7 +733,7 @@ export default function EconCalendar() {
                     ),
 
                     // Event rows for this date
-                    ...events.map((ev, ei) => {
+                    ...events.flatMap((ev, ei) => {
                       const isFomc = ev.cat === 'FOMC';
                       const imp = IMPACT_BADGE[ev.impact];
                       const actualColor = ev.beat === true
@@ -778,37 +782,6 @@ export default function EconCalendar() {
                                 {ev.note}
                               </div>
                             )}
-                            {ev.marketImpact && ev.marketImpact.length > 0 && (
-                              <div className="pl-6 mt-2">
-                                <table className="text-xs w-full" style={{ maxWidth: 520 }}>
-                                  <thead>
-                                    <tr className="text-gray-500">
-                                      <th className="text-left pr-2 pb-1 font-medium">สินทรัพย์</th>
-                                      <th className="text-left pr-2 pb-1 font-medium">ผลกระทบ</th>
-                                      <th className="text-left pb-1 font-medium">เหตุผล</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {ev.marketImpact.map((row, ri) => (
-                                      <tr key={ri} className="border-t border-gray-800/40">
-                                        <td className="pr-2 py-1 text-gray-300 font-medium whitespace-nowrap">{row.asset}</td>
-                                        <td className={`pr-2 py-1 font-semibold whitespace-nowrap ${
-                                          row.effect.includes('Bullish') ? 'text-green-400' :
-                                          row.effect.includes('Bearish') || row.effect.includes('ลดลง') ? 'text-red-400' :
-                                          'text-yellow-400'
-                                        }`}>{row.effect}</td>
-                                        <td className="py-1 text-gray-500">{row.reason}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                                {ev.impactSummary && (
-                                  <div className="text-xs text-cyan-400/80 mt-1.5 leading-relaxed">
-                                    {ev.impactSummary}
-                                  </div>
-                                )}
-                              </div>
-                            )}
                           </td>
 
                           {/* Period */}
@@ -842,8 +815,90 @@ export default function EconCalendar() {
                               : '—'
                             }
                           </td>
-                        </tr>
-                      );
+                        </tr>,
+                        ev.marketImpact && ev.marketImpact.length > 0 && (
+                          <tr key={`${ev.date}-${ei}-impact`} className="border-b border-gray-800/30">
+                            <td colSpan={6} className="px-4 py-3">
+                              <div style={{
+                                background: '#0a1628',
+                                border: '1px solid #1a2d4a',
+                                borderRadius: 10,
+                                padding: '16px 20px',
+                                maxWidth: 700,
+                              }}>
+                                <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 12 }}>
+                                  {ev.nameEn} — ผลต่อราคา
+                                </div>
+
+                                {/* Impact table — responsive: stacked on mobile */}
+                                <div className="hidden sm:block">
+                                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                      <tr style={{ borderBottom: '1px solid #1e3050' }}>
+                                        <th style={{ textAlign: 'left', padding: '6px 12px 6px 0', fontSize: 12, color: '#7a90b4', fontWeight: 600 }}>สินทรัพย์</th>
+                                        <th style={{ textAlign: 'left', padding: '6px 12px 6px 0', fontSize: 12, color: '#7a90b4', fontWeight: 600 }}>ผลกระทบ</th>
+                                        <th style={{ textAlign: 'left', padding: '6px 0', fontSize: 12, color: '#7a90b4', fontWeight: 600 }}>เหตุผล</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {ev.marketImpact.map((row, ri) => (
+                                        <tr key={ri} style={{ borderBottom: '1px solid #111c30' }}>
+                                          <td style={{ padding: '8px 12px 8px 0', fontSize: 14, color: '#e2e8f0', fontWeight: 600, whiteSpace: 'nowrap' }}>{row.asset}</td>
+                                          <td style={{
+                                            padding: '8px 12px 8px 0', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+                                            color: row.effect.includes('Bullish') ? '#4ade80' :
+                                                   row.effect.includes('Bearish') || row.effect.includes('ลดลง') ? '#f87171' : '#fbbf24',
+                                          }}>{row.effect}</td>
+                                          <td style={{ padding: '8px 0', fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}>{row.reason}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                {/* Mobile: stacked cards */}
+                                <div className="sm:hidden" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                  {ev.marketImpact.map((row, ri) => (
+                                    <div key={ri} style={{
+                                      background: '#111c30',
+                                      borderRadius: 8,
+                                      padding: '10px 12px',
+                                    }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                        <span style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 600 }}>{row.asset}</span>
+                                        <span style={{
+                                          fontSize: 13, fontWeight: 700,
+                                          color: row.effect.includes('Bullish') ? '#4ade80' :
+                                                 row.effect.includes('Bearish') || row.effect.includes('ลดลง') ? '#f87171' : '#fbbf24',
+                                        }}>{row.effect}</span>
+                                      </div>
+                                      <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>{row.reason}</div>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Summary bullets */}
+                                {ev.impactSummary && ev.impactSummary.length > 0 && (
+                                  <div style={{
+                                    marginTop: 14,
+                                    paddingTop: 12,
+                                    borderTop: '1px solid #1a2d4a',
+                                  }}>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa', marginBottom: 6 }}>สรุป:</div>
+                                    <ul style={{ margin: 0, paddingLeft: 20, listStyleType: 'disc' }}>
+                                      {ev.impactSummary.map((s, si) => (
+                                        <li key={si} style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.7, marginBottom: 2 }}>
+                                          {s}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ),
+                      ].filter(Boolean);
                     }),
                   ];
                 }),
