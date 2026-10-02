@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 const KNPLAB_API_KEY = process.env.KNPLAB_API_KEY || '';
 const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
-const AI_MODEL = process.env.WEEKLY_AI_MODEL || 'deepseek-v4-flash';
+const AI_MODEL = process.env.WEEKLY_AI_MODEL || 'deepseek-v4-pro';
 
 let cache: { data: any; ts: number } | null = null;
 const CACHE_TTL = 7 * 24 * 3600 * 1000; // 7 days
