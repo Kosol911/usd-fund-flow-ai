@@ -742,7 +742,7 @@ export default function EconCalendar() {
                         ? 'text-red-400 font-bold'
                         : 'text-gray-300';
 
-                      return (
+                      return [
                         <tr
                           key={`${ev.date}-${ei}`}
                           className={`border-b transition-colors ${
@@ -818,7 +818,7 @@ export default function EconCalendar() {
                         </tr>,
                         ev.marketImpact && ev.marketImpact.length > 0 && (
                           <tr key={`${ev.date}-${ei}-impact`} className="border-b border-gray-800/30">
-                            <td colSpan={6} className="px-4 py-3">
+                            <td colSpan={7} className="px-4 py-3">
                               <div style={{
                                 background: '#0a1628',
                                 border: '1px solid #1a2d4a',
