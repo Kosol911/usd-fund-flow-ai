@@ -3,7 +3,7 @@ import fs from 'fs';
 
 const KNPLAB_API_KEY = process.env.KNPLAB_API_KEY || '';
 const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
-const AI_MODEL = process.env.KNPLAB_AI_MODEL || 'deepseek-v4-pro';
+const AI_MODEL = process.env.KNPLAB_AI_MODEL || 'deepseek-v4.1-flash';
 
 let cache: { data: any; ts: number } | null = null;
 const CACHE_TTL = 20 * 3600 * 1000; // 20 hours — generate once per day

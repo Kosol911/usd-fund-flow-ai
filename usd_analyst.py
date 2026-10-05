@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parent
 PROMPT_PATH = ROOT / "prompts" / "MASTER_PROMPT_v2.md"
 
 MODELS = {
-    "default": "deepseek-v4-pro",
-    "deepseek": "deepseek-v4-pro",
+    "default": "deepseek-v4.1-flash",
+    "deepseek": "deepseek-v4.1-flash",
     "haiku":  "anthropic/claude-haiku-4-5-20251001",
     "sonnet": "anthropic/claude-sonnet-5",
     "opus":   "anthropic/claude-opus-5",
