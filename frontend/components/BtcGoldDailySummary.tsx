@@ -138,22 +138,32 @@ export default function BtcGoldDailySummary() {
   const [model, setModel] = useState('');
 
   useEffect(() => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    fetch('/api/daily-summary', { signal: controller.signal })
-      .then((r) => {
+    let cancelled = false;
+    async function load(attempt = 0) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 30000);
+        const r = await fetch('/api/daily-summary', { signal: controller.signal });
+        clearTimeout(timer);
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((json) => {
+        const json = await r.json();
+        if (json.error) throw new Error(json.error);
+        if (cancelled) return;
         const { _cached, _cachedAt, _model, _generatedAt, error, ...rest } = json;
-        if (error) throw new Error(error);
         setData(rest as DailyData);
         setStatus('ok');
         setModel(_model || '');
-      })
-      .catch(() => setStatus('error'))
-      .finally(() => clearTimeout(timer));
+      } catch {
+        if (cancelled) return;
+        if (attempt < 1) {
+          setTimeout(() => load(attempt + 1), 3000);
+        } else {
+          setStatus('error');
+        }
+      }
+    }
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   if (status === 'loading') {

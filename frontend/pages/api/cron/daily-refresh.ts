@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+const PROD_URL = 'https://usd-fund-flow-ai.vercel.app';
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const authHeader = req.headers.authorization;
   const cronSecret = process.env.CRON_SECRET;
@@ -8,12 +10,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
-
   try {
-    const dailyRes = await fetch(`${baseUrl}/api/daily-summary?refresh=true`);
+    const dailyRes = await fetch(`${PROD_URL}/api/daily-summary?refresh=true`, {
+      headers: { 'User-Agent': 'VercelCron/1.0' },
+    });
     const dailyData = await dailyRes.json();
 
     const now = new Date();
