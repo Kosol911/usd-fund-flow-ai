@@ -264,7 +264,7 @@ ${rawData.newsHeadlines}
         { role: 'user', content: prompt },
       ],
       temperature: 0.3,
-      max_tokens: 16000,
+      max_tokens: 8000,
       response_format: { type: 'json_object' },
     }),
   });
@@ -292,6 +292,10 @@ ${rawData.newsHeadlines}
 
   return JSON.parse(cleaned);
 }
+
+export const config = {
+  maxDuration: 60,
+};
 
 export default async function handler(
   req: NextApiRequest,

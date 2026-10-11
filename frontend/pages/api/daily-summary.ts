@@ -273,6 +273,10 @@ ${rawData.news}
   return JSON.parse(cleaned);
 }
 
+export const config = {
+  maxDuration: 60,
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!KNPLAB_API_KEY) {
     return res.status(500).json({ error: 'KNPLAB_API_KEY not configured' });
