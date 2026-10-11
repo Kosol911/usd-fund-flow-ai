@@ -86,11 +86,12 @@ async function fetchETFFlows(): Promise<string> {
   try {
     const res = await fetch('https://farside.co.uk/btc/', {
       headers: { 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return 'ไม่สามารถดึงข้อมูล ETF flows ได้';
     const html = await res.text();
     const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
-    const lastRows = rows.slice(-10);
+    const lastRows = rows.slice(-6);
     const texts = lastRows.map((r) =>
       r.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
     );
@@ -159,94 +160,29 @@ async function analyzeWithAI(rawData: {
   const yearBE = sunday.getFullYear() + 543;
   const weekLabel = `${monDay}–${sunDay} ${month} ${yearBE}`;
 
-  const prompt = `คุณเป็นนักวิเคราะห์ macro finance ระดับสูง วิเคราะห์ข้อมูลตลาดสัปดาห์นี้แล้วสร้าง JSON สำหรับ dashboard
+  const prompt = `วิเคราะห์ตลาด BTC/Gold/DXY สัปดาห์นี้ ตอบ JSON เท่านั้น
 
-## ข้อมูลดิบ
+ข้อมูล: BTC=${JSON.stringify(rawData.btc)} | Gold=${JSON.stringify(rawData.gold)} | DXY=${JSON.stringify(rawData.dxy)}
+ETF: ${rawData.etfFlows.substring(0, 500)}
+ข่าว: ${rawData.newsHeadlines.substring(0, 800)}
 
-### BTC (Binance)
-${JSON.stringify(rawData.btc, null, 2)}
-
-### Gold - XAUUSD (Yahoo Finance)
-${JSON.stringify(rawData.gold, null, 2)}
-
-### DXY (Yahoo Finance)
-${JSON.stringify(rawData.dxy, null, 2)}
-
-### BTC ETF Flows (Farside)
-${rawData.etfFlows}
-
-### ข่าวล่าสุดจาก Google News (ใช้ประกอบการวิเคราะห์ forwardEvents และ geopolitics)
-${rawData.newsHeadlines}
-
-## คำสั่ง
-
-สร้าง JSON ตาม format นี้ (ตอบ JSON เท่านั้น ไม่ต้อง markdown ไม่ต้อง code fence):
-
+ตอบ JSON format นี้:
 {
   "weekLabel": "${weekLabel}",
   "updatedISO": "${today.toISOString().slice(0, 10)}",
-  "context": "สรุปภาพรวม 2-3 ประโยค ภาษาไทย เชื่อมโยง BTC/Gold/DXY/ETF เข้าด้วยกัน",
+  "context": "สรุปภาพรวม 2 ประโยค ภาษาไทย",
   "sections": [
-    {
-      "id": 1,
-      "title": "กระแสเงินทุน ETF และความต้องการลงทุน",
-      "bullets": [
-        { "label": "หัวข้อย่อย", "text": "รายละเอียด", "sub": "หมายเหตุเพิ่มเติม (optional)" }
-      ]
-    },
-    {
-      "id": 2,
-      "title": "นโยบาย Fed, เงินเฟ้อ, ดอลลาร์ และ Bond Yield",
-      "bullets": [...]
-    },
-    {
-      "id": 3,
-      "title": "สถานการณ์ภูมิรัฐศาสตร์ / ความเสี่ยงตลาด",
-      "bullets": [...]
-    },
-    {
-      "id": 4,
-      "title": "ปัจจัยเฉพาะ Bitcoin",
-      "bullets": [...]
-    },
-    {
-      "id": 5,
-      "title": "ปัจจัยเฉพาะทองคำ",
-      "bullets": [...]
-    }
+    {"id":1,"title":"BTC & ETF Flows","bullets":[{"label":"หัวข้อ","text":"รายละเอียด"}]},
+    {"id":2,"title":"Gold, Fed & DXY","bullets":[...]},
+    {"id":3,"title":"ภูมิรัฐศาสตร์ & ความเสี่ยง","bullets":[...]}
   ],
   "forwardEvents": [
-    {
-      "date": "DD เดือน ปี พ.ศ.",
-      "time": "HH:MM น. ICT",
-      "event": "ชื่อ event",
-      "consensus": "ค่าที่ตลาดคาด (ถ้ามี)",
-      "watch": "วิเคราะห์ว่าจะส่งผลอย่างไร ใช้ \\n สำหรับขึ้นบรรทัดใหม่ และ ▸ สำหรับ bullet"
-    }
+    {"date":"DD เดือน พ.ศ.","time":"HH:MM น. ICT","event":"ชื่อ","consensus":"ค่าคาด","watch":"วิเคราะห์สั้น 1-2 บรรทัด ▸ scenario"}
   ],
-  "sources": [
-    { "name": "ชื่อแหล่ง", "url": "URL", "use": "ใช้ดูอะไร" }
-  ]
+  "sources": [{"name":"ชื่อ","url":"URL","use":"ใช้ดูอะไร"}]
 }
 
-## กฎ
-- ทุกข้อความ user-facing ต้องเป็นภาษาไทย
-- ตัวเลขทุกตัวต้องมาจากข้อมูลดิบที่ให้ไป ห้ามสร้างขึ้นเอง
-- แต่ละ section ต้องมี 3-6 bullets
-- forwardEvents ต้องมี 5-8 events สำคัญใน 3 สัปดาห์ข้างหน้า ครอบคลุมทุกมิติ ไม่ใช่แค่ตัวเลขเศรษฐกิจ:
-  A) ตัวเลขเศรษฐกิจตามปฏิทิน: Core PCE Price Index m/m (ตัวชี้วัดหลักที่สุดของ Fed ไม่ใช่ YoY), NFP, CPI, ISM, FOMC, GDP, Retail Sales ฯลฯ — ใส่วันเวลา ICT + consensus
-  B) ภูมิรัฐศาสตร์: การประชุม US-China, G7, NATO, ตะวันออกกลาง, สงครามการค้า, tariff deadlines, sanctions
-  C) นโยบาย Fed / ธนาคารกลาง: Fed speech ที่กำหนดไว้, blackout period, ECB/BOJ meeting, bond auction สำคัญ
-  D) กฎหมาย / กำกับดูแล: crypto bills, SEC rulings, stablecoin legislation, CFTC rulemaking, EU MiCA deadlines
-  E) events เฉพาะตลาด: options expiry ใหญ่, ETF deadline, token unlock, protocol upgrade
-  - เรียงตามวันที่
-  - เชื่อมโยงข้อมูลสัปดาห์นี้กับ outlook เช่น "ETF flow +$2B สัปดาห์นี้ ถ้า PCE ออกต่ำกว่าคาด flow อาจเร่งขึ้นอีก"
-  - ใส่ scenario analysis: ถ้า > X จะเกิด Y / ถ้า < X จะเกิด Z
-  - watch field ใช้ \\n สำหรับขึ้นบรรทัดใหม่ และ ▸ นำหน้า scenario
-- sources ใส่ 5-6 แหล่งที่ใช้จริง
-- ใส่ปี พ.ศ. (ค.ศ. + 543)
-- เวลาแสดงเป็น ICT (UTC+7) เสมอ
-- ห้ามมีคำแนะนำลงทุน ราคาเป้าหมาย หรือเทคนิคอล`;
+กฎ: ภาษาไทย | 3 sections x 3-4 bullets | forwardEvents 3-5 รายการ | sources 3-4 | ปี พ.ศ. | เวลา ICT | ห้ามแนะนำลงทุน | ตัวเลขจากข้อมูลดิบเท่านั้น`;
 
   const res = await fetch(`${KNPLAB_BASE_URL}/v1/chat/completions`, {
     method: 'POST',
@@ -254,17 +190,18 @@ ${rawData.newsHeadlines}
       'Content-Type': 'application/json',
       Authorization: `Bearer ${KNPLAB_API_KEY}`,
     },
+    signal: AbortSignal.timeout(45000),
     body: JSON.stringify({
       model: AI_MODEL,
       messages: [
         {
           role: 'system',
-          content: 'You are a JSON API. You MUST respond with ONLY valid JSON. No text before or after the JSON. No markdown. No explanation. Start your response with { and end with }.',
+          content: 'You are a JSON API. Respond with ONLY valid JSON. No markdown.',
         },
         { role: 'user', content: prompt },
       ],
       temperature: 0.3,
-      max_tokens: 8000,
+      max_tokens: 4000,
       response_format: { type: 'json_object' },
     }),
   });
