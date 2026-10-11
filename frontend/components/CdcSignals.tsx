@@ -519,6 +519,7 @@ export default function CdcSignals() {
   const [weekLabel, setWeekLabel] = useState(currentWeekLabel);
   const [liveMacro, setLiveMacro] = useState<{ dxy: any; us10y: any } | null>(null);
   const [marketData, setMarketData] = useState<{ btc: any; gold: any; dxy: any } | null>(null);
+  const [keyEvents, setKeyEvents] = useState<any[] | null>(null);
 
   const load = async (isRetry = false) => {
     if (!isRetry) setLoading(true);
@@ -563,6 +564,7 @@ export default function CdcSignals() {
         if (j?.forwardEvents?.length) setAiForwardEvents(j.forwardEvents);
         if (j?.weekLabel) setWeekLabel(j.weekLabel);
         if (j?.marketData) setMarketData(j.marketData);
+        if (j?.keyEvents?.length) setKeyEvents(j.keyEvents);
       })
       .catch(() => {});
     // Live DXY / US10Y — stands in for the Railway backend when it is down
@@ -759,6 +761,50 @@ export default function CdcSignals() {
                   <span className="text-xs text-gray-600">(ไม่ทำนายราคา){aiForwardEvents ? ' · 🤖 AI' : ' · static'}</span>
                 </div>
               </div>
+
+              {keyEvents && (
+                <div className="mb-4">
+                  <div className="text-sm font-bold text-white mb-1">Event สำคัญที่สุด — กรอบตัวเลข ดี / ปกติ / แย่</div>
+                  <div className="text-xs text-gray-500 mb-3">
+                    "ดี" = ออกฝั่ง dovish (ดีต่อ Gold/BTC) · กรอบปกติ = consensus ± ความคลาดเคลื่อนจริงย้อนหลังของตัวเลขชุดเดียวกัน
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    {keyEvents.map((k: any, i: number) => (
+                      <div key={i} className="rounded-lg border border-sky-800/40 bg-sky-950/20 p-3">
+                        <div className="flex flex-wrap items-baseline gap-2 mb-1">
+                          <span className="font-mono text-amber-400 text-sm">{k.date}</span>
+                          {k.time && k.time !== '—' && <span className="font-mono text-gray-500 text-xs">🕐 {k.time} ICT</span>}
+                        </div>
+                        <div className="text-base font-black text-white leading-snug mb-1">{k.nameTh}</div>
+                        <div className="text-xs text-gray-400 mb-2">
+                          consensus <span className="text-gray-200 font-mono">{k.forecast}</span>
+                          {k.prev && <> · ก่อนหน้า <span className="text-gray-200 font-mono">{k.prev}</span></>}
+                        </div>
+                        <div className="space-y-1.5">
+                          {k.bands.map((b: any) => {
+                            const tone = b.label === 'ดี'
+                              ? { bg: 'bg-green-900/25', border: 'border-green-700/40', text: 'text-green-300' }
+                              : b.label === 'แย่'
+                                ? { bg: 'bg-red-900/25', border: 'border-red-700/40', text: 'text-red-300' }
+                                : { bg: 'bg-gray-800/40', border: 'border-gray-700/40', text: 'text-gray-200' };
+                            return (
+                              <div key={b.label} className={`rounded border ${tone.border} ${tone.bg} px-2.5 py-1.5`}>
+                                <div className="flex flex-wrap items-baseline gap-2">
+                                  <span className={`text-xs font-bold ${tone.text} w-8 shrink-0`}>{b.label}</span>
+                                  <span className={`font-mono text-sm font-bold ${tone.text}`}>{b.range}</span>
+                                </div>
+                                {b.effect && <div className="text-xs text-gray-300 leading-relaxed mt-0.5 pl-10">{b.effect}</div>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="text-[10px] text-gray-600 mt-2">{k.basis}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-3">
                 {aiForwardEvents ? (
                   aiForwardEvents.map((ev: any, i: number) => (

@@ -1,5 +1,27 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
+import { EVENTS, keyScenarios } from '../../lib/econEvents';
+import type { KeyScenario } from '../../lib/econEvents';
+
+function todayIct(): string {
+  return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+function calendarText(from: string, days: number): string {
+  const end = new Date(from + 'T00:00:00Z');
+  end.setUTCDate(end.getUTCDate() + days);
+  const endIso = end.toISOString().slice(0, 10);
+  const rows = EVENTS
+    .filter((e) => e.actual == null && e.date >= from && e.date <= endIso)
+    .map((e) => `${e.date} ${e.time} ICT | ${e.nameTh} | consensus ${e.forecast ?? '—'}${e.unit ? ' ' + e.unit : ''} | ก่อนหน้า ${e.prev ?? '—'}`);
+  return rows.join('\n') || 'ไม่มี event ในปฏิทิน';
+}
+
+const FALLBACK_EFFECT = {
+  good: 'ออกฝั่ง dovish → แรงกดดันขึ้นดอกเบี้ยลด DXY มีแนวโน้มอ่อน หนุน Gold และ BTC',
+  normal: 'ใกล้เคียงคาด ตลาดรับรู้ไปแล้ว ผลกระทบจำกัด',
+  bad: 'ออกฝั่ง hawkish → โอกาส Fed เข้มงวดเพิ่ม DXY มีแนวโน้มแข็ง กดดัน Gold และ BTC',
+};
 
 const KNPLAB_API_KEY = process.env.KNPLAB_API_KEY || '';
 const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
@@ -51,7 +73,7 @@ function deriveWeekly(bars: { date: string; close: number; high: number; low: nu
       w.days += 1;
     }
   }
-  const ordered = [...weeks.entries()].sort(([a], [b]) => a < b ? -1 : 1);
+  const ordered = Array.from(weeks.entries()).sort(([a], [b]) => a < b ? -1 : 1);
   if (ordered.length < 2) return null;
   const latest = ordered[ordered.length - 1][1];
   const prev = ordered[ordered.length - 2][1];
@@ -69,8 +91,8 @@ function deriveWeekly(bars: { date: string; close: number; high: number; low: nu
     if (lows[i] <= lows[i - 1] && lows[i] <= lows[i - 2] && lows[i] <= lows[i + 1] && lows[i] <= lows[i + 2]) pivotLows.push(lows[i]);
   }
   // Resistance: pivot highs above current price, sorted ascending; Support: pivot lows below, descending
-  const resistances = [...new Set(pivotHighs.filter(h => h > price).map(h => Math.round(h)))].sort((a, b) => a - b).slice(0, 2);
-  const supports = [...new Set(pivotLows.filter(l => l < price).map(l => Math.round(l)))].sort((a, b) => b - a).slice(0, 2);
+  const resistances = Array.from(new Set(pivotHighs.filter(h => h > price).map(h => Math.round(h)))).sort((a, b) => a - b).slice(0, 2);
+  const supports = Array.from(new Set(pivotLows.filter(l => l < price).map(l => Math.round(l)))).sort((a, b) => b - a).slice(0, 2);
 
   // EMA21 (daily) for trend reference
   let ema21: number | null = null;
@@ -277,6 +299,8 @@ async function analyzeWithAI(rawData: {
   dxy: any;
   etfFlows: string;
   newsHeadlines: string;
+  scenarios: KeyScenario[];
+  calendar: string;
 }): Promise<any> {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -303,6 +327,12 @@ DXY: price=${rawData.dxy?.price} derived=${JSON.stringify(rawData.dxy?.derived)}
 ETF: ${rawData.etfFlows.substring(0, 500)}
 ข่าว: ${rawData.newsHeadlines.substring(0, 800)}
 
+ปฏิทินเศรษฐกิจ 3 สัปดาห์ข้างหน้า (consensus จริง ใช้ค่านี้ในช่อง consensus):
+${rawData.calendar}
+
+Event สำคัญที่สุด พร้อมกรอบตัวเลขที่คำนวณไว้แล้ว ("ดี" = ฝั่ง dovish ดีต่อ Gold/BTC):
+${rawData.scenarios.map((s, i) => `${i}. ${s.date} ${s.time} ${s.nameTh} | ${s.basis} | ${s.bands.map(b => `${b.label}: ${b.range}`).join(' / ')}`).join('\n')}
+
 ตอบ JSON format นี้:
 {
   "weekLabel": "${weekLabel}",
@@ -316,10 +346,15 @@ ETF: ${rawData.etfFlows.substring(0, 500)}
   "forwardEvents": [
     {"date":"DD เดือน พ.ศ.","time":"HH:MM น. ICT","event":"ชื่อ event","consensus":"ค่าที่ตลาดคาด","watch":"อธิบายว่าตัวชี้วัดนี้คืออะไร 1 บรรทัด\\n▸ ถ้าออก > X = ผลต่อ Fed/DXY/Gold/BTC\\n▸ ถ้าออกตรงคาด = ผล\\n▸ ถ้าออก < X = ผล\\n▸ เชื่อมโยงงวดก่อนหน้า"}
   ],
-  "sources": [{"name":"ชื่อ","url":"URL","use":"ใช้ดูอะไร"}]
+  "sources": [{"name":"ชื่อ","url":"URL","use":"ใช้ดูอะไร"}],
+  "scenarioEffects": [
+    {"good":"ผลถ้าออกกรอบดี 1 บรรทัด ระบุ Fed/DXY/Gold/BTC","normal":"ผลถ้าออกกรอบปกติ","bad":"ผลถ้าออกกรอบแย่"}
+  ]
 }
 
 กฎ:
+- scenarioEffects ต้องมีจำนวนและลำดับตรงกับรายการ "Event สำคัญที่สุด" ข้างบนทุกตัว ห้ามเปลี่ยนตัวเลขกรอบ เขียนเฉพาะผลกระทบ
+- ช่อง consensus ใน forwardEvents ใช้ค่าจากปฏิทินเท่านั้น ถ้าไม่มีให้เขียน "—"
 - ภาษาไทย | ปี พ.ศ. | เวลา ICT | ห้ามแนะนำลงทุน | ตัวเลขจากข้อมูลดิบเท่านั้น
 - 3 sections x 3 bullets (text สั้น ไม่เกิน 25 คำ)
 - forwardEvents 4 รายการ เรียงตามวันที่ — ทุกรายการต้องมี scenario 3 ทาง (สูงกว่าคาด / ตรงคาด / ต่ำกว่าคาด) พร้อมระบุผลต่อ Fed, DXY, Gold, BTC
@@ -423,13 +458,31 @@ export default async function handler(
           fetchETFFlows(),
           fetchNewsHeadlines(),
         ]);
-        const ai = await analyzeWithAI({ btc, gold, dxy, etfFlows, newsHeadlines });
+        const today = todayIct();
+        const scenarios = keyScenarios(today);
+        const calendar = calendarText(today, 21);
+        const ai = await analyzeWithAI({ btc, gold, dxy, etfFlows, newsHeadlines, scenarios, calendar });
+        const effects: any[] = Array.isArray(ai.scenarioEffects) ? ai.scenarioEffects : [];
+        delete ai.scenarioEffects;
+        const keyEvents = scenarios.map((s, i) => {
+          const fx = effects[i] || {};
+          const pick = (k: 'good' | 'normal' | 'bad') =>
+            typeof fx[k] === 'string' && fx[k].trim() ? fx[k].trim() : FALLBACK_EFFECT[k];
+          return {
+            ...s,
+            bands: [
+              { ...s.bands[0], effect: pick('good') },
+              { ...s.bands[1], effect: pick('normal') },
+              { ...s.bands[2], effect: pick('bad') },
+            ],
+          };
+        });
         const marketData = {
           btc: btc ? { price: btc.price, ...btc.derived } : null,
           gold: gold ? { price: gold.price, ...gold.derived } : null,
           dxy: dxy ? { price: dxy.price, ...dxy.derived } : null,
         };
-        return { ...ai, marketData };
+        return { ...ai, marketData, keyEvents };
       })().finally(() => { inFlight = null; });
     }
     const analysis = await inFlight;
