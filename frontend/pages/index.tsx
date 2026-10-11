@@ -5,6 +5,7 @@ import { liquidityApi, crossAssetApi, eventApi } from '../lib/api';
 import TradingViewCharts from '../components/TradingViewCharts';
 import BtcGoldWeeklySummary from '../components/BtcGoldWeeklySummary';
 import BtcGoldDailySummary from '../components/BtcGoldDailySummary';
+import TreasuryYields from '../components/TreasuryYields';
 import CdcSignals from '../components/CdcSignals';
 import FedRatePath from '../components/FedRatePath';
 import PreReleaseSignals from '../components/PreReleaseSignals';
@@ -249,6 +250,8 @@ export default function Home() {
           <BtcGoldDailySummary />
 
           <BtcGoldWeeklySummary />
+
+          <TreasuryYields />
 
           <CdcSignals />
 
