@@ -6,6 +6,8 @@ const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
 const AI_MODEL = process.env.KNPLAB_AI_MODEL || 'deepseek-v4.1-flash';
 
 let cache: { data: any; ts: number } | null = null;
+// Concurrent requests on one instance share a single generation
+let inFlight: Promise<any> | null = null;
 const CACHE_TTL = 7 * 24 * 3600 * 1000; // 7 days
 const CACHE_FILE = '/tmp/usd-weekly-summary.json';
 
@@ -300,48 +302,42 @@ export default async function handler(
 
   const forceRefresh = req.query.refresh === 'true';
 
-  // Check caches first (both browser and cron requests)
-  if (cache && Date.now() - cache.ts < CACHE_TTL) {
-    return res.status(200).json({
-      ...cache.data,
-      _cached: true,
-      _cachedAt: new Date(cache.ts).toISOString(),
-      _model: AI_MODEL,
-    });
-  }
-
-  const fileCache = readFileCache();
-  if (fileCache) {
-    cache = fileCache;
-    return res.status(200).json({
-      ...fileCache.data,
-      _cached: true,
-      _cachedAt: new Date(fileCache.ts).toISOString(),
-      _model: AI_MODEL,
-    });
-  }
-
-  // Only generate new data when explicitly requested (cron job)
   if (!forceRefresh) {
-    return res.status(200).json({
-      error: 'no_cache',
-      message: 'ยังไม่มีข้อมูลสัปดาห์ รอ cron generate',
-      _model: AI_MODEL,
-    });
+    if (cache && Date.now() - cache.ts < CACHE_TTL) {
+      return res.status(200).json({
+        ...cache.data,
+        _cached: true,
+        _cachedAt: new Date(cache.ts).toISOString(),
+        _model: AI_MODEL,
+      });
+    }
+
+    const fileCache = readFileCache();
+    if (fileCache) {
+      cache = fileCache;
+      return res.status(200).json({
+        ...fileCache.data,
+        _cached: true,
+        _cachedAt: new Date(fileCache.ts).toISOString(),
+        _model: AI_MODEL,
+      });
+    }
   }
 
   try {
-    const [btc, gold, dxy, etfFlows, newsHeadlines] = await Promise.all([
-      fetchBTC(),
-      fetchYahoo('GC=F'),
-      fetchYahoo('DX-Y.NYB'),
-      fetchETFFlows(),
-      fetchNewsHeadlines(),
-    ]);
-
-    const rawData = { btc, gold, dxy, etfFlows, newsHeadlines };
-
-    const analysis = await analyzeWithAI(rawData);
+    if (!inFlight) {
+      inFlight = (async () => {
+        const [btc, gold, dxy, etfFlows, newsHeadlines] = await Promise.all([
+          fetchBTC(),
+          fetchYahoo('GC=F'),
+          fetchYahoo('DX-Y.NYB'),
+          fetchETFFlows(),
+          fetchNewsHeadlines(),
+        ]);
+        return analyzeWithAI({ btc, gold, dxy, etfFlows, newsHeadlines });
+      })().finally(() => { inFlight = null; });
+    }
+    const analysis = await inFlight;
 
     cache = { data: analysis, ts: Date.now() };
     writeFileCache(analysis);

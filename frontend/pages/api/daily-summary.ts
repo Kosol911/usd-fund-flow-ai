@@ -6,6 +6,8 @@ const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
 const BRIEF_MODEL = process.env.BRIEF_AI_MODEL || 'deepseek-v4.1-flash';
 
 let cache: { data: any; ts: number } | null = null;
+// Concurrent requests on one instance share a single generation
+let inFlight: Promise<any> | null = null;
 const CACHE_TTL = 20 * 3600 * 1000; // 20 hours — generate once per day
 const CACHE_FILE = '/tmp/usd-daily-summary.json';
 
@@ -164,6 +166,50 @@ async function fetchNewsHeadlines(): Promise<string> {
   return all.join('\n\n') || 'ไม่สามารถดึงข่าวได้';
 }
 
+// Salvage a response the model cut off mid-array: drop the partial tail,
+// then close whatever brackets are still open.
+function repairTruncatedJson(s: string): string {
+  let lastComplete = -1;
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === '{' || c === '[') depth++;
+    else if (c === '}' || c === ']') { depth--; if (depth > 0) lastComplete = i; }
+    else if (c === ',' && depth > 0) lastComplete = i - 1;
+  }
+
+  let out = lastComplete > 0 ? s.substring(0, lastComplete + 1) : s;
+
+  const open: string[] = [];
+  inStr = false;
+  esc = false;
+  for (let i = 0; i < out.length; i++) {
+    const c = out[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === '{' || c === '[') open.push(c);
+    else if (c === '}' || c === ']') open.pop();
+  }
+  if (inStr) out += '"';
+  while (open.length) out += open.pop() === '{' ? '}' : ']';
+  return out;
+}
+
 async function analyzeDaily(rawData: { btc: any; gold: any; dxy: any; us10y: any; news: string }) {
   const now = new Date();
   const ict = new Date(now.getTime() + 7 * 3600 * 1000);
@@ -270,7 +316,11 @@ ${rawData.news}
   if (firstBrace >= 0 && lastBrace > firstBrace) {
     cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
-  return JSON.parse(cleaned);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    return JSON.parse(repairTruncatedJson(cleaned.substring(cleaned.indexOf('{'))));
+  }
 }
 
 export const config = {
@@ -284,59 +334,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const forceRefresh = req.query.refresh === 'true';
 
-  // Check in-memory cache first
-  if (cache && Date.now() - cache.ts < CACHE_TTL) {
-    return res.status(200).json({
-      ...cache.data,
-      _cached: true,
-      _cachedAt: new Date(cache.ts).toISOString(),
-      _model: BRIEF_MODEL,
-    });
-  }
-
-  // Check file cache (survives cold starts)
-  const fileCache = readFileCache();
-  if (fileCache) {
-    cache = fileCache;
-    return res.status(200).json({
-      ...fileCache.data,
-      _cached: true,
-      _cachedAt: new Date(fileCache.ts).toISOString(),
-      _model: BRIEF_MODEL,
-    });
-  }
-
-  // Only generate when explicitly requested (cron or manual refresh)
   if (!forceRefresh) {
-    return res.status(200).json({
-      error: 'no_cache',
-      message: 'ยังไม่มีข้อมูลรายวัน รอ cron generate',
-      _model: BRIEF_MODEL,
-    });
+    // In-memory cache
+    if (cache && Date.now() - cache.ts < CACHE_TTL) {
+      return res.status(200).json({
+        ...cache.data,
+        _cached: true,
+        _cachedAt: new Date(cache.ts).toISOString(),
+        _model: BRIEF_MODEL,
+      });
+    }
+
+    // File cache (survives cold starts within an instance)
+    const fileCache = readFileCache();
+    if (fileCache) {
+      cache = fileCache;
+      return res.status(200).json({
+        ...fileCache.data,
+        _cached: true,
+        _cachedAt: new Date(fileCache.ts).toISOString(),
+        _model: BRIEF_MODEL,
+      });
+    }
   }
 
   try {
-    const [btc, gold, dxy, us10y, news] = await Promise.all([
-      fetchBTC24h(),
-      fetchGoldDXY('GC=F'),
-      fetchGoldDXY('DX-Y.NYB'),
-      fetchGoldDXY('%5ETNX'),
-      fetchNewsHeadlines(),
-    ]);
-
-    const rawData = { btc, gold, dxy, us10y, news };
-
-    let ai: any;
-    let lastErr: any;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        ai = await analyzeDaily(rawData);
-        break;
-      } catch (e) {
-        lastErr = e;
-      }
+    if (!inFlight) {
+      inFlight = (async () => {
+        const [btc, gold, dxy, us10y, news] = await Promise.all([
+          fetchBTC24h(),
+          fetchGoldDXY('GC=F'),
+          fetchGoldDXY('DX-Y.NYB'),
+          fetchGoldDXY('%5ETNX'),
+          fetchNewsHeadlines(),
+        ]);
+        const ai = await analyzeDaily({ btc, gold, dxy, us10y, news });
+        return { ai, btc, gold, dxy, us10y };
+      })().finally(() => { inFlight = null; });
     }
-    if (!ai) throw lastErr;
+    const { ai, btc, gold, dxy, us10y } = await inFlight;
 
     const now = new Date();
     const ict = new Date(now.getTime() + 7 * 3600 * 1000);
