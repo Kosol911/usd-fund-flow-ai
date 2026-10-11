@@ -11,10 +11,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const dailyRes = await fetch(`${PROD_URL}/api/daily-summary?refresh=true`, {
-      headers: { 'User-Agent': 'VercelCron/1.0' },
-    });
+    const [dailyRes, weeklyRes] = await Promise.all([
+      fetch(`${PROD_URL}/api/daily-summary?refresh=true`, {
+        headers: { 'User-Agent': 'VercelCron/1.0' },
+      }),
+      fetch(`${PROD_URL}/api/weekly-summary`, {
+        headers: { 'User-Agent': 'VercelCron/1.0' },
+      }),
+    ]);
     const dailyData = await dailyRes.json();
+    const weeklyData = await weeklyRes.json();
 
     const now = new Date();
     const ict = new Date(now.getTime() + 7 * 3600 * 1000);
@@ -24,7 +30,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ok: true,
       refreshedAt: `${timeStr} ICT`,
       daily: dailyRes.ok ? 'success' : 'failed',
-      model: dailyData._model || 'unknown',
+      weekly: weeklyRes.ok ? 'success' : 'failed',
+      dailyModel: dailyData._model || 'unknown',
+      weeklyModel: weeklyData._model || 'unknown',
     });
   } catch (err: any) {
     console.error('Cron daily-refresh error:', err);
