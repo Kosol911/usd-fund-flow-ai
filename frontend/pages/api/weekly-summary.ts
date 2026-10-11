@@ -136,6 +136,52 @@ async function fetchNewsHeadlines(): Promise<string> {
   return allHeadlines.join('\n\n') || 'ไม่สามารถดึงข่าวได้';
 }
 
+// Salvage a response the model cut off mid-array: drop the partial tail,
+// then close whatever brackets are still open.
+function repairTruncatedJson(s: string): string {
+  let lastComplete = -1;
+  let depth = 0;
+  let inStr = false;
+  let esc = false;
+  const stack: string[] = [];
+
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === '{' || c === '[') { stack.push(c); depth++; }
+    else if (c === '}' || c === ']') { stack.pop(); depth--; if (depth > 0) lastComplete = i; }
+    else if (c === ',' && depth > 0) lastComplete = i - 1;
+  }
+
+  let out = lastComplete > 0 ? s.substring(0, lastComplete + 1) : s;
+
+  // Recompute open brackets on the trimmed string and close them.
+  const open: string[] = [];
+  inStr = false;
+  esc = false;
+  for (let i = 0; i < out.length; i++) {
+    const c = out[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') inStr = true;
+    else if (c === '{' || c === '[') open.push(c);
+    else if (c === '}' || c === ']') open.pop();
+  }
+  if (inStr) out += '"';
+  while (open.length) out += open.pop() === '{' ? '}' : ']';
+  return out;
+}
+
 // ── AI Analysis ──
 async function analyzeWithAI(rawData: {
   btc: any;
@@ -177,12 +223,18 @@ ETF: ${rawData.etfFlows.substring(0, 500)}
     {"id":3,"title":"ภูมิรัฐศาสตร์ & ความเสี่ยง","bullets":[...]}
   ],
   "forwardEvents": [
-    {"date":"DD เดือน พ.ศ.","time":"HH:MM น. ICT","event":"ชื่อ","consensus":"ค่าคาด","watch":"วิเคราะห์สั้น 1-2 บรรทัด ▸ scenario"}
+    {"date":"DD เดือน พ.ศ.","time":"HH:MM น. ICT","event":"ชื่อ event","consensus":"ค่าที่ตลาดคาด","watch":"อธิบายว่าตัวชี้วัดนี้คืออะไร 1 บรรทัด\\n▸ ถ้าออก > X = ผลต่อ Fed/DXY/Gold/BTC\\n▸ ถ้าออกตรงคาด = ผล\\n▸ ถ้าออก < X = ผล\\n▸ เชื่อมโยงงวดก่อนหน้า"}
   ],
   "sources": [{"name":"ชื่อ","url":"URL","use":"ใช้ดูอะไร"}]
 }
 
-กฎ: ภาษาไทย | 3 sections x 3-4 bullets | forwardEvents 3-5 รายการ | sources 3-4 | ปี พ.ศ. | เวลา ICT | ห้ามแนะนำลงทุน | ตัวเลขจากข้อมูลดิบเท่านั้น`;
+กฎ:
+- ภาษาไทย | ปี พ.ศ. | เวลา ICT | ห้ามแนะนำลงทุน | ตัวเลขจากข้อมูลดิบเท่านั้น
+- 3 sections x 3 bullets (text สั้น ไม่เกิน 25 คำ)
+- forwardEvents 4 รายการ เรียงตามวันที่ — ทุกรายการต้องมี scenario 3 ทาง (สูงกว่าคาด / ตรงคาด / ต่ำกว่าคาด) พร้อมระบุผลต่อ Fed, DXY, Gold, BTC
+- watch ใช้ \\n ขึ้นบรรทัด และ ▸ นำหน้าแต่ละ scenario
+- sources 3 รายการ
+- ตอบ JSON สมบูรณ์เท่านั้น ห้ามตัดกลางคัน`;
 
   const res = await fetch(`${KNPLAB_BASE_URL}/v1/chat/completions`, {
     method: 'POST',
@@ -201,7 +253,7 @@ ETF: ${rawData.etfFlows.substring(0, 500)}
         { role: 'user', content: prompt },
       ],
       temperature: 0.3,
-      max_tokens: 4000,
+      max_tokens: 6000,
       response_format: { type: 'json_object' },
     }),
   });
@@ -227,7 +279,11 @@ ETF: ${rawData.etfFlows.substring(0, 500)}
     cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
 
-  return JSON.parse(cleaned);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    return JSON.parse(repairTruncatedJson(cleaned.substring(cleaned.indexOf('{'))));
+  }
 }
 
 export const config = {
@@ -285,17 +341,7 @@ export default async function handler(
 
     const rawData = { btc, gold, dxy, etfFlows, newsHeadlines };
 
-    let analysis: any;
-    let lastErr: any;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        analysis = await analyzeWithAI(rawData);
-        break;
-      } catch (e) {
-        lastErr = e;
-      }
-    }
-    if (!analysis) throw lastErr;
+    const analysis = await analyzeWithAI(rawData);
 
     cache = { data: analysis, ts: Date.now() };
     writeFileCache(analysis);
