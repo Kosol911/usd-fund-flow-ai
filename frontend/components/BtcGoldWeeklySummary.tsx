@@ -63,11 +63,27 @@ export default function BtcGoldWeeklySummary() {
   const [model, setModel] = useState('');
 
   useEffect(() => {
+    const CACHE_KEY = 'usd-weekly-brief';
+    const CACHE_TTL = 12 * 3600 * 1000; // 12 hours
+
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached && cached.ts && Date.now() - cached.ts < CACHE_TTL && cached.data?.weekLabel) {
+          setData(cached.data as WeeklyData);
+          setModel(cached.model || '');
+          setStatus('ok');
+          return;
+        }
+      }
+    } catch {}
+
     let cancelled = false;
     async function load(attempt = 0) {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 30000);
+        const timer = setTimeout(() => controller.abort(), 45000);
         const r = await fetch('/api/weekly-summary', { signal: controller.signal });
         clearTimeout(timer);
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -79,6 +95,7 @@ export default function BtcGoldWeeklySummary() {
           setData(rest as WeeklyData);
           setStatus('ok');
           setModel(_model || '');
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: rest, model: _model || '', ts: Date.now() })); } catch {}
         } else {
           throw new Error('Invalid data');
         }

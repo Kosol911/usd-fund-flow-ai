@@ -118,12 +118,39 @@ function DeepDive({ analysis, label, icon }: { analysis: DeepAnalysis; label: st
   );
 }
 
+const DAILY_CACHE_KEY = 'usd-daily-brief';
+const DAILY_CACHE_TTL = 4 * 3600 * 1000; // 4 hours
+
+function readLocalCache(key: string, ttl: number): { data: any; model: string } | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.ts && Date.now() - parsed.ts < ttl) return parsed;
+  } catch {}
+  return null;
+}
+
+function writeLocalCache(key: string, data: any, model: string) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, model, ts: Date.now() }));
+  } catch {}
+}
+
 export default function BtcGoldDailySummary() {
   const [data, setData] = useState<BriefData | null>(null);
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [model, setModel] = useState('');
 
   useEffect(() => {
+    const cached = readLocalCache(DAILY_CACHE_KEY, DAILY_CACHE_TTL);
+    if (cached) {
+      setData(cached.data as BriefData);
+      setModel(cached.model);
+      setStatus('ok');
+      return;
+    }
+
     let cancelled = false;
     async function load(attempt = 0) {
       try {
@@ -139,6 +166,7 @@ export default function BtcGoldDailySummary() {
         setData(rest as BriefData);
         setStatus('ok');
         setModel(_model || '');
+        writeLocalCache(DAILY_CACHE_KEY, rest, _model || '');
       } catch {
         if (cancelled) return;
         if (attempt < 1) {
