@@ -27,57 +27,141 @@ function writeFileCache(data: any) {
   } catch {}
 }
 
-// ── Binance: BTC price ──
-async function fetchBTC(): Promise<{ price: number; change7d: number } | null> {
+// Derive weekly OHLC and nearby support/resistance from daily bars.
+// Returns the latest closed week (if today isn't the week close) plus the
+// prior week for WoW %, and the two nearest pivot low/high levels.
+function deriveWeekly(bars: { date: string; close: number; high: number; low: number; volume?: number }[]) {
+  if (!bars.length) return null;
+  // Group by ISO week starting Monday
+  const weeks = new Map<string, { open: number; close: number; high: number; low: number; volume: number; days: number }>();
+  for (const b of bars) {
+    const d = new Date(b.date + 'T00:00:00Z');
+    const dow = d.getUTCDay();
+    const monday = new Date(d);
+    monday.setUTCDate(d.getUTCDate() - (dow === 0 ? 6 : dow - 1));
+    const key = monday.toISOString().slice(0, 10);
+    const w = weeks.get(key);
+    if (!w) {
+      weeks.set(key, { open: b.close, close: b.close, high: b.high, low: b.low, volume: b.volume || 0, days: 1 });
+    } else {
+      w.close = b.close;
+      w.high = Math.max(w.high, b.high);
+      w.low = Math.min(w.low, b.low);
+      w.volume += b.volume || 0;
+      w.days += 1;
+    }
+  }
+  const ordered = [...weeks.entries()].sort(([a], [b]) => a < b ? -1 : 1);
+  if (ordered.length < 2) return null;
+  const latest = ordered[ordered.length - 1][1];
+  const prev = ordered[ordered.length - 2][1];
+  const wowPct = ((latest.close - prev.close) / prev.close) * 100;
+  const avgVolume = latest.days ? latest.volume / latest.days : 0;
+
+  // Pivot lows/highs: a bar is a pivot low if its low is <= 2 neighbors each side
+  const highs = bars.map(b => b.high);
+  const lows = bars.map(b => b.low);
+  const price = bars[bars.length - 1].close;
+  const pivotHighs: number[] = [];
+  const pivotLows: number[] = [];
+  for (let i = 2; i < bars.length - 2; i++) {
+    if (highs[i] >= highs[i - 1] && highs[i] >= highs[i - 2] && highs[i] >= highs[i + 1] && highs[i] >= highs[i + 2]) pivotHighs.push(highs[i]);
+    if (lows[i] <= lows[i - 1] && lows[i] <= lows[i - 2] && lows[i] <= lows[i + 1] && lows[i] <= lows[i + 2]) pivotLows.push(lows[i]);
+  }
+  // Resistance: pivot highs above current price, sorted ascending; Support: pivot lows below, descending
+  const resistances = [...new Set(pivotHighs.filter(h => h > price).map(h => Math.round(h)))].sort((a, b) => a - b).slice(0, 2);
+  const supports = [...new Set(pivotLows.filter(l => l < price).map(l => Math.round(l)))].sort((a, b) => b - a).slice(0, 2);
+
+  // EMA21 (daily) for trend reference
+  let ema21: number | null = null;
+  if (bars.length >= 21) {
+    const k = 2 / 22;
+    let e = bars.slice(0, 21).reduce((s, b) => s + b.close, 0) / 21;
+    for (let i = 21; i < bars.length; i++) e = bars[i].close * k + e * (1 - k);
+    ema21 = e;
+  }
+
+  // Weekly RSI(14) on closes
+  let rsi: number | null = null;
+  const weekCloses = ordered.map(([, w]) => w.close);
+  if (weekCloses.length >= 15) {
+    let gains = 0, losses = 0;
+    for (let i = 1; i <= 14; i++) {
+      const d = weekCloses[i] - weekCloses[i - 1];
+      if (d >= 0) gains += d; else losses -= d;
+    }
+    let avgG = gains / 14, avgL = losses / 14;
+    for (let i = 15; i < weekCloses.length; i++) {
+      const d = weekCloses[i] - weekCloses[i - 1];
+      avgG = (avgG * 13 + Math.max(d, 0)) / 14;
+      avgL = (avgL * 13 + Math.max(-d, 0)) / 14;
+    }
+    const rs = avgL === 0 ? 100 : avgG / avgL;
+    rsi = 100 - 100 / (1 + rs);
+  }
+
+  return {
+    close: latest.close,
+    high: latest.high,
+    low: latest.low,
+    wowPct,
+    avgVolume,
+    supports,
+    resistances,
+    ema21,
+    rsi,
+  };
+}
+
+// ── Binance: BTC price (60 days of daily bars) ──
+async function fetchBTC(): Promise<any | null> {
   try {
     const [tickerRes, klineRes] = await Promise.all([
       fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
-      fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=8'),
+      fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=60'),
     ]);
     if (!tickerRes.ok || !klineRes.ok) return null;
     const ticker = await tickerRes.json();
     const klines: any[] = await klineRes.json();
     const price = parseFloat(ticker.price);
-    const openPrice7d = parseFloat(klines[0]?.[1] || '0');
-    const change7d = openPrice7d ? ((price - openPrice7d) / openPrice7d) * 100 : 0;
-    const dailyCloses = klines.map((k: any) => ({
+    const bars = klines.map((k: any) => ({
       date: new Date(k[0]).toISOString().slice(0, 10),
       close: parseFloat(k[4]),
       high: parseFloat(k[2]),
       low: parseFloat(k[3]),
-      volume: parseFloat(k[5]),
+      volume: parseFloat(k[7]), // quote asset volume (USD)
     }));
-    return { price, change7d, ...{ dailyCloses } };
+    return { price, derived: deriveWeekly(bars), bars };
   } catch {
     return null;
   }
 }
 
-// ── Yahoo Finance: Gold / DXY ──
-async function fetchYahoo(symbol: string): Promise<{ price: number; change5d: number } | null> {
+// ── Yahoo Finance: Gold / DXY (60 days) ──
+async function fetchYahoo(symbol: string): Promise<any | null> {
   try {
     const now = Math.floor(Date.now() / 1000);
-    const from = now - 10 * 86400;
+    const from = now - 90 * 86400;
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${from}&period2=${now}&interval=1d`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!res.ok) return null;
     const json = await res.json();
     const result = json?.chart?.result?.[0];
     if (!result) return null;
-    const closes: number[] = result.indicators?.quote?.[0]?.close || [];
+    const q = result.indicators?.quote?.[0] || {};
+    const closes: number[] = q.close || [];
+    const highs: number[] = q.high || [];
+    const lows: number[] = q.low || [];
     const timestamps: number[] = result.timestamp || [];
-    const validCloses = closes.filter((c: any) => c != null);
-    if (validCloses.length < 2) return null;
-    const price = validCloses[validCloses.length - 1];
-    const price5dAgo = validCloses.length >= 6 ? validCloses[validCloses.length - 6] : validCloses[0];
-    const change5d = ((price - price5dAgo) / price5dAgo) * 100;
-    const dailyData = timestamps.map((ts: number, i: number) => ({
+    const bars = timestamps.map((ts: number, i: number) => ({
       date: new Date(ts * 1000).toISOString().slice(0, 10),
       close: closes[i],
-    })).filter((d: any) => d.close != null);
-    return { price, change5d, ...{ dailyData } };
+      high: highs[i],
+      low: lows[i],
+    })).filter((d: any) => d.close != null && d.high != null && d.low != null);
+    if (!bars.length) return null;
+    const price = bars[bars.length - 1].close;
+    return { price, derived: deriveWeekly(bars), bars };
   } catch {
     return null;
   }
@@ -210,7 +294,10 @@ async function analyzeWithAI(rawData: {
 
   const prompt = `วิเคราะห์ตลาด BTC/Gold/DXY สัปดาห์นี้ ตอบ JSON เท่านั้น
 
-ข้อมูล: BTC=${JSON.stringify(rawData.btc)} | Gold=${JSON.stringify(rawData.gold)} | DXY=${JSON.stringify(rawData.dxy)}
+ข้อมูล (ส่งเฉพาะที่ AI ต้องใช้ ตัว bars 60 วันไม่ส่ง):
+BTC: price=${rawData.btc?.price} derived=${JSON.stringify(rawData.btc?.derived)}
+Gold: price=${rawData.gold?.price} derived=${JSON.stringify(rawData.gold?.derived)}
+DXY: price=${rawData.dxy?.price} derived=${JSON.stringify(rawData.dxy?.derived)}
 ETF: ${rawData.etfFlows.substring(0, 500)}
 ข่าว: ${rawData.newsHeadlines.substring(0, 800)}
 
@@ -334,7 +421,13 @@ export default async function handler(
           fetchETFFlows(),
           fetchNewsHeadlines(),
         ]);
-        return analyzeWithAI({ btc, gold, dxy, etfFlows, newsHeadlines });
+        const ai = await analyzeWithAI({ btc, gold, dxy, etfFlows, newsHeadlines });
+        const marketData = {
+          btc: btc ? { price: btc.price, ...btc.derived } : null,
+          gold: gold ? { price: gold.price, ...gold.derived } : null,
+          dxy: dxy ? { price: dxy.price, ...dxy.derived } : null,
+        };
+        return { ...ai, marketData };
       })().finally(() => { inFlight = null; });
     }
     const analysis = await inFlight;

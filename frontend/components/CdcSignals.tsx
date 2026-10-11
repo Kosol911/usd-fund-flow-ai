@@ -450,6 +450,51 @@ const RETRY_DELAY_MS = 4000; // 4s — gives Railway time to wake up
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
   'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
+// Build the AssetCard price/level block from live weekly OHLC + pivots.
+// Falls back to the hand-written static notes when the API is unavailable.
+function derivePriceAndLevels(
+  live: any | null | undefined,
+  fallbackPrice: { close: string; high: string; low: string; wowPct: string; volume: string; trend: string; rsi: string },
+  fallbackSupport: string[],
+  fallbackResistance: string[],
+  isBtc: boolean
+) {
+  if (!live || live.close == null) {
+    return { price: fallbackPrice, support: fallbackSupport, resistance: fallbackResistance, isLive: false };
+  }
+  const fmt = (n: number) => isBtc
+    ? '$' + Math.round(n).toLocaleString('en-US')
+    : '$' + n.toLocaleString('en-US', { maximumFractionDigits: isBtc ? 0 : 1 });
+  const wow = live.wowPct;
+  const trend = live.ema21 != null
+    ? (live.close > live.ema21 ? 'เหนือ EMA21 (ขาขึ้น)' : 'ใต้ EMA21 (ขาลง)')
+    : '—';
+  const rsiLabel = (() => {
+    if (live.rsi == null) return 'RSI(W): —';
+    const r = Math.round(live.rsi);
+    const note = r >= 70 ? 'Overbought' : r <= 30 ? 'Oversold' : r >= 55 ? 'ยังมีที่ขึ้นต่อ' : r <= 45 ? 'อ่อนตัว' : 'Neutral';
+    return `RSI(W): ${r} — ${note}`;
+  })();
+  const price = {
+    close: fmt(live.close),
+    high: fmt(live.high),
+    low: fmt(live.low),
+    wowPct: `${wow >= 0 ? '+' : ''}${wow.toFixed(2)}%`,
+    volume: isBtc && live.avgVolume
+      ? '$' + (live.avgVolume / 1e9).toFixed(1) + 'B avg/day'
+      : '—',
+    trend,
+    rsi: rsiLabel,
+  };
+  const support = (live.supports as number[] | undefined)?.length
+    ? live.supports.map((s: number) => `~${fmt(s)}${live.ema21 != null && Math.abs(s - live.ema21) / live.ema21 < 0.02 ? ' (ใกล้ EMA21)' : ''}`)
+    : fallbackSupport;
+  const resistance = (live.resistances as number[] | undefined)?.length
+    ? live.resistances.map((r: number) => `~${fmt(r)}`)
+    : fallbackResistance;
+  return { price, support, resistance, isLive: true };
+}
+
 // Monday–Sunday of the current week, in Thai with a Buddhist-era year
 function currentWeekLabel(): string {
   const today = new Date();
@@ -473,6 +518,7 @@ export default function CdcSignals() {
   const [aiForwardEvents, setAiForwardEvents] = useState<any[] | null>(null);
   const [weekLabel, setWeekLabel] = useState(currentWeekLabel);
   const [liveMacro, setLiveMacro] = useState<{ dxy: any; us10y: any } | null>(null);
+  const [marketData, setMarketData] = useState<{ btc: any; gold: any; dxy: any } | null>(null);
 
   const load = async (isRetry = false) => {
     if (!isRetry) setLoading(true);
@@ -510,12 +556,13 @@ export default function CdcSignals() {
   useEffect(() => {
     load();
     const timer = setInterval(() => load(), AUTO_REFRESH_MS);
-    // AI-generated forwardEvents + week label
+    // AI-generated forwardEvents + week label + live price/levels
     fetch('/api/weekly-summary')
       .then(r => r.ok ? r.json() : null)
       .then(j => {
         if (j?.forwardEvents?.length) setAiForwardEvents(j.forwardEvents);
         if (j?.weekLabel) setWeekLabel(j.weekLabel);
+        if (j?.marketData) setMarketData(j.marketData);
       })
       .catch(() => {});
     // Live DXY / US10Y — stands in for the Railway backend when it is down
@@ -588,8 +635,26 @@ export default function CdcSignals() {
         <>
           {/* ── Asset cards ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-            <AssetCard data={data.btc} ticker="₿ Bitcoin (BTC)" notes={WEEKLY_NOTES.btc} staticPrice={WEEKLY_NOTES.btc.price} />
-            <AssetCard data={data.gold} ticker="🥇 Gold (XAU/USD)" notes={WEEKLY_NOTES.gold} staticPrice={WEEKLY_NOTES.gold.price} />
+            {(() => {
+              const btcLive = derivePriceAndLevels(marketData?.btc, WEEKLY_NOTES.btc.price, WEEKLY_NOTES.btc.support, WEEKLY_NOTES.btc.resistance, true);
+              const goldLive = derivePriceAndLevels(marketData?.gold, WEEKLY_NOTES.gold.price, WEEKLY_NOTES.gold.support, WEEKLY_NOTES.gold.resistance, false);
+              return (
+                <>
+                  <AssetCard
+                    data={data.btc}
+                    ticker="₿ Bitcoin (BTC)"
+                    notes={{ events: WEEKLY_NOTES.btc.events, support: btcLive.support, resistance: btcLive.resistance }}
+                    staticPrice={btcLive.price}
+                  />
+                  <AssetCard
+                    data={data.gold}
+                    ticker="🥇 Gold (XAU/USD)"
+                    notes={{ events: WEEKLY_NOTES.gold.events, support: goldLive.support, resistance: goldLive.resistance }}
+                    staticPrice={goldLive.price}
+                  />
+                </>
+              );
+            })()}
           </div>
 
           {/* ── Macro context strip ── */}
