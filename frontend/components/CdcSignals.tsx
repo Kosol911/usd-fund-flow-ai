@@ -447,6 +447,23 @@ function AssetCard({
 const AUTO_REFRESH_MS = 24 * 60 * 60 * 1000; // 24 hours
 const RETRY_DELAY_MS = 4000; // 4s — gives Railway time to wake up
 
+const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+// Monday–Sunday of the current week, in Thai with a Buddhist-era year
+function currentWeekLabel(): string {
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const span = monday.getMonth() === sunday.getMonth()
+    ? `${monday.getDate()}–${sunday.getDate()} ${THAI_MONTHS[sunday.getMonth()]}`
+    : `${monday.getDate()} ${THAI_MONTHS[monday.getMonth()]} – ${sunday.getDate()} ${THAI_MONTHS[sunday.getMonth()]}`;
+  return `${span} ${sunday.getFullYear() + 543}`;
+}
+
 export default function CdcSignals() {
   const [data, setData] = useState<CdcResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -454,6 +471,8 @@ export default function CdcSignals() {
   const [fetchedAt, setFetchedAt] = useState('');
   const [retrying, setRetrying] = useState(false);
   const [aiForwardEvents, setAiForwardEvents] = useState<any[] | null>(null);
+  const [weekLabel, setWeekLabel] = useState(currentWeekLabel);
+  const [liveMacro, setLiveMacro] = useState<{ dxy: any; us10y: any } | null>(null);
 
   const load = async (isRetry = false) => {
     if (!isRetry) setLoading(true);
@@ -491,10 +510,22 @@ export default function CdcSignals() {
   useEffect(() => {
     load();
     const timer = setInterval(() => load(), AUTO_REFRESH_MS);
-    // Fetch AI-generated forwardEvents from weekly-summary
+    // AI-generated forwardEvents + week label
     fetch('/api/weekly-summary')
       .then(r => r.ok ? r.json() : null)
-      .then(j => { if (j?.forwardEvents?.length) setAiForwardEvents(j.forwardEvents); })
+      .then(j => {
+        if (j?.forwardEvents?.length) setAiForwardEvents(j.forwardEvents);
+        if (j?.weekLabel) setWeekLabel(j.weekLabel);
+      })
+      .catch(() => {});
+    // Live DXY / US10Y — stands in for the Railway backend when it is down
+    fetch('/api/daily-summary')
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (j?.snapshot?.dxy || j?.snapshot?.us10y) {
+          setLiveMacro({ dxy: j.snapshot.dxy, us10y: j.snapshot.us10y });
+        }
+      })
       .catch(() => {});
     return () => clearInterval(timer);
   }, []);
@@ -526,7 +557,7 @@ export default function CdcSignals() {
           </button>
         </div>
       </div>
-      <p className="text-sm text-orange-300/80 font-semibold mb-1">สัปดาห์ที่ {WEEKLY_NOTES.weekLabel}</p>
+      <p className="text-sm text-orange-300/80 font-semibold mb-1">สัปดาห์ที่ {weekLabel}</p>
 
       {/* ── Zone legend ── */}
       <div className="flex flex-wrap gap-3 text-xs mb-5">
@@ -582,6 +613,14 @@ export default function CdcSignals() {
                       <span className="text-gray-600 ml-1">WoW</span>
                     </div>
                   </>
+                ) : liveMacro?.dxy ? (
+                  <>
+                    <div className="font-mono font-bold text-white">{f(liveMacro.dxy.price, 2)}</div>
+                    <div className="text-[10px]">
+                      <PctBadge v={liveMacro.dxy.change1d} />
+                      <span className="text-gray-600 ml-1">1D</span>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div className="font-mono font-bold text-white">{WEEKLY_NOTES.macroStatic.dxy.split(' ')[0]}</div>
@@ -596,6 +635,14 @@ export default function CdcSignals() {
                     <div className="font-mono font-bold text-white">{f(ctx.us10y.close, 3)}%</div>
                     <div className="text-[10px] text-gray-500">
                       {ctx.us10y.change_bps > 0 ? '+' : ''}{ctx.us10y.change_bps} bps WoW
+                    </div>
+                  </>
+                ) : liveMacro?.us10y ? (
+                  <>
+                    <div className="font-mono font-bold text-white">{f(liveMacro.us10y.price, 3)}%</div>
+                    <div className="text-[10px]">
+                      <PctBadge v={liveMacro.us10y.change1d} />
+                      <span className="text-gray-600 ml-1">1D</span>
                     </div>
                   </>
                 ) : (
