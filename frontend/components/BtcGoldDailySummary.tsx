@@ -119,7 +119,7 @@ function DeepDive({ analysis, label, icon }: { analysis: DeepAnalysis; label: st
 }
 
 const DAILY_CACHE_KEY = 'usd-daily-brief';
-const DAILY_CACHE_TTL = 4 * 3600 * 1000; // 4 hours
+const DAILY_CACHE_TTL = 24 * 3600 * 1000; // 24 hours — brief is generated once a day
 
 function readLocalCache(key: string, ttl: number): { data: any; model: string } | null {
   try {

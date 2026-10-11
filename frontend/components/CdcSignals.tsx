@@ -444,7 +444,7 @@ function AssetCard({
   );
 }
 
-const AUTO_REFRESH_MS = 4 * 60 * 60 * 1000; // 4 hours
+const AUTO_REFRESH_MS = 24 * 60 * 60 * 1000; // 24 hours
 const RETRY_DELAY_MS = 4000; // 4s — gives Railway time to wake up
 
 export default function CdcSignals() {
@@ -516,7 +516,7 @@ export default function CdcSignals() {
           CDC Action Zone — BTC & Gold
         </h2>
         <div className="flex items-center gap-2">
-          {fetchedAt && <span className="text-xs text-gray-500 font-mono">อัปเดต {fetchedAt} ICT · รีเฟรชอัตโนมัติทุก 4 ชม.</span>}
+          {fetchedAt && <span className="text-xs text-gray-500 font-mono">อัปเดต {fetchedAt} ICT · รีเฟรชอัตโนมัติทุกวัน</span>}
           <button
             onClick={() => load()}
             disabled={loading || retrying}
