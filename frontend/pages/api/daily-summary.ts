@@ -3,7 +3,7 @@ import fs from 'fs';
 
 const KNPLAB_API_KEY = process.env.KNPLAB_API_KEY || '';
 const KNPLAB_BASE_URL = 'https://devmain.knplabai.com';
-const AI_MODEL = process.env.KNPLAB_AI_MODEL || 'deepseek-v4.1-flash';
+const BRIEF_MODEL = process.env.BRIEF_AI_MODEL || 'claude-sonnet-5-5';
 
 let cache: { data: any; ts: number } | null = null;
 const CACHE_TTL = 20 * 3600 * 1000; // 20 hours — generate once per day
@@ -164,65 +164,76 @@ async function fetchNewsHeadlines(): Promise<string> {
   return all.join('\n\n') || 'ไม่สามารถดึงข่าวได้';
 }
 
-async function analyzeDaily(rawData: { btc: any; gold: any; dxy: any; news: string }) {
+async function analyzeDaily(rawData: { btc: any; gold: any; dxy: any; us10y: any; news: string }) {
   const now = new Date();
   const ict = new Date(now.getTime() + 7 * 3600 * 1000);
   const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
     'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   const dayLabel = `${ict.getUTCDate()} ${thaiMonths[ict.getUTCMonth()]} ${ict.getUTCFullYear() + 543}`;
 
-  const prompt = `คุณเป็นนักวิเคราะห์ macro finance ระดับสูง วิเคราะห์ข้อมูลราคา BTC และ Gold วันนี้แล้วสร้าง JSON สำหรับ daily dashboard
+  const prompt = `คุณเป็นนักวิเคราะห์ตลาด macro finance ระดับสูง เขียนรายงาน Gold & Bitcoin Morning Brief เป็นภาษาไทย
 
 วันนี้คือ: ${dayLabel}
 
-## ข้อมูลดิบ
+## ข้อมูลดิบ (ดึงจาก API แล้ว ห้ามแต่งตัวเลขเอง)
 
 ### BTC (Binance 24h)
-${rawData.btc ? JSON.stringify(rawData.btc, null, 2) : 'ข้อมูล BTC ไม่พร้อมใช้งาน — ถ้าไม่มีข้อมูลให้ใส่ null ใน btc field'}
+${rawData.btc ? JSON.stringify(rawData.btc, null, 2) : 'ไม่พร้อม'}
 
 ### Gold - XAUUSD (Yahoo Finance)
-${rawData.gold ? JSON.stringify(rawData.gold, null, 2) : 'ข้อมูล Gold ไม่พร้อมใช้งาน'}
+${rawData.gold ? JSON.stringify(rawData.gold, null, 2) : 'ไม่พร้อม'}
 
 ### DXY (Yahoo Finance)
-${rawData.dxy ? JSON.stringify(rawData.dxy, null, 2) : 'ข้อมูล DXY ไม่พร้อมใช้งาน'}
+${rawData.dxy ? JSON.stringify(rawData.dxy, null, 2) : 'ไม่พร้อม'}
 
-### ข่าวล่าสุด
+### US 10Y Treasury Yield
+${rawData.us10y ? JSON.stringify(rawData.us10y, null, 2) : 'ไม่พร้อม'}
+
+### ข่าวล่าสุด (RSS feeds)
 ${rawData.news}
 
 ## คำสั่ง
 
-สร้าง JSON ตาม format นี้เท่านั้น (ตอบ JSON เท่านั้น ไม่ต้อง markdown ไม่ต้อง code fence):
-
-- ถ้าข้อมูล BTC ไม่พร้อม → ใส่ "btc": null
-- ถ้าข้อมูล Gold ไม่พร้อม → ใส่ "gold": null
-- ห้ามตอบ error object หรือโครงสร้างอื่น ต้องตอบ format นี้เสมอ
+วิเคราะห์ข้อมูลข้างต้นแล้วตอบเป็น JSON ตาม format ด้านล่าง:
 
 {
-  "btc": {
-    "sentiment": "bullish" | "bearish" | "neutral",
-    "keyDriver": "ปัจจัยขับเคลื่อนหลักของวัน 1 ประโยค ภาษาไทย",
-    "outlook": "มุมมองระยะสั้น 1-2 ประโยค ภาษาไทย"
+  "tldr": ["bullet 1 สั้น 15-20 คำ", "bullet 2", "bullet 3", "ประโยคสรุปภาพรวมตลาด"],
+  "catalyst48h": ["ไทม์ไลน์เหตุการณ์ที่กระทบ 48 ชม. เรียงตามเวลา 3-5 บรรทัด"],
+  "goldAnalysis": {
+    "whatHappened": "เกิดอะไรกับทองคำ 2-3 ประโยค เน้นข่าว→กลไก→ราคา",
+    "whyMatters": "ทำไมถึงสำคัญ 2-3 ประโยค",
+    "direction": "เชิงบวก|เชิงลบ|ผันผวน",
+    "confidence": "สูง|ปานกลาง|ต่ำ"
   },
-  "gold": {
-    "sentiment": "bullish" | "bearish" | "neutral",
-    "keyDriver": "ปัจจัยขับเคลื่อนหลักของวัน 1 ประโยค ภาษาไทย",
-    "outlook": "มุมมองระยะสั้น 1-2 ประโยค ภาษาไทย"
+  "btcAnalysis": {
+    "whatHappened": "เกิดอะไรกับ BTC 2-3 ประโยค เน้น ETF flows, สภาพคล่อง, กฎระเบียบ",
+    "whyMatters": "ทำไมถึงสำคัญ 2-3 ประโยค",
+    "direction": "เชิงบวก|เชิงลบ|ผันผวน",
+    "confidence": "สูง|ปานกลาง|ต่ำ"
   },
-  "correlation": "อธิบายความสัมพันธ์ BTC/Gold/DXY วันนี้ 1-2 ประโยค ภาษาไทย",
-  "headlines": [
-    "ข่าวสำคัญที่สุด 3-5 ข่าวที่กระทบ BTC/Gold วันนี้ ภาษาไทย สั้นๆ"
+  "crossAsset": "เปรียบเทียบว่าทำไมทองกับ BTC ตอบ macro ต่างกัน 2-3 ประโยค",
+  "watchList": [
+    {"time": "เวลา ICT", "event": "ชื่อเหตุการณ์", "why": "ทำไมสำคัญ สั้นๆ"}
   ],
-  "riskLevel": "low" | "medium" | "high"
+  "triggerLevels": {
+    "goldBull": "ระดับราคาทอง bullish trigger",
+    "goldBear": "ระดับราคาทอง bearish trigger",
+    "btcBull": "ระดับราคา BTC bullish trigger",
+    "btcBear": "ระดับราคา BTC bearish trigger"
+  },
+  "riskLevel": "low|medium|high",
+  "limitations": "ข้อจำกัดของข้อมูล เช่น ETF flow ไม่มี, Fed odds ไม่ได้ดึง"
 }
 
-## กฎ
-- ทุกข้อความ user-facing ต้องเป็นภาษาไทย
-- ตัวเลขราคาจะถูกเพิ่มเข้าไปในตัว response ที่ฝั่ง server อย่าใส่ตัวเลขราคาเอง
-- เวลาแสดงเป็น ICT (UTC+7) เสมอ
-- ปี พ.ศ. (ค.ศ. + 543)
-- ห้ามมีคำแนะนำลงทุน ราคาเป้าหมาย หรือเทคนิคอล
-- headlines ต้องเป็นข่าวจริงจากข้อมูลที่ให้ ห้ามแต่งเอง
-- ห้ามตอบเป็น error/missing_data object ต้องตอบ format ข้างบนเท่านั้น`;
+## กฎเหล็ก
+- ทุกข้อความต้องเป็นภาษาไทย (ศัพท์การเงินคงอังกฤษได้)
+- ห้ามแต่งตัวเลขราคา ใช้ตัวเลขจากข้อมูลดิบเท่านั้น
+- ถ้าข้อมูลไม่พอ ให้ระบุข้อจำกัดใน limitations
+- ห้ามมีคำแนะนำลงทุน ราคาเป้าหมาย
+- headlines ต้องอิงข่าวจริงจาก RSS ห้ามแต่งเอง
+- เวลา ICT (UTC+7) เสมอ · ปี พ.ศ.
+- triggerLevels เป็นระดับราคา support/resistance สำคัญที่เห็นจากข้อมูล ไม่ใช่คำแนะนำ
+- ตอบ JSON เท่านั้น ห้าม markdown ห้าม code fence`;
 
   const res = await fetch(`${KNPLAB_BASE_URL}/v1/chat/completions`, {
     method: 'POST',
@@ -231,7 +242,7 @@ ${rawData.news}
       Authorization: `Bearer ${KNPLAB_API_KEY}`,
     },
     body: JSON.stringify({
-      model: AI_MODEL,
+      model: BRIEF_MODEL,
       messages: [
         {
           role: 'system',
@@ -239,8 +250,8 @@ ${rawData.news}
         },
         { role: 'user', content: prompt },
       ],
-      temperature: 0.3,
-      max_tokens: 4000,
+      temperature: 0.4,
+      max_tokens: 6000,
       response_format: { type: 'json_object' },
     }),
   });
@@ -275,7 +286,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...cache.data,
       _cached: true,
       _cachedAt: new Date(cache.ts).toISOString(),
-      _model: AI_MODEL,
+      _model: BRIEF_MODEL,
     });
   }
 
@@ -288,20 +299,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ...fileCache.data,
         _cached: true,
         _cachedAt: new Date(fileCache.ts).toISOString(),
-        _model: AI_MODEL,
+        _model: BRIEF_MODEL,
       });
     }
   }
 
   try {
-    const [btc, gold, dxy, news] = await Promise.all([
+    const [btc, gold, dxy, us10y, news] = await Promise.all([
       fetchBTC24h(),
       fetchGoldDXY('GC=F'),
       fetchGoldDXY('DX-Y.NYB'),
+      fetchGoldDXY('%5ETNX'),
       fetchNewsHeadlines(),
     ]);
 
-    const rawData = { btc, gold, dxy, news };
+    const rawData = { btc, gold, dxy, us10y, news };
 
     let ai: any;
     let lastErr: any;
@@ -326,28 +338,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       dateLabel: `${ict.getUTCDate()} ${thaiMonths[ict.getUTCMonth()]} ${ict.getUTCFullYear() + 543}`,
       updatedISO: now.toISOString().slice(0, 10),
       updatedTime: `${hh}:${mm} น. ICT`,
-      btc: btc ? {
-        price: btc.price,
-        change24h: btc.change24h,
-        high24h: btc.high24h,
-        low24h: btc.low24h,
-        sentiment: ai.btc?.sentiment || 'neutral',
-        keyDriver: ai.btc?.keyDriver || 'ไม่มีข้อมูลเพียงพอ',
-        outlook: ai.btc?.outlook || 'รอข้อมูลเพิ่มเติม',
-      } : null,
-      gold: gold ? {
-        price: gold.price,
-        change1d: gold.change1d,
-        high: gold.high,
-        low: gold.low,
-        sentiment: ai.gold?.sentiment || 'neutral',
-        keyDriver: ai.gold?.keyDriver || 'ไม่มีข้อมูลเพียงพอ',
-        outlook: ai.gold?.outlook || 'รอข้อมูลเพิ่มเติม',
-      } : null,
-      dxy: dxy ? { price: dxy.price, change1d: dxy.change1d } : { price: 0, change1d: 0 },
-      correlation: ai.correlation || '',
-      headlines: ai.headlines || [],
+      snapshot: {
+        btc: btc ? { price: btc.price, change24h: btc.change24h, high24h: btc.high24h, low24h: btc.low24h } : null,
+        gold: gold ? { price: gold.price, change1d: gold.change1d, high: gold.high, low: gold.low } : null,
+        dxy: dxy ? { price: dxy.price, change1d: dxy.change1d } : null,
+        us10y: us10y ? { price: us10y.price, change1d: us10y.change1d } : null,
+      },
+      tldr: ai.tldr || [],
+      catalyst48h: ai.catalyst48h || [],
+      goldAnalysis: ai.goldAnalysis || { whatHappened: '', whyMatters: '', direction: 'ผันผวน', confidence: 'ต่ำ' },
+      btcAnalysis: ai.btcAnalysis || { whatHappened: '', whyMatters: '', direction: 'ผันผวน', confidence: 'ต่ำ' },
+      crossAsset: ai.crossAsset || '',
+      watchList: ai.watchList || [],
+      triggerLevels: ai.triggerLevels || {},
       riskLevel: ai.riskLevel || 'medium',
+      limitations: ai.limitations || '',
     };
 
     cache = { data: result, ts: Date.now() };
@@ -356,14 +361,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       ...result,
       _cached: false,
-      _model: AI_MODEL,
+      _model: BRIEF_MODEL,
       _generatedAt: now.toISOString(),
     });
   } catch (err: any) {
     console.error('Daily summary error:', err);
     return res.status(500).json({
       error: err.message || 'Failed to generate daily summary',
-      _model: AI_MODEL,
+      _model: BRIEF_MODEL,
     });
   }
 }
