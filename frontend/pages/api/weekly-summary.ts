@@ -113,35 +113,37 @@ function deriveWeekly(bars: { date: string; close: number; high: number; low: nu
   };
 }
 
-// ── Binance: BTC price (60 days of daily bars) ──
+// ── Binance (primary) with CoinGecko/Yahoo fallback for Vercel edges Binance blocks ──
 async function fetchBTC(): Promise<any | null> {
+  // Try Binance first
   try {
     const [tickerRes, klineRes] = await Promise.all([
-      fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
-      fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=60'),
+      fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { signal: AbortSignal.timeout(6000) }),
+      fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200', { signal: AbortSignal.timeout(6000) }),
     ]);
-    if (!tickerRes.ok || !klineRes.ok) return null;
-    const ticker = await tickerRes.json();
-    const klines: any[] = await klineRes.json();
-    const price = parseFloat(ticker.price);
-    const bars = klines.map((k: any) => ({
-      date: new Date(k[0]).toISOString().slice(0, 10),
-      close: parseFloat(k[4]),
-      high: parseFloat(k[2]),
-      low: parseFloat(k[3]),
-      volume: parseFloat(k[7]), // quote asset volume (USD)
-    }));
-    return { price, derived: deriveWeekly(bars), bars };
-  } catch {
-    return null;
-  }
+    if (tickerRes.ok && klineRes.ok) {
+      const ticker = await tickerRes.json();
+      const klines: any[] = await klineRes.json();
+      const price = parseFloat(ticker.price);
+      const bars = klines.map((k: any) => ({
+        date: new Date(k[0]).toISOString().slice(0, 10),
+        close: parseFloat(k[4]),
+        high: parseFloat(k[2]),
+        low: parseFloat(k[3]),
+        volume: parseFloat(k[7]),
+      }));
+      return { price, derived: deriveWeekly(bars), bars };
+    }
+  } catch {}
+  // Fallback: Yahoo BTC-USD (200 days)
+  return fetchYahoo('BTC-USD', 200);
 }
 
-// ── Yahoo Finance: Gold / DXY (60 days) ──
-async function fetchYahoo(symbol: string): Promise<any | null> {
+// ── Yahoo Finance: Gold / DXY (default 200 days for weekly RSI) ──
+async function fetchYahoo(symbol: string, days = 200): Promise<any | null> {
   try {
     const now = Math.floor(Date.now() / 1000);
-    const from = now - 90 * 86400;
+    const from = now - days * 86400;
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${from}&period2=${now}&interval=1d`;
     const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!res.ok) return null;
