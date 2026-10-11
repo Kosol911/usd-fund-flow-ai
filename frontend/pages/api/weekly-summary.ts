@@ -244,7 +244,8 @@ export default async function handler(
 
   const forceRefresh = req.query.refresh === 'true';
 
-  if (cache && !forceRefresh && Date.now() - cache.ts < CACHE_TTL) {
+  // Check caches first (both browser and cron requests)
+  if (cache && Date.now() - cache.ts < CACHE_TTL) {
     return res.status(200).json({
       ...cache.data,
       _cached: true,
@@ -253,17 +254,24 @@ export default async function handler(
     });
   }
 
+  const fileCache = readFileCache();
+  if (fileCache) {
+    cache = fileCache;
+    return res.status(200).json({
+      ...fileCache.data,
+      _cached: true,
+      _cachedAt: new Date(fileCache.ts).toISOString(),
+      _model: AI_MODEL,
+    });
+  }
+
+  // Only generate new data when explicitly requested (cron job)
   if (!forceRefresh) {
-    const fileCache = readFileCache();
-    if (fileCache) {
-      cache = fileCache;
-      return res.status(200).json({
-        ...fileCache.data,
-        _cached: true,
-        _cachedAt: new Date(fileCache.ts).toISOString(),
-        _model: AI_MODEL,
-      });
-    }
+    return res.status(200).json({
+      error: 'no_cache',
+      message: 'ยังไม่มีข้อมูลสัปดาห์ รอ cron generate',
+      _model: AI_MODEL,
+    });
   }
 
   try {

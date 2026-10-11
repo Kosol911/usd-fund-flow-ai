@@ -152,7 +152,7 @@ export default function BtcGoldDailySummary() {
     }
 
     let cancelled = false;
-    async function load(attempt = 0) {
+    async function load() {
       try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 30000);
@@ -169,11 +169,7 @@ export default function BtcGoldDailySummary() {
         writeLocalCache(DAILY_CACHE_KEY, rest, _model || '');
       } catch {
         if (cancelled) return;
-        if (attempt < 1) {
-          setTimeout(() => load(attempt + 1), 3000);
-        } else {
-          setStatus('error');
-        }
+        setStatus('error');
       }
     }
     load();
@@ -204,7 +200,7 @@ export default function BtcGoldDailySummary() {
             <span className="text-amber-400 font-semibold text-sm">ไม่สามารถโหลดข้อมูลรายวันได้</span>
           </div>
           <p className="text-xs text-amber-500/70 mt-1 pl-6">
-            KNPLAB API อาจไม่พร้อม · รีเฟรชหน้าเพื่อลองใหม่
+            ข้อมูลจะถูก generate อัตโนมัติทุก 06:00 น. ICT · ลองใหม่ในภายหลัง
           </p>
         </div>
       </div>

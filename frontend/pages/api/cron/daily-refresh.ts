@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fetch(`${PROD_URL}/api/daily-summary?refresh=true`, {
         headers: { 'User-Agent': 'VercelCron/1.0' },
       }),
-      fetch(`${PROD_URL}/api/weekly-summary`, {
+      fetch(`${PROD_URL}/api/weekly-summary?refresh=true`, {
         headers: { 'User-Agent': 'VercelCron/1.0' },
       }),
     ]);

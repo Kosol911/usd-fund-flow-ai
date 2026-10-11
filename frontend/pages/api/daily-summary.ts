@@ -285,7 +285,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const forceRefresh = req.query.refresh === 'true';
 
   // Check in-memory cache first
-  if (cache && !forceRefresh && Date.now() - cache.ts < CACHE_TTL) {
+  if (cache && Date.now() - cache.ts < CACHE_TTL) {
     return res.status(200).json({
       ...cache.data,
       _cached: true,
@@ -295,17 +295,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Check file cache (survives cold starts)
+  const fileCache = readFileCache();
+  if (fileCache) {
+    cache = fileCache;
+    return res.status(200).json({
+      ...fileCache.data,
+      _cached: true,
+      _cachedAt: new Date(fileCache.ts).toISOString(),
+      _model: BRIEF_MODEL,
+    });
+  }
+
+  // Only generate when explicitly requested (cron or manual refresh)
   if (!forceRefresh) {
-    const fileCache = readFileCache();
-    if (fileCache) {
-      cache = fileCache;
-      return res.status(200).json({
-        ...fileCache.data,
-        _cached: true,
-        _cachedAt: new Date(fileCache.ts).toISOString(),
-        _model: BRIEF_MODEL,
-      });
-    }
+    return res.status(200).json({
+      error: 'no_cache',
+      message: 'ยังไม่มีข้อมูลรายวัน รอ cron generate',
+      _model: BRIEF_MODEL,
+    });
   }
 
   try {
