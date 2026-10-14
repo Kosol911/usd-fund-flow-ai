@@ -282,12 +282,14 @@ export const EVENTS: EconEvent[] = [
   {
     date: '2026-10-14', time: '19:30', nameTh: 'CPI ก.ย. (YoY)', nameEn: 'CPI YoY',
     period: 'ก.ย. 2569', impact: 'critical', cat: 'inflation', unit: '% YoY',
-    forecast: '3.7', prev: '3.4',
+    forecast: '3.7', actual: '3.7', prev: '3.4', beat: undefined,
+    note: 'ตรงตามคาดพอดี 3.7% — เพิ่มขึ้นจาก 3.4% ส.ค. เงินเฟ้อยังไม่ชะลอ',
   },
   {
     date: '2026-10-14', time: '19:30', nameTh: 'Core CPI ก.ย. (YoY)', nameEn: 'Core CPI YoY',
     period: 'ก.ย. 2569', impact: 'high', cat: 'inflation', unit: '% YoY',
-    forecast: '3.4', prev: '3.4',
+    forecast: '2.5', actual: '2.6', prev: '2.4', beat: true,
+    note: 'สูงกว่าคาดเล็กน้อย 2.6% vs คาด 2.5% (แก้ forecast จาก seed ที่ผิด)',
   },
   {
     date: '2026-10-15', time: '19:30', nameTh: 'PPI ก.ย. (YoY)', nameEn: 'PPI YoY',
