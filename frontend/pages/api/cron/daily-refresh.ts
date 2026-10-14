@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const [dailyRes, weeklyRes, treasuryRes] = await Promise.all([
+    const [dailyRes, weeklyRes, treasuryRes, econRes] = await Promise.all([
       fetch(`${PROD_URL}/api/daily-summary?refresh=true`, {
         headers: { 'User-Agent': 'VercelCron/1.0' },
       }),
@@ -21,10 +21,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fetch(`${PROD_URL}/api/treasury-yields?refresh=true`, {
         headers: { 'User-Agent': 'VercelCron/1.0' },
       }),
+      fetch(`${PROD_URL}/api/econ-actuals?refresh=true`, {
+        headers: { 'User-Agent': 'VercelCron/1.0' },
+      }),
     ]);
     const dailyData = await dailyRes.json();
     const weeklyData = await weeklyRes.json();
     const treasuryData = await treasuryRes.json();
+    const econData = await econRes.json();
 
     const now = new Date();
     const ict = new Date(now.getTime() + 7 * 3600 * 1000);
@@ -36,9 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       daily: dailyRes.ok ? 'success' : 'failed',
       weekly: weeklyRes.ok ? 'success' : 'failed',
       treasury: treasuryRes.ok ? 'success' : 'failed',
+      econActuals: econRes.ok ? 'success' : 'failed',
       dailyModel: dailyData._model || 'unknown',
       weeklyModel: weeklyData._model || 'unknown',
       treasuryModel: treasuryData._model || 'unknown',
+      econActualsCount: econData.count || 0,
     });
   } catch (err: any) {
     console.error('Cron daily-refresh error:', err);

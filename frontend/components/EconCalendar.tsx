@@ -2,10 +2,25 @@
 // เวลา ICT (UTC+7) รูปแบบ 24 ชั่วโมง
 // อัปเดตทุกสัปดาห์ (เพิ่ม actual หลังประกาศ, เพิ่ม event ล่วงหน้า)
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { EVENTS, computeSurpriseStats } from '../lib/econEvents';
 import type { EconEvent, Impact } from '../lib/econEvents';
+
+interface BLSActual {
+  nameEn: string;
+  period: string;
+  actual: string;
+  prev?: string;
+  source: string;
+}
+
+const NAME_MAP: Record<string, string[]> = {
+  'CPI YoY':           ['CPI YoY'],
+  'Core CPI YoY':      ['Core CPI YoY'],
+  'Nonfarm Payrolls':   ['Nonfarm Payrolls'],
+  'Unemployment Rate':  ['Unemployment Rate'],
+};
 
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -41,7 +56,29 @@ function ZBadge({ z }: { z: number | null }) {
   );
 }
 
-const SURPRISE_STATS = computeSurpriseStats(EVENTS);
+function mergeActuals(events: EconEvent[], actuals: BLSActual[]): EconEvent[] {
+  if (!actuals.length) return events;
+  return events.map((ev) => {
+    if (ev.actual) return ev;
+    const matchNames = NAME_MAP[ev.nameEn];
+    if (!matchNames) return ev;
+    const match = actuals.find(
+      (a) => matchNames.includes(a.nameEn) && a.period === ev.period
+    );
+    if (!match) return ev;
+    const a = parseFloat(match.actual);
+    const f = ev.forecast ? parseFloat(ev.forecast) : NaN;
+    let beat: boolean | undefined;
+    if (!isNaN(a) && !isNaN(f)) {
+      if (ev.nameEn === 'Unemployment Rate') {
+        beat = a < f;
+      } else {
+        beat = a > f;
+      }
+    }
+    return { ...ev, actual: match.actual, beat, prev: match.prev || ev.prev };
+  });
+}
 
 const MONTH_COLORS: Record<string, string> = {
   '2026-6':  '#60A5FA', // blue
@@ -78,8 +115,36 @@ function isToday(date: string) { return date === TODAY; }
 export default function EconCalendar() {
   const [impactFilter, setImpactFilter] = useState<'critical' | 'all'>('critical');
   const [showPast, setShowPast] = useState(true);
+  const [blsActuals, setBlsActuals] = useState<BLSActual[]>([]);
 
-  const visible = EVENTS.filter((e) => {
+  useEffect(() => {
+    const CACHE_KEY = 'usd-econ-actuals';
+    const CACHE_TTL = 12 * 3600 * 1000;
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached?.ts && Date.now() - cached.ts < CACHE_TTL && cached.data?.length) {
+          setBlsActuals(cached.data);
+          return;
+        }
+      }
+    } catch {}
+    fetch('/api/econ-actuals')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.actuals?.length) {
+          setBlsActuals(json.actuals);
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data: json.actuals, ts: Date.now() })); } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const mergedEvents = useMemo(() => mergeActuals(EVENTS, blsActuals), [blsActuals]);
+  const surpriseStats = useMemo(() => computeSurpriseStats(mergedEvents), [mergedEvents]);
+
+  const visible = mergedEvents.filter((e) => {
     if (!showPast && isPast(e.date)) return false;
     if (impactFilter === 'critical' && e.impact !== 'critical') return false;
     return true;
@@ -276,7 +341,7 @@ export default function EconCalendar() {
                             {ev.actual
                               ? <>
                                   {ev.actual}{ev.unit && ev.unit !== '—' ? <span className="text-sm text-gray-500 ml-0.5">{ev.unit}</span> : null}
-                                  <ZBadge z={getSurpriseZ(ev, SURPRISE_STATS)} />
+                                  <ZBadge z={getSurpriseZ(ev, surpriseStats)} />
                                 </>
                               : <span className="text-gray-700">—</span>
                             }

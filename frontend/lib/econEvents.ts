@@ -253,7 +253,8 @@ export const EVENTS: EconEvent[] = [
   {
     date: '2026-10-01', time: '19:30', nameTh: 'ADP จ้างงาน ก.ย.', nameEn: 'ADP Employment',
     period: 'ก.ย. 2569', impact: 'medium', cat: 'employment', unit: 'K',
-    forecast: '155', prev: '148',
+    forecast: '68', actual: '90', prev: '36', beat: true,
+    note: 'Beat คาด — 90K vs คาด 68K; ส.ค. ปรับลงแรงจาก 148K เหลือ 36K',
   },
   {
     date: '2026-10-02', time: '19:30', nameTh: 'NFP จ้างงานนอกภาคเกษตร ก.ย.', nameEn: 'Nonfarm Payrolls',
@@ -275,7 +276,8 @@ export const EVENTS: EconEvent[] = [
   {
     date: '2026-10-02', time: '19:30', nameTh: 'อัตราว่างงาน ก.ย.', nameEn: 'Unemployment Rate',
     period: 'ก.ย. 2569', impact: 'high', cat: 'employment', unit: '%',
-    forecast: '4.2', prev: '4.0',
+    forecast: '4.1', actual: '4.2', prev: '4.1', beat: false,
+    note: 'เพิ่มขึ้นเล็กน้อย 4.1% → 4.2% ตลาดแรงงานเย็นลงสอดคล้องกับ NFP 29K',
   },
   {
     date: '2026-10-14', time: '19:30', nameTh: 'CPI ก.ย. (YoY)', nameEn: 'CPI YoY',
